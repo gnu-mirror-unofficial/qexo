@@ -2,22 +2,27 @@
 <html>
   <head>
     <title>Compiled XSLT stylesheet support in Kawa</title>
+<style type="text/css">
+dt { font-weight: bold }
+</style>
   </head>
 
   <body>
     <h1>Compiled XSLT stylesheet support in Kawa</h1>
 
 <p>The <a href="http://www.gnu.org/sofwtare/kawa/">Kawa framework</a>
-includes some support for <a href="http://www.w3.org/Style/XSL/">XSLT</a>,
+includes some support for <a href="http://www.w3.org/Style/XSL/">XSLT</a>.
 XSL (Extensible StyleSheet Language) Tranformations.
 XSLT is a popular language for transforming (including selecting
 and re-organizing) XML documents.
 The Kawa implementation treats an XSLT stylesheet as a program
 in the XSLT programming language, in the same way that other
-Kawa-sofftered languages (Scheme, XQuery, Emacs Lisp, and Common Lisp).
+Kawa-supported languages (Scheme, XQuery, Emacs Lisp, and Common Lisp)
+are handled.
 Thus an XSLT stylesheets gets translated to Java bytecodes before execution,
 either on-the-fly, or saved to (one or more) <code>.class</code> files.</p>
 
+<h2>Example</h2>
 <p>
 The current implementation is little more than a proof-of-concept.
 However, the following is an example of a working stylesheet:</p>
@@ -91,11 +96,35 @@ you will get the resulting HTML code:
 <td>A</td>
 </tr>
 </table>
+
+<h2>Status</h2>
+<p>
+The following XSLT elements are handled:
+<dl>
+<dt><code>xsl:stylesheet</code></dt>
+<dt><code>xsl:apply-template</code></dt>
+Only the default no-attribute case is supported.
+The <code>mode</code> attribute is implemented but untested.
+<dt><code>xsl:value-of</code></dt>
+The <code>select</code> attribute is handled and evaluated,
+but this has not been tested well.
+<dt><code>xsl:template</code></dt>
+The <code>match</code> attribute can only be a simple element name.
+The <code>name</code> attribute is handled.
+<dt><code>xsl:if</code></dt>
+Is handled, but the expression in the <code>test</code> attribute is
+probably not evaluated in the correct context.
+</dl>
+<p>
+Namespace handling has not been tested.
+<h2>Trying out Kawa-XSLT</h2>
+You need to get and install Kawa, as described in the
+<a href="http://www.gnu.org/software/kawa/">Kawa manual</a>.
     <hr>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Wed Jun 12 12:55:25 PDT 2002 -->
 <!-- hhmts start -->
-Last modified: Wed Jun 12 16:46:56 PDT 2002
+Last modified: Thu Jun 13 14:51:09 PDT 2002
 <!-- hhmts end -->
   </body>
 </html>
