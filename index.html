@@ -7,7 +7,7 @@
   <body>
 <table><tr>
 <td style="width: 60%">
-<h1><center>Qexo</center><br />The GNU Kawa implementation of XQuery</h1>
+<h1><center>Qexo - The GNU Kawa implementation of XQuery</center></h1>
 
 </td>
 <td style="width: 40%">
@@ -15,7 +15,7 @@
 <p id="p2"><a rel="bookmark" href="#Examples">Short examples</a>
 <p id="p2"><a rel="bookmark" href="#Download">Getting and installing</a>
 <p id="p2"><a rel="bookmark" href="#Usage">Using and running</a> Qexo
-<p id="p1"><a rel="bookmark" href="#Servlets">Using XQuery servlets</a>
+<p id="p1"><a rel="bookmark" href="#Servlets">Servlets and Web Applications</a>
 <p id="p1"><a rel="bookmark" href="#Extensions">Extensions</a>
 <p id="p1"><a rel="bookmark" href="#License">License: Qexo is Free Software</a>
 <p id="p2">Qexo is based on <a rel="bookmark" href="../kawa/index.html">Kawa</a>
@@ -74,6 +74,11 @@ and a longer article on
 You can read <a href="Running.html">here for more on running Qexo</a>.<br/>
 Here is an article <a href="debugging.html">debugging and finding errors</a>
 in Qexo programs.
+<p>
+If you're interested in <em>servlets</em> and <em>web applications</em>,
+you can read an article showing
+<a href="simple-xquery-webapp.html">how to write and install a trivial web application</a>,
+or an article with <a href="servlet.html">an older but useful information</a>.
 
 <h2 id="Examples">Examples</h2>
 
@@ -223,9 +228,10 @@ You can read <a href="Running.html">here for more on running Qexo</a>.
 
 <h2 id="Servlets">Generating and Running Servlets</h2>
 <p>
-You can compile an XQuery program to a Servlet, as described
-<a href="servlet.html">here</a>.  The servlet can be run
-in a servlet-aware web server, or as a CGI script.
+You can compile an XQuery program to a Servlet.
+Here is a <a href="simple-xquery-webapp.html">simple web application example</a>.
+This article has <a href="servlet.html">addition but older information</a>.
+The servlet can be run in a servlet-aware web server, or as a CGI script.
 
 <h2 id="License">License</h2>
 <p>Kawa-XQuery is available under the
@@ -249,7 +255,7 @@ For most path expressions it shouldn't
 matter, but in some cases we get the wrong result.  
 This will be fixed in a future release.
 <p>
-In this table "Ok" means that the feature works in both the
+In this table <i>(which needs to be updated)</i> "Ok" means that the feature works in both the
 released (source and jar) versions listed above, and also in CVS;
 "Ok, in CVS" means the feature/fix is so recent it is only
 available in the CVS version.
@@ -346,7 +352,7 @@ A convenient namespace-based syntax for <a href="Extensions.html#Calling-Java-Me
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sat Aug 18 14:08:13 PDT 2001 -->
 <!-- hhmts start -->
-Last modified: Mon Jun 16 22:08:55 PDT 2003
+Last modified: Mon Jun 16 23:10:06 PDT 2003
 <!-- hhmts end -->
   </body>
 </html>
