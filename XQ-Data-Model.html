@@ -18,6 +18,15 @@ including the XQuery/XPath data model.</p>
 <p>and</p>
 <pre>&lt;a b="upcase" &gt;Hello&amp;#33;&lt;/a&gt;</pre>
 <p>have the same information sets.</p>
+<p>The <a href="http://www.w3.org/TR/2001/REC-xml-c14n-20010315">"Canonical
+ XML" recommendation</a> is a related standard in that it specifies
+a unique ("canonical") way to convert an XML infoset (back) into an
+XML document.  Two XML documents that are "logically equivalent"
+(i.e. have the same infoset) translate to the same canonical XML
+representation. The Canonical XML for the above example is:</p>
+<pre>
+&lt;a b="upcase"&gt;Hello!&lt;/a&gt;
+</pre>
 <p>A parsed XML file results in an infoset, but there can also be <i>synthetic infosets</i> that are constructed from other sources, such as a database, or created by a program that
 manipulates a DOM (Document Object Model). A DOM is a popular data structure API used to encode and manipulate XML data - i.e. infosets.</p>
 <p>The XQuery language also allows you to create <i>infoset items</i>, using element constructor expressions or pre-defined functions.</p>
