@@ -189,9 +189,9 @@ by using the XQuery sandbox hosted at
 
 <h2 id="Download">How to get and install Qexo</h2>
 <p>Qexo is part of Kawa.  The easiest way to try it out it to
-download a <a href="http://ftp.gnu.org/pub/gnu/kawa/kawa-1.7.jar">runnable jar</a>.
+download a <a href="http://ftp.gnu.org/pub/gnu/kawa/kawa-1.7.90.jar">runnable jar</a>.
 Alternatively, you can get the
-<a href="http://ftp.gnu.org/pub/gnu/kawa/kawa-1.7.tar.gz">source code</a>.
+<a href="http://ftp.gnu.org/pub/gnu/kawa/kawa-1.7.90.tar.gz">source code</a>.
 Both are available from the Kawa ftp site
 <a href="http://ftp.gnu.org/pub/gnu/kawa/">http://ftp.gnu.org/pub/gnu/kawa/"</a>
 or a <a href="http://www.gnu.org/order/ftp.html">mirror</a>
@@ -210,7 +210,7 @@ valid XQuery expression, then that expression will be treated as
 a complete expression.  (However, when parsing a file the entire
 file is parsed.)
 <pre>
-$ java -jar kawa-1.7.jar --xquery
+$ java -jar kawa-1.7.90.jar --xquery
 xquery[1]: for $x in (3,4,5) return &lt;a&gt;{$x}&lt;/a&gt;
 &lt;a&gt;3&lt;/a&gt;&lt;a&gt;4&lt;/a&gt;&lt;a&gt;5&lt;/a&gt;
 xquery[2]: string-value(&lt;a&gt;3+5 is {3+5}&lt;/a&gt;)
@@ -220,8 +220,8 @@ xquery[3]:
 <p>
 You can also compile an XQuery program to a Java application:
 <pre>
-$ java -jar kawa-1.7.jar --xquery --main -C prog.xql
-$ java -cp .:kawa-1.7.jar prog
+$ java -jar kawa-1.7.90.jar --xquery --main -C prog.xql
+$ java -cp .:kawa-1.7.90.jar prog
 </pre>
 <p>
 You can read <a href="Running.html">here for more on running Qexo</a>.
@@ -352,7 +352,7 @@ A convenient namespace-based syntax for <a href="Extensions.html#Calling-Java-Me
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sat Aug 18 14:08:13 PDT 2001 -->
 <!-- hhmts start -->
-Last modified: Mon Jun 16 23:10:06 PDT 2003
+Last modified: Tue Nov  9 12:50:51 PST 2004
 <!-- hhmts end -->
   </body>
 </html>
