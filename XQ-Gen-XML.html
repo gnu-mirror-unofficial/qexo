@@ -8,8 +8,9 @@
     <h1>Generating XML and HTML using XQuery</h1>
 
 <p><i>Material from this article will appear in a book on XQuery to be
-published by Sam's publishing.  If you find a mistake, or something unclear,
-I would appreciate hearing about it, so I can fix the text.</i>
+published by Sams publishing.  If you find a mistake, or something is unclear,
+please email <a href="mailto:per@bothner.com">per@bothner.com</a>,
+so I can fix the text.</i>
 
 <p>Most people think of XQuery as a query language for processing
 XML "data-bases".  But it is also a very nice language for
@@ -20,14 +21,14 @@ we will look at XQuery from this angle.</p>
 There are many tools for generating web pages. Many of these
 are based on <dfn>templates</dfn>:  You write an HTML page, but you
 can embed within it expressions that get calculated by the
-web server.
+web server.  Here are some popular examples:
 <ul>
 <li><b>JSP:</b><br />
 <code>&lt;p&gt;3*4 is: &lt;%= 3*4%&gt;.&lt;/p&gt;</code>
 <br />
 JSP or "Java Server Pages" (<a href="http://java.sun.com/products/jsp/">http://java.sun.com/products/jsp/</a>)
 is a format where Java expressions and commands
-are imbedded in HTML pages.  A JSP page is automatically translated
+are embedded in HTML pages.  A JSP page is automatically translated
 into a special kind of Java class, a <dfn>servlet</dfn>.  A servlet can
 be executed by a Web server to execute when receiving Web requests.
 <li><b>PHP:</b><br />
@@ -67,7 +68,7 @@ for $i in (1 to 10) return
 <p>
 With XQuery, you can also define functions that return HTML fragments,
 and you can pass those fragments though to other functions.
-With most template systems, you can only create output fragemnts as strings,
+With most template systems, you can only create output fragments as strings,
 and pass them around as strings.</p>
 
 <h2>A Photo-album Application</h2>
@@ -115,7 +116,7 @@ using XQuery.</p>
 describes six digital pictures from a car trip to the West Coast
 of Norway in the Summer of 2001.
 Each photograph is described by a <code>&lt;picture&gt;</code> element.
-Each picture is available in three resolutions:
+Each picture may be available in three resolutions:
 <ul>
 <li> The <code>&lt;full-image&gt;</code> element gives the
 name (and size in pixels) of the original full-size image.
@@ -236,7 +237,7 @@ Otherwise, there are more than 3 pictures, so we take the first 3 pictures,
 put them in a row using <code>format-row</code>,
 then we take the rest of the pictures (starting at picture 4),
 and recursively call <code>make-row</code>.
-This preocesses the rest of the pictures in the same way,
+This processes the rest of the pictures in the same way,
 putting 3 pictures in a row each time, until we come to the end.</p>
 
 <pre>
@@ -331,8 +332,8 @@ Another sometimes useful feature is to be able to explicitly
 specify how the pictures are to be origanized into rows,
 rather than depend on the default maximum-three-per-row.
 You can do that by putting a <code>&lt;row&gt;</code> element
-around one or more <code>&lt;pciture&gt;</code> elements to
-specify that these shoudl go in a row my themselves.</p>
+around one or more <code>&lt;picture&gt;</code> elements to
+specify that these shoudl go in a row by themselves.</p>
 <pre>
 define function make-group-page($group) {
 &lt;html&gt;&lt;head&gt;
@@ -417,7 +418,7 @@ that each image can be displayed in:</p>
 <li>"<tt>Medium image</tt>" is the default style.  It display the image at
 at around 640 pixels wide, which is fine for most screens and browsers.
 <li>"<tt>Large image</tt>" gives you at a larger resolution,
-about 1024-1280 pixels wide. (For most of the pictures I take
+about 1024 or 1280 pixels wide. (For most of the pictures I take
 1280 pixes wide is the original camera resolution.
 From which you can infer my camera is a few years old.)
 <li>The "<tt>Info</tt>" style shows the thumbnail image, EXIF camera
@@ -432,7 +433,7 @@ There are (at least) three ways to do it:
 <li>
 Write a script or driver program (perhaps a batch script) that
 loops through the pictures, calling the XQuery implementation once
-for each desired output file.  You need to pass the derired
+for each desired output file.  You need to pass the desired
 file as some kind of parameter that XQuery can access.
 The standard function <code>inputs</code>
 is one way to tell the XQuery program which file to generate.
@@ -454,7 +455,8 @@ It is then easy to write a post-processor to split this into
 separate XML files.
 <li>We generate all the HTML output files in a single XQuery run,
 but we use some non-standard function to write to HTML separately.
-While non-standard, it is the simplest, so it is what I will use.
+While non-standard, it is the simplest and most efficient, so it
+is what I will use.
 </ul>
 <p>
 The Qexo implementation of XQuery includes a <code>write-to</code>
@@ -463,7 +465,7 @@ an element node), and a file name and writes the former
 to the latter, using HTML-compatible XML (XHTML) syntax.
 It returns an empty sequence.  Other XQuery implementations
 may have similar functions.
-The overmost expression of our new XQuery program
+The outermost expression of our new XQuery program
 writes both the <code>index.html</code>
 overview file, and each of the individual picture pages, the latter
 in each of the 3 styles.
@@ -581,10 +583,10 @@ if <code>'n'</code> or </code>'p'</code> is pressed.
 (The strange layout of the code is to make the generated HTML look nice.)
 Note how we check the <code>$style</code> parameter
 to select which JPEG image to show, and whether we need to scale it.
-The <code>"info</code> style generates a picture with information
+The <code>"info"</code> style generates a picture with information
 about the picture itself, as in this figure.
 This so-called EXIF information is generated by the camera, and
-has been extracted from the the JPEG file using the <code>jhead</code> program
+has been extracted from the JPEG file using the <code>jhead</code> program
 (<a href="http://www.sentex.net/~mwandel/jhead/">http://www.sentex.net/~mwandel/jhead/</a>).
 </p>
 <img src="XQ-Skjolden-info.jpg"/>
@@ -647,16 +649,16 @@ define function make-link($picture-name, $style, $text) {
 }
 </pre>
 
-<h2>Servlets and Java Server Pages</h2>
+<h2>Running XQuery programs as Servlets</h2>
 <p>
 Servlets are a popular framework for having a web server
-process a web (http) request.  It is both efficient and
-powerful, and it part of the Java Enterprise framework.
+process a web (HTTP) request.  It is both efficient and
+powerful, and it is part of the Java Enterprise framework.
 JSP (Java Server Pages, mentioned earlier) is built on top of servlets.
 A JSP page is an HTML template that can contain embedded Java
-expressios and commands.  A JSP-capable web server
-automatically translates (if needed) a JSP "page",
-creating from it a Java servlet class.
+expressions and commands.  A JSP-capable web server
+automatically translates (if needed) a JSP "page"
+into a Java servlet class.
 Such a server has various ways you can configure it to select
 which servlet is executed for a given request url.
 <p>
@@ -665,20 +667,24 @@ write using JSP.  However, it is quite easy to do it using XQuery.
 There is at this time no standard for how web
 servers can cause XQuery programs be be executed in
 response to a web request, so we will look at how the Qexo
-implementation supports servets.</p>
+implementation supports servlets.
+Most of the XQuery program is the same as before.
+What is different is the top-level "main" expression:
+</p>
 <p>
 <pre>
-<!-- FIXME
-let $group := document("/opt/Tomcat/webapps/pictures/data/index.xml")/group,
--->
-let $group := document("index.xml")/group,
+let $path := substring(request-servlet-path(), 2),
+    $last-slash := invoke($path, "lastIndexOf", "/")+1,
+    $dir := substring($path, 1, $last-slash),
+    $file := substring($path, $last-slash+1),
+    $xml-file := concat("/opt/Tomcat/webapps/pics/", $dir, "index.xml"),
+    $group := document($xml-file)/group,
     $group-date := $group/date,
     $group-name := $group/title,
-    $pictures := get-pictures($group),
-    $path-info := substring(request-path-info(), 2),
+    $pictures := $group//picture,
     $count := count($pictures)
   return
-    if ($path-info = "index.html") then
+    if ($file = "index.html") then
       make-group-page($group)
     else
       for $i in 1 to $count return
@@ -690,35 +696,159 @@ let $group := document("index.xml")/group,
           $name := (if (empty($picture/caption)) then $group-name
             else concat(string($group/title), " - ", string($picture/caption)))
         return
-          if ($path-info = concat(string($picture/@id), ".html")) then
+          if ($file = concat(string($picture/@id), ".html")) then
             picture($picture, $group, string($picture/@id),
               $prev, $next, $date, "")
-          else if ($path-info = concat(string($picture/@id), "info.html")) then
+          else if ($file = concat(string($picture/@id), "info.html")) then
             picture($picture, $group, string($picture/@id),
               $prev, $next, $date, "info")
-          else if ($path-info = concat(string($picture/@id), "large.html")) then
+          else if ($file = concat(string($picture/@id), "large.html")) then
             picture($picture, $group, string($picture/@id),
               $prev, $next, $date, "large")
           else
 	    ()
 </pre>
 <p>
-The <code>request-path-info</code> returns the request URL,
-relative the servlet context.  We strip off the initial <code>'/'</code>,
-and that becomes the <code>$path-info</code> variable.
-Depending on <code>$path-info</code>'s value
+The <code>request-servlet-path</code> returns the request URL,
+relative the servlet context.
+We extract the "directory name" and the "file name" using some
+string operations (<i>note: this needs to be fixed to use
+standard operators - but the draft spec doesn't provide a way to
+do lastIndexOf</i>).
+Depending on <code>$file</code>'s value
 we either call <code>make-group-page</code> (if <code>"index.html"</code>
 was requested), or loop through the pictures looking for a matching
 <code>&lt;picture&gt;</code> element.
 This search loop isn't the most efficient implementation,
 but it's simple and fast enough for this application.
+<i>(Note: The problem with a search loop is that it doesn't handle
+invalid urls well.  So the next revision should
+should instead use something like:</i><code> $pictures[@id = @file]</code>).
 <p>
-[[Show how we can modify the photo album example
-to run as a servlet under Qexo.  This includes both the
-modifications to the XQuery code, and how we can compile
-and install it in Tomcat.]]</p>
+<i>Note the unfortunate hard-wired-in path to the <code>$xml-path</code>
+value passed to <code>document</code>.  We need to fix that, though
+as the draft standard doesn't provide a way to do that, we will have to
+use some non-standard extension.  Note we also have to hard-wire
+the argument to <code>document</code> in the <code>picture</code> function.</i>
+
+<h3>Installing the servlet under the Tomcat server</h3>
 <p>
-[[Some other Qexo features useful for servlet/web applications]]</p>
+There are a number of Web servers that can run servlets.
+The servlet specification describes how a "web application"
+consists of some number of servlets, static pages, and
+a <code>web.xml</code> "deployment descriptor".
+We will show how you can create a application
+running under the Tomcat server from the photo album program.
+Tomcat is an open-source web server written in Java,
+and released by the Apache Foundation's Jakarta project.
+It is the "reference platform" for servlets.
+The instructions here assume you have version 4.0
+of Tomcat installed, and that the value of <code>$CATALINA_HOME</code>
+where Tomcat is installed is <code>/opt/Tomcat</code>.
+<p>
+We assume you're using the Qexo implementation of XQuery.
+The Qexo implementation classes are included in
+the <code>kawa-<var>N.M</var>.jar</code>
+file containing the Kawa compiled classes,
+where <var>N.M</var> is the Kawa version number.
+You will need to install this jar file somewhere
+where Tomcat can find it. For example install it in
+<code>$CATALINA_HOME/lib/kawa-<var>N.M</var>.jar</code>.
+<p>
+Create the actual <code>pics</code> web application.
+You need to create the directories <code>$CATALINA_HOME/webapps/pics</code>,
+<code>$CATALINA_HOME/webapps/pics/WEB-INF</code>,
+and <code>$CATALINA_HOME/webapps/pics/WEB-INF/classes</code>,
+Under Unix or Linux, do:
+<pre>
+mkdir $CATALINA_HOME/webapps/pics
+mkdir $CATALINA_HOME/webapps/pics/WEB-INF
+mkdir $CATALINA_HOME/webapps/pics/WEB-INF/classes
+</pre>
+You next need to compile the "<code>pictures</code>" XQuery program
+to a servlet:
+<pre>
+kawa --xquery --servlet -C pictures.xql
+</pre>
+<p>
+This creates a <code>pictures.class</code> file, which you need to install
+in the <code>$CATALINA_HOME/webapps/pics/WEB-INF/classes</code> directory,
+so Tomcat can find it:
+<pre>
+cp pictures.class $CATALINA_HOME/webapps/pics/WEB-INF/classes/pictures.class
+</pre>
+<p>
+You next need to write the <code>web.xml</code> "deployment descriptor".
+This is an optional file that describes the web application,
+and goes into the <code>$CATALINA_HOME/webapps/pics/WEB-INF</code>
+directory.
+The following is sufficient for the <code>pics</code> application:
+<pre>
+&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;
+&lt;!DOCTYPE web-app 
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" 
+    "http://java.sun.com/dtd/web-app_2_3.dtd"&gt;
+
+&lt;web-app&gt;
+    &lt;display-name&gt;Web Photo Album&lt;/display-name&gt;
+
+    &lt;servlet&gt;
+      &lt;servlet-name&gt;pictures&lt;/servlet-name&gt;
+      &lt;servlet-class&gt;pictures&lt;/servlet-class&gt;
+    &lt;/servlet&gt;
+
+    &lt;servlet-mapping&gt;
+      &lt;servlet-name&gt;pictures&lt;/servlet-name&gt;
+      &lt;url-pattern&gt;*.html&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;
+</pre>
+<p>
+The <code>&lt;display-name&gt;</code> element is just a human-readable
+description of the web application.
+Each <code>&lt;servlet&gt</code> element names a servelet, and gives
+the fully-qualified name of the Java class used to implement it.
+(In our example they're the same.)
+The <code>&lt;servlet-mapping&gt</code> element specifies
+which URLs (within the <code>pics</code> web application)
+cause the named servlet to be called;
+in this case,  all requests that end in the <code>.html</code> extension.
+<p>
+Finally, we need to create some content!
+For example, we can take the <code>*.jpg</code> files and
+the <code>index.xml</code> file from the earlier <code>NorwayHighlights</code>
+and copy the into the web application's directory
+(i.e. <code>$CATALINA_HOME/webapps/pics</code>).
+<p>
+If Tomcat isn't already running, start it now:
+<pre>
+export JAVA_HOME=$(JAVA_HOME)
+export CATALINA_HOME=$(CATALINA_HOME)
+$(CATALINA_HOME)/bin/startup.sh start
+</pre>
+<p>
+After you have started up Tomcat, it by default listens to port
+8080. To view the <code>NorwayHighlights</code> album,
+point your browser at
+<code>http://localhost:8080/pics/NorwayHighlights/index.html</code>.
+When Tomcat receives this request, it will invoke
+the <code>pictures</code> servlet, and the
+call <code>request-servlet-path()</code> will return
+"<code>/NorwayHighlights/index.html</code>".
+The <code>file</code> variable will get set <code>index.html</code>,
+so <code>make-group-page</code> is called.  If you click a link,
+the browser sends back a new request, which the servlet handles.
+Any <code>.jpg</code> image files that might be
+requested via a <code>&lt;img&gt;</code> or <code>&lt;a&gt;</code> tag.
+such as <code>http://localhost:8080/pics/NorwayHighlights/Skjolden1p.jpg</code>,
+will not be handled by the servlet. Instead, Tomcat handles those using
+its default rules, and looks for correspondingly-named
+files relative to the web application direcory,
+such as <code>$CATALINA_HOME/webapps/pics</code>.
+<p>
+<i>[[Some other Qexo features useful for servlet/web applications]]</i></p>
+
+<h3>Comparison with Java Server Pages</h3>
 <p>
 Summary of advantages of XQuery vs JSP and similar template systems:</p>
 <ul>
@@ -727,24 +857,26 @@ Summary of advantages of XQuery vs JSP and similar template systems:</p>
 around so can do more complex calculations.</li>
 <li>etc</li>
 </ul>
+<p>
+<i>Needs more here ...</i>
 
 <h2>Running XQuery programs from CGI scripts</h2>
 <p>
 CGI (Common Gateway Interface) scripts or programs or scripts
 that are executed by a Web server in response to a request.
-The request parameters are passwd to the script as environment
+The request parameters are passed to the script as environment
 variable.  The script writes the result parameters followed by the
 data (typically an HTML page) to standard output, and the server
-takes that ourput and sends it back as an HTTP response.
+takes that output and sends it back as an HTTP response.
 </p>
 <p>
-You can have a CGI script call a XQuery processer, and that way
+You can have a CGI script call an XQuery processer, and that way
 use XQuery to generate the result.
 Using CGI scripts will not give you high performance, especially
 if you have to start up an XQuery processor on each request.
-On the plus side, it does not requie any server modifications or
+On the plus side, it does not require any server modifications or
 configuration, and it may be fast enough for some applications.
-It may be most useful for testing simple Xquery applications.</p>
+It may be most useful for testing simple XQuery applications.</p>
 <p>
 Another problem running XQuery from CGI scripts is that there is
 no standard for accessing request parameters from XQuery.
@@ -803,7 +935,7 @@ for testing or when you can't run servlets.
 <h2>Comparing XSLT vs XQuery</h2>
 <p>
 XSLT (XSL Transformations, where XSL stands for XML Stylesheet Language)
-is popular and powerful langauge for transforming an input XML document
+is a popular and powerful language for transforming an input XML document
 into an output document, which can be XML, HTML, or plain text.
 XSLT became a W3C recommendation (standard) in 1999; it is being
 revised in conjunction with the XQuery standardization process.
@@ -813,27 +945,29 @@ XPath is also a subset of XQuery.
 The most obvious difference between XSLT and XQuery is that an XSLT
 "program" (a <dfn>stylesheet</dfn>) is actually also an XML document.
 This can sometimes be useful, but it has the big disadvantage that
-XSLT stylesheets, in spite of their simplocity, can be both verbose
+XSLT stylesheets, in spite of their simplicity, can be both verbose
 and hard to read.</p>
 <p>
 The more signification difference betwen XSLT and XQuery is
 in the execution model, specifically the flow of control.
-XQuery is relatively "normal" programming language, except
-for the unusual data types, with explicit control flow.
+Except for XQuery's  unusual data types, it is otherwise
+a relatively "normal" programming language, with explicit control flow.
 In contrast, executing an XSLT stylesheet is controlled
 by a <dfn>template processor</dfn>,
 which matches a node against a set of template, selects the
 template whose pattern most closely matches the input node,
 and then executes that template.  This process may then be
-repeated by the xslt:<code>&lt;apply-templates&gt;</code>
+repeated by the <code>&lt;xslt:apply-templates&gt;</code>
 instruction, which recursively calls the template processor
 on the child nodes of the current node.
 <p>
 Using pattern matching to drive the execution in this way is
 very powerful and usually convenient.  It works best when
-doing relatively simple conversion that can be expressed
-using pattern.  You can do more complex programming using
+doing relatively simple conversions that can be expressed
+using patterns.  You can do more complex programming using
 XSLT, but it can quickly become very awkward and verbose.
+
+<h3>Transforming Docbook to HTML using XLST</h3>
 <p>
 As an example application we will look at converting Docbook to HTML,
 using both XSLT and XQuery.  Docbook is a popular SGML/XML format
@@ -952,6 +1086,7 @@ Docbook to HTML:
 
 &lt;/xsl:stylesheet&gt;
 </pre>
+<h3>Transformaing Docbook to HTML using XQuery</h3>
 <p>
 In contrast, here is an XQuery program for doing the same
 Docbook-to-HTML translation.  Since XQuery doesn't have XSLT's
@@ -960,10 +1095,10 @@ flow using recursive function calls.
 The <code>typeswitch</code> expression is useful for selecting
 between different node types, but unfortuntely XQuery type
 expressions are not as expressive as XPath patterns, so more
-comple patterns may need explicit logic.
+complex patterns may need explicit logic.
 <p>
-Note especially how context patterns like <code>artheader/title</code>.
-The idea is that in place of the XSLT rules that use
+Note especially how context patterns like <code>artheader/title</code>
+are handled.  The idea is that in place of the XSLT rules that use
 the <code>artheader</code> "context" we have a <code>convert-artheader</code>
 function.
 <p>
@@ -1059,14 +1194,15 @@ that is XSLT's strength.  So my advice is:  If you have a task that
 matches XSLT's strength, by all means use XSLT.  However, if you
 have a task that is a mix of XSLT-style transformation combined
 with some control logic, consider using XQuery, even for the part
-of the task that is "XSLT-like".  The photo-album is an example
-of a task much easier solved using XQuery.
+of the task that is "XSLT-like".  The photo-album is an application
+I first wrote in XSLT, but I was able to easily make sigificant
+improvements when I re-wrote it in XQuery.
 
     <hr>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Fri Apr 26 12:32:59 PDT 2002 -->
 <!-- hhmts start -->
-Last modified: Sun May 19 14:30:41 PDT 2002
+Last modified: Sun May 19 20:27:40 PDT 2002
 <!-- hhmts end -->
   </body>
 </html>
