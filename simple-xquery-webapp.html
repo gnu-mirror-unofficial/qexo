@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>A Simple XQuery Web Application</title>
+  </head>
+
+  <body>
+    <h1>A Simple XQuery Web Application</h1>
+
+<p>
+In this article we will show to to write and install
+a very simple "web application" written in the
+<a href="http://www.w3.org/XML/Query">XQuery language</a>.
+Our application uses the servlet extension of
+<a href="http://www.gnu.org/software/qexo/">Qexo</a>
+(version 1.7 or later), a Free implementation of XQuery.</p>
+<p>
+Our application presents to the user a form like the following:</p>
+<img src="webapp-adder-1.png" title="Figure 1"
+alt="First screenshot of adder webapp"
+longdesc="webapp-adder-1.html"/>
+<p>.
+You can edit either field, perhaps to 10 and 3.
+When you click <code>Submit</code>,
+you get an updated form showing the sum of the two fields:</p>
+<img src="webapp-adder-2.png" title="Figure 2"
+alt="First screenshot of adder webapp"
+longdesc="webapp-adder-2.html"/>
+<p>
+The application uses HTTP <dfn>parameters</dfn> to "remember" the sum from
+one request to the next.  A more interesting application
+might use some kind of permanent storage or a datebase.
+We'll get those in later article, but for now let's think of
+this as a slightly more interesting version of <code>"Hello world!"</code>.
+
+<h2>The XQuery program</h2>
+<p>
+The following simple XQuery program <code>adder.xql</code>
+handles both the "logic" and "presentation" of our web application.
+
+<pre>
+define function num-parameter($name, $default) {
+  number(request-parameter($name, $default))
+}
+
+&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;Accumulating Adder&lt;/title&gt;&lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;form&gt;
+      &lt;table&gt;
+        &lt;tr&gt;
+          &lt;td&gt;Result so far: &lt;/td&gt;
+          &lt;td&gt;
+            &lt;input
+              name="sum1"
+              value="{num-parameter("sum1", 0)+num-parameter("sum2", 0)}" /&gt;
+          &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;Add to it:&lt;/td&gt;
+          &lt;td&gt;&lt;input name="sum2" value="{num-parameter("sum2", 1)}" /&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/table&gt;
+      &lt;input type="submit" value="Submit" /&gt;
+    &lt;/form&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>
+The main part of our XQuery module is just a big "element constructor
+expression" that generates the HTML (or rather XHTML)
+of a single <code>&lt;form&gt;</code> element.
+The initial values of the <code>&lt;input&gt;</code> fields are
+given by embedded XQuery expressions inside <code>{curly braces}</code>.
+Those use the <code>num-parameter</code> function,
+which is defined in the <dfn>Query prolog</dfn>.
+The <code>num-parameter</code> function uses <code>request-parameter</code>
+to extract a named HTTP parameter from the URL.
+(Future Qexo version may provide alternative ways of getting request
+parameters, including likely moving <code>request-parameter</code>
+to a non-default name-space.)
+<p>
+I'll explain the control flow of our "application"
+after we look at how to install and get it running.
+
+<h2>Installing Qexo under Tomcat</h2>
+
+<p>Installing this application is very easy, assuming you have
+a web server that can run servlets.
+I tested this application using version 4.1.24 of
+<a href="http://jakarta.apache.org/tomcat/">Tomcat</a>,
+which is a Free web server
+written in Java and released by the Apache Foundation's Jakarta project.
+I assume you or someone else has already installed Tomcat,
+and that the environment variable <code>$CATALINA_HOME</code> is
+where Tomcat is installed.</p>
+<p>
+Qexo is part of the
+<a href="http://www.gnu.org/software/kawa/">Kawa framework</a>.
+You will need to install a <code>jar</code> file of Kawa
+(version 1.7 beta2 or later).
+You can get <code>kawa-1.7.jar</code> from
+<a href="ftp://ftp.gnu.org/pub/gnu/kawa/">the Kawa ftp site</a>
+or from a <a href="http://www.gnu.org/order/ftp.html">mirror site</a>.
+Install this as <code>$CATALINA_HOME/shared/lib/kawa-1.7.jar</code>.
+(If you're using Tomcat 4.0.x, <code>shared/lib</code> doesn't
+exist.  Use  <code>$CATALINA_HOME/lib/kawa-1.7.jar</code> instead.)</p>
+<p>
+If Tomcat isn't already running, start it.
+For example, under Unix-like systems you can
+run the script <code>$CATALINA_HOME/bin/bin/startup.sh</code>.
+You may need to set the environment variable <code>JAVA_HOME</code>
+to point to where Java is installed on your machine.
+(On Mac OS X 10.2 this
+is <code>/System/Library/Frameworks/JavaVM.framework/Home</code>.)
+If you haven't changed any of the defaults,
+you should now be able to point your browser at
+<a href="http://localhost:8080/"><code>http://localhost:8080/</code></a>,
+and get the default Tomcat home page.
+
+<h2>Installing our web application</h2>
+<p>A <dfn>web application</dfn> is a group of data,
+servlets, and configuration files to handle a related set of URLs.
+The servlet specification specifies the directory structure of a
+web application.
+Let us instll our <code>adder</code> in a new web application called <code>utils</code>.
+This means that we need to create two directories:
+<pre>
+mkdir $CATALINA_HOME/webapps/utils
+mkdir $CATALINA_HOME/webapps/utils/WEB-INF
+</pre>
+<p>
+Each web application has a <code>web.xml</code> configurarion file.
+Copy the following file into
+<code>$CATALINA_HOME/webapps/utils/WEB-INF/web.xml</code>:</p>
+<pre>
+&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;
+&lt;web-app&gt;
+  &lt;display-name&gt;XQuery Utils&lt;/display-name&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;KawaPageServlet&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;gnu.kawa.servlet.KawaPageServlet&lt;/servlet-class&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;KawaPageServlet&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;*.xql&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;
+</pre>
+<p>
+The <code>&lt;servlet-mapping&gt;</code> clause tells Tomcat (or any
+other compatible web server) that if it sees a URL that matches
+the pattern <code>*.xql</code> within the current
+web application <code>utils</code>, then it should use the servlet named
+<code>KawaPageServlet</code> to handle it.
+The <code>&lt;servlet-name&gt;</code> clause tells Tomcat that
+the servlet named <code>KawaPageServlet</code> is implemented
+by the Java class <code>gnu.kawa.servlet.KawaPageServlet</code>.
+(This class is included in the <code>kawa-1.7.jar</code> that
+we installed earlier.)
+In other words, any URL of the
+form <code>http://localhost:8080/utils/*.xql</code>
+or <code>http://localhost:8080/utils/*/*.xql</code> and so on
+will be handled by the class <code>gnu.kawa.servlet.KawaPageServlet</code>.
+<p>
+So far this has all been boiler-plate.  Now finally we just need
+to install our XQuery program <code>adder.xql</code> into
+the <code>utils</code> web application, by copying to the file:
+<code>$CATALINA_HOME/webapps/utils/adder.xql</code>.
+
+<h2>Accessing our web application</h2>
+<p>
+To access the web application, point you favorite browser at
+<code>http://localhost:8080/utils/adder.xql</code>.
+Tomcat will receive this request, use the <code>utils</code> part
+to determine that it is for the <code>utils</code> web application,
+and use the <code>utils/WEB-INF/web.xml</code> configuration file.
+That tells Tomcat to forward the request to the <code>KawaPageServlet</code>.
+<p>
+The first time the <code>KawaPageServlet</code> sees a request
+for <code>adder.xql</code> it will compile <code>adder.xql</code>
+to a Java class named <code>adder</code>.  This class will get added
+to the Java Virtual machine that is running Tomcat, but by
+default the class is not written to a file.
+This means that <code>adder.xql</code> will have to be re-compiled
+the first time you request it each time you re-start Tomcat,
+but the Kawa compiler is fast enough that there is no real gain in
+keeping the compiled class around.  (Kawa also gives you the
+option of <a href="http://www.gnu.org/software/qexo/servlet.html">manually compiling to a servlet</a>).
+(If you're cursious about the class that <code>KawaPageServlet</code> creates,
+add a <code>qexo-save-class</code> parameter to the <em>initial</em> request,
+as in <a href="http://localhost:8080/utils/adder.xql?qexo-save-class"><code>http://localhost:8080/utils/adder.xql?qexo-save-class</code></a>.
+This will write out the compiled class to
+<code>$CATALINA_HOME/webapps/utils/WEB-INF/classes/adder.class.)
+<p>
+After <code>KawaPageServlet</code> has compiled <code>adder.xql</code>,
+it will execute the compiled body of <code>adder.xql</code>.
+This first time, there won't be any parameters in the request,
+so calls to the <code>request-parameter</code> function return the
+specified default values: respectively 0, 0, and 1.  So the
+initial values in the <code>&lt;input&gt;</code> fields
+will be 0 and 1 respectively.
+The result of evaluating <code>adder.xql</code> will be some XHTML,
+which will be sent as the HTTP response back to your browser,
+which will display as in teh first image above.
+<p>
+In your browser you can edit the input fields,
+changing them to (say) 10 and 3.
+When you click <code>Submit</code> those values are used
+to set the HTTP request parameters <code>sum1</code> and <code>sum2</code>,
+with the browser sending the URL
+<a href="http://localhost:8080/utils/adder.xql?sum1=10&sum2=2"></code>http://localhost:8080/utils/adder.xql?sum1=10&sum2=3</code></a>.
+The Tomcat browser receives the request, passes it
+to <code>KawaPageServlet</code>, which forwards the request to the
+previously-compiled <code>adder</code> class.
+This time the <code>adder</code> gets the values 10 and 3, respectively,
+for the parameters <code>sum1</code> and <code>sum2</code>,
+so when the new form is returned to the browser the initial
+values of the two fields are 13 and 3,
+whihc will display the second image above.
+If you leave the fields as-is and click <code>Submit</code>,
+the updated forms will show 16 and 3.  And so on.
+
+<h2>Development and Debugging</h2>
+<p>
+If you request <code>adder.xql</code> after ading it,
+<code>KawaPageServlet</code> will automatically re-compile it.
+This makes it easy to test out changes.
+If you make a syntax error, the result sent to the browser
+will include error messages from the compiler.
+If you cuase a run-time error, you will get a stack trace
+that will hopefully help you track down the error.
+<p>
+The latest XQuery draft specification includes a <code>trace</code>
+function that may be useful.
+
+    <hr>
+    <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
+<!-- Created: Mon May  5 20:28:35 PDT 2003 -->
+<!-- hhmts start -->
+Last modified: Wed May  7 13:49:01 PDT 2003
+<!-- hhmts end -->
+  </body>
+</html>
