@@ -2,11 +2,24 @@
 <html>
   <head>
     <title>Scripts for Managing Photographs </title>
+<!--
+<style type="text/css">
+
+.top h1: {width: 50% }
+.map p: {width: 50%}
+</style>-->
   </head>
 
   <body>
-    <h1>Scripts for Managing Photographs </h1>
+<table><tr>
+<td style="width: 60%"><h1>QAlbum: Scripts for Digital Pictures</h1></td>
+<td style="width: 40%">
+<p id="p1"><a rel="bookmark" href="#Suggested">Suggested procedure</a>
+<p id="p2"><a rel="bookmark" href="#Format">Format of the picture-group file</a>
+<p id="p2"><a rel="bookmark" href="#Download">Getting and installing</a>
+</td></tr></table>
 
+<div id="content">
 <p>
 The idea of these scripts is that you write a "picture-group file",
 which is an XML file which describes a group of images (such as jpegs
@@ -20,7 +33,9 @@ automatically get nice linked web pages.
 <p>
 There are also some helper scripts for generating scaled images
 (thumbnails) and that help with some of the tedious parts
-of editing the picture-group file.</p>
+of editing the picture-group file.
+See the <a href="#Download">Installation section below</a>.
+</p>
 <p>
 Here is an <a href="http://pics.bothner.com/2000/Japan/">example</a>
 page generated with these scripts, and here is the
@@ -39,7 +54,7 @@ so it is suitable for viewing in a web page by itself); and
 <code>t</code> means a thumbnail image (scaled to show multiple images
 per page).</p>
 
-<h2>Suggested procedure</h2>
+<h2 id="Suggested">Suggested procedure</h2>
 <p>
 If you have a group of pictures you want to web-ify,
 this section gives suggested instructions for what to do.
@@ -139,7 +154,7 @@ what you have is:
 </pre>
 <p>Finally, re-run <code>gen-images</code>.
 
-<h2>Format of the picture-group file</h2>
+<h2 id="Format">Format of the picture-group file</h2>
 <p>A picture-group file is an xml file, which looks rather like an
 html file, but with different tags (element names).  Also the syntax
 is more strict:  For example, for every start tag
@@ -247,16 +262,49 @@ named <code>mypics1</code>, <code>mypics2</code>, and so on.)
 (Note the names of the image files need not be related to the <code>id</code>,
 but it makes sense for them to be consistent.)
 
-<h2>Files</h2>
+<h2 id="Download">Installing: Files to download and dependencies</h2>
 <p>These scripts have been run using the
-<a href="http://www.gnu.org/software/kawa/xquery/">Kawa XQuery</a>
-XML processor
+<a href="http://www.gnu.org/software/qexo/">Qexo (Kawa XQuery)</a>
+XML processor.  There is
+<a href="http://www.gnu.org/software/qexo/XQ-Gen-XML.html">an article</a>
+that explains how it works.
 (An older version of these scripts used XSLT.)
 <p>
-If you're on a Unix-like system, I suggest using the
- <code><a href="group.sh">group.sh</a></code> script.
-It passed the correct parameters to the script
-<code><a href="pictures.xql">pictures.xql</a></code>.
+The scripts mentioned before are bash shell scripts that
+should run on most Unix-like systems, including GNU/Linux and Mac OS X,
+and probably also CygWin under Windows.
+Most of them read environment variables
+from the <code><a href="setup.sh">setup.sh</a></code> file,
+which you will need to configure for your own setup.
+<p>
+Start with <code><a href="make-xml.sh">make-xml.sh</a></code> script.
+This requires the <code>rdjpgcom</code> program to get the sizes of the image.
+Alternatively, you can use the
+<code><a href="MakeXml.java">MakeXml.java</a></code> program which does
+the same thing.
+<p>
+The most "work-horse" is the
+<code><a href="group.sh">group.sh</a></code> script.
+It uses the <code><a href="http://www.sentex.net/~mwandel/jhead/">jhead</a></code> program to EXIF information from digital photos.
+</div>
+<p>
+To rotate an images you can use
+the <code><a href="rotations.sh">rotations.sh</a></code> script.
+It uses the <code>jpegtran</code> program to do the actual rotations.
+It also uses <code><a href="http://xmlsoft.org/XSLT/">xsltproc</a></code>
+to run the <code><a href="rotations.xsl">rotations.xsl</a></code>
+XLST stylesheet to update <code>index.xml</code>.
+<p>
+The <code><a href="gen-images">gen-images</a></code> script
+is used to generate scaled images.
+It depends on the <code><a href="Thumbnail.java">Thumbnail.java</a></code>
+program, which requires JDK 1.4.x.
+Alternatively, you can use the <code><a href="http://www.imagemagick.org/www/mogrify.html">mogrify</a></code>, which is part of
+the <a href="http://www.imagemagick.org/">ImageMagick</a> suite of programs.
+When <code>gen-images</code> is done, it also runs
+<code><a href="sizes.sh">sizes.sh</a></code>,
+which also depends on <code>rdjpgcom</code>, though it could be re-written
+to use the JDK 1.4 image facilties.
 
 <h2>Author and license stuff</h2>
 <p>
@@ -275,7 +323,7 @@ make significant enhancements, I would appreciate hearing about it.
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Mon Feb 14 15:42:29 PST 2000 -->
 <!-- hhmts start -->
-Last modified: Fri Sep 27 22:25:44 PDT 2002
+Last modified: Sat May  3 16:25:22 PDT 2003
 <!-- hhmts end -->
   </body>
 </html>
