@@ -8,8 +8,8 @@
 <h1>Qexo - an XQuery-to-Java compiler</h1>
 <p>
 Qexo runs on the Java<sup>TM</sup> platform.
-It is written in Java, and it compiles XQuery expressios and programs
-Java bytecodes (<code>.class</code> files).
+It is written in Java, and it compiles XQuery expressions and programs
+to Java bytecodes (<code>.class</code> files).
 Qexo is Free Software (or open-source, if you prefer), available from
 the <a href="http://www.gnu.org/software/qexo/">Qexo website</a>.</p>
 <p>
@@ -24,9 +24,9 @@ languages, including now XQuery.</p>
 Kawa depends on a Java feature called a <code>ClassLoader</code>,
 which can take bytecode representation of a Java program
 (same format as a <code>.class</code> file, but stored in an
-array in memeory), and convert that into a runnable class in
-an existing Java exectable (or "virtual machine").  The same
-mechanism is use when a browser down-loads and runs an "applet".</p>
+array in memory), and convert that into a runnable class in
+an existing Java executable (or "virtual machine").  (The same
+mechanism is used when a browser down-loads and runs an "applet".)</p>
 <p>
 Compiling the bytecodes and then using a <code>ClassLoader</code>
 gives Qexo the best of both fast interactive responsiveness,
@@ -45,27 +45,37 @@ and put it in your class path.</p>
 
 <h2>Running the Qexo application</h2>
 <p>
-In the following, we write <code>qexo</code> to means
+In the following, we write '<code>qexo</code>' to means
 the command you use to start up Qexo.  There are a number of
 ways you can actually run Qexo.
 If you have downloaded Kawa as a <code>jar</code> file
 (for example <code>kawa-1.7.jar</code>), you can start up
-Qexo using the command <code>java -cp kawa-1.7.jar --xquery</code>,
-using you have the <code>jar</code> command in your <code>PATH</code>.
-On a Unix of GNU/Linux system, you can make an alias like the following,
-We assume <code>$ </code> is the propt for you command-line
-processor (shell or console).
+Qexo using the command <code>java -cp kawa-1.7.jar --xquery</code>.
+On a Unix or GNU/Linux system, you can make an alias like the following,
 <pre>
 $ <b>alias qexo='java -cp kawa.jar --xquery'</b>
 </pre>
+and then just do:
+<pre>
+$ <b>qexo</b>
+</pre>
 <p>
-<p>On Windows systems you can create a batch file <i>(test this)</i).</p>
+We use <code>$ </code> to stand for the prompt for your
+command-line processor (shell or console), and
+we use boldface for commands you type.</p>
+<p>
+Alternatively, you can place the <code>kawa.tar</code> file in you
+class path, and just type '<code>java kawa.repl --xquery</code>'
+instead of '<code>qexo</code>':
+<pre>
+$ <b>java kawa.repl --xquery</b>
+</pre>
 
 <h2>Interactive use</h2>
 
 <p>
 If you start up Qexo without specifying any file parameters,
-it will entern an inteactive loop.  Here are some examples,
+it will enter an inteactive loop.  Here are some examples,
 with user input shown in <b>bold</b>.
 
 <pre>
@@ -73,20 +83,20 @@ $ <b>qexo</b>
 {-- 1--} <b>for $i in 1 to 3 return 10*$i</b>
 10 20 30
 </pre>
-
-<p>The command line prompt includes the current input line number,
-and the form of an XQuery comment, to make it easier to cut
-and paste.  Following the prompt type some complete XQuery expression,
+<p>
+The command line prompt includes the current input line number,
+and has the form of an XQuery comment, to make it easier to cut and paste.
+Following the prompt you can type some complete XQuery expression,
 in the example <code>for $i in 1 to 3 return 10*$i</code>.
 and hit <key>Enter</key> (or <key>Return</key> on some keyboards).
 The Qexo processor evaluates the expression, and writes out the result,
-in this case a sequence of 4 integers.</p>
+in this case a sequence of 3 integers.</p>
 
-<p>How does Qexo know when an expression is "complete"?  I.e. when
-should it evaluate what it has, as opposed to prompting for more input?
+<p>How does Qexo know when an expression is "complete"?
+When should it evaluate what it has, as opposed to prompting for more input?
 The rule is that if current input line forms a complete valid expression,
-it evaluates it.  if It has seen a syntax error, it prints out a
-message and discards the input.  Otherwise, it print a prompt, and waits
+it evaluates it.  If it has seen a syntax error, it prints out a
+message and discards the input.  Otherwise, it prints a prompt, and waits
 for more input.</p>
 
 <p>
@@ -120,19 +130,22 @@ or <code>if</code> expression, respectively.</p>
 (in this case the standard console input), followed by the
 line and column numbers.  For the last error, it couldn't be
 more specific than <code>missing expression</code>.</p>
-
+<p>
+Next is an example of an element constructor expression.
+Notice how the prompt changes to an XML comment.</p>
 <pre>
 {-- 2--} <b>&lt;a&gt;</b>
 &lt;!--3--&gt;  <b>&lt;b&gt;{for $i in 1 to 3 return 10*$i}&lt;/b&gt;</b>
 &lt;!--4--&gt;<b>&lt;/a&gt;</b>
 &lt;a&gt;
-  &lt;b&gt;10 20 30lt;/b&gt;
+  &lt;b&gt;10 20 30&lt;/b&gt;
 &lt;/a&gt;
 </pre>
-
+<p>
+You can also define XQuery functions interactively:</p>
 <pre>
 {-- 5--} <b>define function repeat ($count, $values) {</b>
-{--{6--}   </b>for $i in 1 to $count return $values</b>
+{--{6--}   <b>for $i in 1 to $count return $values</b>
 {--{7--} <b>}</b>
 {-- 8--} <b>"[", repeat(4, (1,2)), "]"</b>
 [1 2 1 2 1 2 1 2]
@@ -142,9 +155,9 @@ more specific than <code>missing expression</code>.</p>
 <h2>Running XQuery programs</h2>
 
 <p>
-The XQuery specification defines a <i>program</i>, as a collection
+The XQuery specification defines a <i>program</i> as a collection
 of declarations followed by a top-level expression.
-The "nromal" of running a program is to put it in a file,
+The "normal" way of running a program is to put it in a file,
 and evaluate it.  You can use the <code>-f</code> command-line flag
 to specify the name of a file containing a program:</p>
 <pre>
@@ -158,7 +171,7 @@ $ <b>qexo -e '&lt;img src="file.png"&gt;&lt;/img&gt;'</b>
 &lt;img src="file.png" /&gt;
 </pre>
 </p>
-The by default prints the output using the XHTML style, which is
+The output is by default printed using the XHTML style, which is
 XML in a style that most HTML browsers can handle.
 You can override the output format using an <code>--output-format</code>
 option.  For example you can specify HTML format:</p>
@@ -177,19 +190,21 @@ $ <b>qexo --output-format scheme -e '&lt;img src="file.png"&gt;&lt;/img&gt;'</b>
 <p>
 If yuu have an application you'll be running repeatedly,
 it makes sense to compile, and save the compiled form for future use.
-If you run Qexo with the <code>-C</code> followed by one or more filenames,
-those files will be compiled, producing or more <code>.class</code> files.
+If you run Qexo with the <code>-C</code> flag followed by one or more
+filenames, then those files will be compiled,
+producing or more <code>.class</code> files.
 The <code>--main</code> option species that Qexo should generate
 a <code>main</code> method, creating an application that can be
 run by the <code>java</code> command.
 Assume <code>pictures.xql</code> is the name of a file
-containing an XQuery progra,
+containing an XQuery program:</p>
 <pre>
 $ <b>qexo --main -C pictures.xql</b>
 </pre>
 <p>
 This creates a file <code>pictures.class</code>.  (It may in rare cases
-create some other classes, that have the form <code>pictures*.class</code>.)
+create some other classes as well.
+These have the form <code>pictures*.class</code>.)
 You can run this as follows:
 <pre>
 $ <b>java pictures</b>
@@ -207,7 +222,7 @@ Web server to process and answer HTTP requests.  It is an
 efficient way to provide server-side computation, because
 the servlet can be loaded and allocated once, and then
 process thousands of requests.
-An XQuery program can by compiled by Qexo info a servlet.
+An XQuery program can be compiled by Qexo into a servlet.
 See <a href="http://www.gnu.org/software/qexo/servlet.html">here</a>
 and <a href="http://www.gnu.org/software/qexo/XQ-Gen-XML.html">chapter 12</a>
 for more information and examples of servlets using Qexo.</p>
@@ -232,7 +247,7 @@ declare namespace File = "class:java.io.File"
 <p>
 Remember that a namespace defines a prefix alias for a URL literal,
 which can be any string, used as a unique name.
-Qexo uses the convention that a URL string with the <code>class:</code>
+Qexo uses the convention that a URL string starting with <code>class:</code>
 refers to a Java class.  Specifically, it acts as if all Java methods
 are pre-bound to a QName whose local name is the method name,
 and whose namespace URI is <code>class:</code> followed by the
@@ -242,11 +257,10 @@ For example, if the Qexo processor sees a call to a function
 defined above, then it will translate that into a call to
 a method named <code>getImageInfo</code> in the class
 <code>com.drew.imaging.exif.ExifLoader</code>.
-(Thisis assume you haven't explicitly defined a function
-by that name!)
-If there is overloaded, Qexo uses to arguemnyt types to select a method.
-The method name <code>new</code> is treated created a new objects,
-as is using a <code>new</code> expression.
+(That is assuming you haven't explicitly defined a function by that name!)
+If the method is overloaded, Qexo uses the argument types to select a method.
+The method name <code>new</code> is used specially for creating a new objects,
+being equivalent to a Java <code>new</code> expression.
 <pre>
 define function get-image-info ($filename as xs:string)
 {
@@ -261,6 +275,16 @@ define function get-image-info ($filename as xs:string)
 <p>
 The function takes a single parameter: <code>$filename</code>, which is the
 name of a JPEG image file as a string.
+It uses that to create a new <code>File</code>,
+which is used to create an <code>ImageInfo</code> object.
+The <code>getTagIterator</code> method creates an
+<code>java.util.Iterator</code> instance, which you can use
+to get all the EXIF tags in the image.
+The Qexo function <code>interator-items</code> takes
+an <code>Iterator</code> and turns it into an XQuery sequence
+consisting of the values returned by the <code>Iterator</code>.
+The <code>for</code> "loops" over this sequence,
+and we format each tag item into a readable output line.</p>
 </p>
 <p>
 For more information, see
@@ -291,11 +315,11 @@ public class RunXQuery
 {
   public static void main (String[] args) throws Throwable
   {
-    XQuery xq = new XQuery();
+    <b>XQuery xq = new XQuery();</b>
     for (int i = 0;  i < args.length;  i++)
       {
 	String exp = args[i];
-	Object result = xq.eval(exp);
+	<b>Object result = xq.eval(exp);</b>
 	System.out.print(exp);
 	System.out.print(" =&gt; ");
 	System.out.println(result);
@@ -317,7 +341,7 @@ for $i in 1 to 5 return $i+10 =&gt; 11, 12, 13, 14, 15
 The <code>println</code> method calls the generic <code>toString</code>
 method, which is fine for quick-and-dirty output (such as for debugging),
 but isn't recommended for printing real data.
-One reason is that it requires allocate a temporary strings,
+One reason is that it requires allocating a temporary string,
 which then has to get copied into the <code>PrintStream</code>'s
 output buffer, which is wasteful for large data structures.
 Another reason is that none of the output shows up in the output
@@ -336,7 +360,7 @@ which is something you can send data to.  It's like a <code>Writer</code>
 (or a SAX2 <code>ContentHandler</code>),
 but it works with abstract data rather than characters.
 The <code>gnu.xml.XMLPrinter</code> class implements <code>Consumer</code>
-and extends <code>PrintWriter</code>, so you can use it as either.
+and extends <code>PrintWriter</code>, so you can use it as either of those two.
 It writes out the received data in XML format, though there are options
 to produce HTML and other styles.
 Below is a revised version of <code>RunXQuery</code>
@@ -350,31 +374,31 @@ public class RunXQuery
   public static void main (String[] args) throws Throwable
   {
     XQuery xq = new XQuery();
-    XMLPrinter pp = new XMLPrinter(System.out);
+    <b>XMLPrinter pp = new XMLPrinter(System.out);</b>
     for (int i = 0;  i < args.length;  i++)
       {
 	String exp = args[i];
 	System.out.print(exp);
 	System.out.print(" => ");
 	Object x = xq.eval(exp);
-	pp.writeObject(x);
+	<b>pp.writeObject(x);</b>
 	pp.println();
 	pp.flush();
       }
   }
 }
 </pre>
-<p>
-Note the <code>flush</code> call to make sure that the output from
-the <code>XMLPrinter</code> is sent to the <code>System.out</code>
-before we write anything on it directly.
-This produces mostly the same output as before, except that
-sequence item are sperated by space instead of comma-space.
-(Also, XML quoting is handled correctly.)
 <pre>
 $ <b>java RunXQuery 'for $i in 1 to 5 return $i+10'</b>
 for $i in 1 to 5 return $i+10 =&gt; 11 12 13 14 15
 </pre>
+<p>
+Note the <code>flush</code> call to make sure that the output from
+the <code>XMLPrinter</code> is sent to the <code>System.out</code>
+before we write anything on the latter directly.
+This produces mostly the same output as before, except that
+sequence item are separated by space instead of comma-space.
+(Also, XML quoting is handled correctly.)
 <p>
 This still isn't the best way to evaluate-and-print.
 It is more efficient to have the evaluator print directly to the output,
@@ -395,7 +419,7 @@ public class RunXQuery
 	String exp = args[i];
 	System.out.print(exp);
 	System.out.print(" => ");
-	xq.eval(exp, pp);
+	<b>xq.eval(exp, pp);</b>
 	pp.println();
 	pp.flush();
       }
@@ -403,8 +427,8 @@ public class RunXQuery
 }
 </pre>
 <p>
-The produced the same output as before.  Whether it is more efficient
-will depend on the xpression you evaluate (and how clever Qexo is).
+This produces the same output as before.  Whether it is more efficient
+will depend on the expression you evaluate (and how clever Qexo is).
 But for XQuery programs that generate large XML data sets it can
 make a large difference, and in general it's a good idea to pass
 the <code>Consumer</code> directly to the evaluator.</p>
@@ -415,15 +439,16 @@ you can use an <code>eval</code> method that takes a <code>Reader</code>.
   xq.eval (new FileReader("file.xql"), new XMLPrinter(System.out));
 </pre>
 <p>
-You can also call Qexo functions that ahve been compiled
+You can also call Qexo functions that have been compiled
 to <code>.class</code> files, directly using Java method invocation.
 How to do so is a bit complicated and likely to change,
-so check <a href="http://www.gnu.org/software/qexo/Running.html">here</a>
-for a future updates,</p>
+so check <a href="http://www.gnu.org/software/qexo/Running.html">the online version of this chapter</a>
+for future updates,</p>
 
 <h2>Using Qexo with SAX2</h2>
 <p>
-The Simple API for XML (SAX) is a set of classes for "copying" XML data
+The <a href="http://www.saxproject.org/">Simple API for XML</a>
+(SAX) is a set of classes for "copying" XML data
 (infosets) using method calls, not necessarily doing any physical
 copying.  It is a propular API because it is an efficient way
 to process large datasets.  The <code>Consumer</code> interface
@@ -442,18 +467,20 @@ import org.xml.sax.ContentHandler;
 
 <h2>The Consumer interface</h2>
 <p>
-The <code>Consumer</code> interface (like the SAX2 <code>ContentHandler</code>
+The <code>Consumer</code> interface (like the SAX2 <code>ContentHandler</code>)
 is very useful and efficient for any kind
-of processing of XML data that can be done in a single pass.</p>
-<p>
+of processing of XML data that can be done in a single pass.
 A <code>Consumer</code> is a passive output "sink".  It doesn't
-do anything its own.  Instead, it is used as the output
+do anything on its own.  Instead, it is used as the output
 of a <dfn>producer</dfn>, which is the application that does the actual work,
 and sends the results to the <code>Consumer</code>.
-The separation between a producer (when generates reuslts)
-and a <code>Consumer</code>, which (uses the results allows)
-allows for geat flexibility in plugging together modules.
-Note that a <code>Consumer</code> can pass 
+The separation between a producer (when generates results)
+and a <code>Consumer</code> (which uses the results) allows
+allows for great flexibility in plugging together modules.
+Note that a <code>Consumer</code> can pass the data along to
+another <code>Consumer</code>, acting as the latter's producer.
+This allows you to chain together a pipeline of <code>Consumer</code>
+<dfn>filters</dfn>.</p>
 <p>
 Here is a Java program that counts the number of different kinds of
 elements produced by evaluating XQuery expressions.
@@ -472,14 +499,14 @@ public class CountElements extends FilterConsumer
     super(VoidConsumer.getInstance());
   }
 
-  List list = new ArrayList();
+  List elementNames = new ArrayList();
   int numAttributes = 0;
   int numInts = 0;
   int numObjects = 0;
 
   public void beginGroup(String typeName, Object type)
   {
-    list.add(typeName);
+    elementNames.add(typeName);
     super.beginGroup(typeName, type);
   }
 
@@ -503,9 +530,9 @@ public class CountElements extends FilterConsumer
 
   void dump (PrintStream out)
   {
-    Collections.sort(list);
+    Collections.sort(elementNames);
     int total = 0;
-    ListIterator it = list.listIterator();
+    ListIterator it = elementNames.listIterator();
     String previous = null;
     int count = 0;
     for (;;)
@@ -546,7 +573,41 @@ public class CountElements extends FilterConsumer
 }
 </pre>
 <p>
-The produced calls the <code>beginGroup</code> method 
+The producer (in this case the <code>XQuery.eval</code>
+method called by the <code>main</code> method)
+calls the <code>beginGroup</code> method when it
+want to "write out" an XML element.  The <code>beginGroup</code>
+implementation in this class just adds the elements string name
+(the <code>typeName</code>) to a <code>List</code> <code>elementNames</code>.
+It then calls <code>super.beginGroup</code> to do the default
+processing of <code>beginGroup</code>, which calls
+<code>beginGroup</code> in the next <code>Consumer</code> in the filter.
+In this case, that is a <code>VoidConsumer</code>, which ignores
+everything it receives, so the <code>super.beginGroup</code>
+isn't really needed, but we include it to illustrate the general idea.</p>
+<p>
+We also count attributes using the <code>beginAttribute</code>
+method as wells as calls to <code>writeInt</code> and <code>writeObject</code>.
+These are used for non-XML typed values, which SAX doesn't handle.</p>
+<p>
+At the end the <code>dump</code> method is called.  It sorts the
+list of elements and writes out the number of times each has been seen,
+along with some other statistics.  Here is a sample run.</p>
+<pre>
+$ <b>javac -g CountElements.java</b>
+$ <b>java CountElements '&lt;a&gt;&lt;b/&gt;{10 to 20}&lt;b/&gt;{1+1}&lt;b/&gt;&lt;/a&gt;'</b>
+&lt;a&gt; - 1 times
+&lt;b&gt; - 3 times
+TOTAL: 4
+ints: 11
+Objects: 1
+</pre>
+<p>
+Note how the sequence <code>10 to 20</code> produces 11 calls to
+<code>writeInt</code>, while expression <code>1+1</code> produces a
+single call to <code>writeObject</code>.  Whether an XQuery integer
+produces a calls to <code>writeInt</code> or <code>writeObject</code>
+is up to the Qexo implementation and how clever it is.</p>
 
 <h2>The TreeList DOM class</h2>
 
@@ -556,7 +617,7 @@ The produced calls the <code>beginGroup</code> method
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sun Dec  8 10:58:11 PST 2002 -->
 <!-- hhmts start -->
-Last modified: Sun Dec 15 13:33:23 PST 2002
+Last modified: Sun Dec 15 15:20:08 PST 2002
 <!-- hhmts end -->
   </body>
 </html>
