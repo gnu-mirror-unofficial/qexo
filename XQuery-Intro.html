@@ -16,7 +16,7 @@ you may not distribute this document without it.-->
 
 <p>
 The World Wide Web Consortium is working on finalizing
-the specification for XQuery, aiming for a final release mid/late 2002.
+the specification for XQuery, aiming for a final release late 2002.
 XQuery is a powerful and convenient language
 that is designed for processing XML data.
 That means not just files in XML format, but also other data
@@ -204,7 +204,7 @@ The <code>$book/chapter</code> selects the child elements of the
 top-level <code>book</code> elements, which results in a sequence
 of the second-level <code>chapter</code> nodes, in <dfn>document order</dfn>.
 <p>
-The next element includes a <dfn>predicate</dfn>.
+The next example includes a <dfn>predicate</dfn>:
 <pre>
 $book//para[@class="warning"]
 </pre>
@@ -426,21 +426,12 @@ My article <cite>Generating XML and HTML using XQuery</cite>
 explains further how to generate XML documents and HTML web pages using XQuery.
 </p>
 <p>
-There aren't many books on XQuery yet, mainly because there are significant
-loose ends in the specification.
-At the time of writing, there is one book:
-<cite>Early Adopter XQuery</cite> from Wrox.
-I am working with other authors on a book for Sams we hope will be ready
-soon after the standard is finalized.
-<p>
-Obviously, there is no complete standards-conforming implementations either,
+Obviously, there is no complete standards-conforming implementations yet,
 but the XQuery site lists known implementations, some of which
 have executable demos.
-The only open-source implementation currently available
-seems to be my own Qexo implementation
-- see <a href="http://www.gnu.org/software/qexo/">www.gnu.org/software/qexo/</a>.
-(The Qexo implementation is interesting in that it compiles XQuery
-programs on-the-fly directly to Java bytecodes.)
+My own <a href="http://www.gnu.org/software/qexo/">Qexo implementation</a>.
+is noteworthy in that it it compiles XQuery
+programs on-the-fly directly to Java bytecodes, and it is open-source.
 I welcome you to experiment with it. But in any case, I do recommend
 considering XQuery when you need a powerful and convenient
 tool for analyzing or generating XML.
@@ -452,7 +443,7 @@ under the terms of the <a href="fdl.txt">GNU Free Documentation License</a>,
 version 1.1.</p>
 <!-- Created: Thu May  2 11:02:20 PDT 2002 -->
 <!-- hhmts start -->
-Last modified: Sun Aug 18 17:14:15 PDT 2002
+Last modified: Thu Oct 17 16:28:20 PDT 2002
 <!-- hhmts end -->
   </body>
 </html>
