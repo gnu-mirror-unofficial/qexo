@@ -315,7 +315,7 @@ definition.</p>
 <p><code>item()+</code> &#8212; Matches any non-empty sequence.</p>
 <p><code>attribute(@ID, *)</code> &#8212; Matches any attribute node whose name is <code>ID</code> (in the empty namespace).</p>
 <p><code>xs:integer</code> &#8212; Matches any integer type or any type derived from it, such a <code>xs:nonNegativeInteger</code>, assuming this is in scope of a namespace declaration that binds
-<code>xsd</code> to  <a href="http://www.w3.org/2001/XMLSchema">http://www.w3.org/2001/XMLSchema</a>.</p>
+<code>xs</code> to  <code>http://www.w3.org/2001/XMLSchema</code>, which is normally the case.</p>
 <p>These types can be used for XQuery's type-checking and -conversion operators.  Here is a very brief summary; see the specification or other chapters for details and
 examples.</p>
 <p><code>expr instance of type</code> &#8212; Returns true if the value of <code>expr</code> matches (is an instance of) <code>type</code>.</p>
