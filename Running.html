@@ -219,7 +219,7 @@ create some other classes as well.
 These have the form <code>pictures*.class</code>.)
 You can run this as follows:
 <pre>
-$ <b>java pictures</b>
+$ <b>java -cp .:kawa-1.7.jar pictures</b>
 </pre>
 <p>
 This should be the same as, but faster than, running:
@@ -345,7 +345,7 @@ public class RunXQuery
 </pre>
 <p>
 You can use these commands to compile and run this application,
-assuming that <code>kawa.jar</code> is in your class path:</p>
+assuming that <code>kawa-1.7.jar</code> is in your class path:</p>
 <pre>
 $ <b>javac -g RunXQuery.java</b>
 $ <b>java RunXQuery '3+4' 'for $i in 1 to 5 return $i+10' '&lt;a&gt;{3+4}&lt;/a&gt;'</b>
@@ -678,7 +678,7 @@ in this case is a <code>CountElements</code> object.</p>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sun Dec  8 10:58:11 PST 2002 -->
 <!-- hhmts start -->
-Last modified: Sun Jan 26 14:06:58 PST 2003
+Last modified: Wed Feb 26 08:33:27 PST 2003
 <!-- hhmts end -->
   </body>
 </html>
