@@ -56,15 +56,15 @@ However, in some cases there may be a
 function in the <i>Functions and Operators</i> document
 with the same name and behavior.  Those <em>are</em> available to
 your XQuery programs.
-For example there is a <code>fn:node-type</code> function which
+For example there is a <code>fn:node-kind</code> function which
 you can use, and which is defined to return the same
-result as <code>dm:node-type</code>.
+result as <code>dm:node-kind</code>.
 </p>
 <h3>Node identity and hierarchy</h3>
 <p>Nodes in XQuery are <i>immutable</i>, which means you cannot change any part of a node once it has been created. This makes sense, since XQuery is a pure side-effect-free expression
 language. However, nodes do have <i>identity</i>: two nodes that
-were created using different expressions are distinct nodes.
-This is true even if they have same properties and children.
+were created using different expressions are distinct nodes,
+even if they contain the same data.
 You can compare the latter using the standard function
 <code>fn:deep-equal</code>.
 The following examples are all <code>true</code>:</p>
@@ -75,11 +75,13 @@ let $x := &lt;a&gt;&lt;b&gt;&lt;/b&gt;&lt;/a&gt; return $x/b is $x/*</pre>
 <p>Because nodes have identity, you can talk about making a copy of a node, because you can distinguish the original from the copy. However, atomic values do not have identity: There is no
 way to copy the string <code>"xyzzy"</code> because there is no way to distinguish the copy from the original. That is the difference between a string atomic value and a text node, which you <i>can</i>
 copy.</p>
-<p>A node may have <i>children</i>, which are the nodes below it in the tree hierarchy. For example, the children of an element node are the text nodes and nested elements (and
-occasionally other nodes) that are its contents. The function <code>dm:children</code> takes a node and returns the sequence of its children.
+<p>A node may have <i>children</i>, which are the nodes below it in the tree hierarchy, but not including attribute or namespace nodes.
+For example, the children of an element node are the text nodes and
+nested elements (and occasionally other nodes) that are its contents.
+The function <code>dm:children</code> takes a node and returns the sequence of its children.
 (This function only exists in the data model; to get the children of a node
 <var>N</var> in XQuery use the expression <code>N/node()</code>.)
-Only document and element node can have children, so
+Only document and element nodes can have children, so
 <code>dm:children</code> returns the empty sequence for other node types.</p>
 <p>For each node <code>X</code> that is a child of <code>Y</code>, the node <code>X</code> has a <i>parent</i> property that is the node <code>Y</code>.
 Using the data model, you can get at <code>Y</code> using the
@@ -277,11 +279,11 @@ that a given element tag can be have different types in different contexts, but 
 schema.</p>
 <p>An XQuery processor may optionally implement the <i>Schema import feature</i>. If it does, it must be able to import definitions from external schemas and validate node trees.</p>
 <p>Each element or attribute in XQuery has a <i>type annotation</i>, which is its <i>dynamic type</i>. If an element has not been validated, or otherwise been given a type annotation, then
-it has the default type annotation <code>xsd:anyType</code>. The corresponding
-default for an attribute node is the type <code>xsd:untypedAtomic</code>.</p>
+it has the default type annotation <code>xs:anyType</code>. The corresponding
+default for an attribute node is the type <code>xs:untypedAtomic</code>.</p>
 <p>Atomic (non-node) values can also have type annotations.  The annotation <code>xsd:untypedAtomic</code> indicates that the type is unknown, typically
 raw text from an schema-less XML file.  Operations that take atomic values may
-cast <code>xsd:untypedAtomic</code> to a more specific type, such as <code>xsd:double</code>, but if the atomic value is of the wrong kind (a string where a number is required, as in the operands of <code>+</code>),
+cast <code>xsd:untypedAtomic</code> to a more specific type, such as <code>xs:double</code>, but if the atomic value is of the wrong kind (a string where a number is required, as in the operands of <code>+</code>),
 then a run-time error may be signaled.</p>
 <p>An XQuery application can use a validate expression:</p>
 <pre>validate ( EXPR )</pre>
@@ -312,7 +314,7 @@ definition.</p>
 <p><code>node()*</code> &#8212; Matches a sequence of zero or more nodes.</p>
 <p><code>item()+</code> &#8212; Matches any non-empty sequence.</p>
 <p><code>attribute(@ID, *)</code> &#8212; Matches any attribute node whose name is <code>ID</code> (in the empty namespace).</p>
-<p><code>xsd:integer</code> &#8212; Matches any integer type or any type derived from it, such a <code>xsd:nonNegativeInteger</code>, assuming this is in scope of a namespace declaration that binds
+<p><code>xs:integer</code> &#8212; Matches any integer type or any type derived from it, such a <code>xs:nonNegativeInteger</code>, assuming this is in scope of a namespace declaration that binds
 <code>xsd</code> to  <a href="http://www.w3.org/2001/XMLSchema">http://www.w3.org/2001/XMLSchema</a>.</p>
 <p>These types can be used for XQuery's type-checking and -conversion operators.  Here is a very brief summary; see the specification or other chapters for details and
 examples.</p>
