@@ -211,6 +211,13 @@ element content (element "literals" like <code>&lt;a&gt;...&lt;/a&gt;</code>);
 FLWR expressions (<code>let</code> and <code>for</code> forms).
 Many complex 'for'- and other expressions now generate inlined code.
 <p>
+Path expressins are evaluated without removing duplicates and
+sorting in document order.  That is also
+why we don't handle <code>//</code> according to spec.
+For most path expressions it shouldn't
+matter, but in some cases we get the wrong result.  
+This will be fixed in a future release.
+<p>
 In this table "Ok" means that the feature works in both the
 released (source and jar) versions listed above, and also in CVS;
 "Ok, in CVS" means the feature/fix is so recent it is only
@@ -253,6 +260,8 @@ available in the CVS version.
 <tr><td>values<code>[</code>boolean<code>]</code></td><td>Ok</td></tr>
 <tr><td>element-name <i>(not following a '/')</i></td><td>Ok</td></tr>
 <tr><td><code>@</code>attribute-name <i>(not following a '/')</i></td><td>Ok</td></tr>
+<tr><td><code>descendant::</code> axis</td><td>Ok</td></tr>
+<tr><td><code>descendant-or-self::</code> axis</td><td>Ok</td></tr>
 <tr><td><code>instanceof</code></td><td>Ok, but DataType limited</td></tr>
 <tr><td><code>instanceof only</code></td><td>Missing</td></tr>
 <tr><td><code>cast as</code></td><td>Missing</td></tr>
@@ -295,7 +304,7 @@ available in the CVS version.
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sat Aug 18 14:08:13 PDT 2001 -->
 <!-- hhmts start -->
-Last modified: Thu Jun 13 14:56:01 PDT 2002
+Last modified: Thu Jun 13 15:05:14 PDT 2002
 <!-- hhmts end -->
   </body>
 </html>
