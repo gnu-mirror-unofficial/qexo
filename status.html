@@ -24,10 +24,10 @@ extends <code>javax.xml.namespace.QName</code>.</li>
 <li><code>xs:boolean</code>: Impleented using <code>java.lang.Boolean</code>.</li>
 <li><code>xs:string</code>: Implemented using <code>java.lang.String</code>.</li>
 <li><code>xs:integer</code>: Implemented using <code>gnu.math.IntNum</code>.</li>
-<li><code>positiveInteger</code>: Implemeted using <code>gnu.math.IntNum</code>.</li>
-<li><code>nonPositiveInteger</code>: Implemeted using <code>gnu.math.IntNum</code>.</li>
-<li><code>negativeInteger</code>: Implemeted using <code>gnu.math.IntNum</code>.</li>
-<li><code>nonNegativeInteger</code>: Implemeted using <code>gnu.math.IntNum</code>.</li>
+<li><code>positiveInteger</code>: Implemented using <code>gnu.math.IntNum</code>.</li>
+<li><code>nonPositiveInteger</code>: Implemented using <code>gnu.math.IntNum</code>.</li>
+<li><code>negativeInteger</code>: Implemented using <code>gnu.math.IntNum</code>.</li>
+<li><code>nonNegativeInteger</code>: Implemented using <code>gnu.math.IntNum</code>.</li>
 <li<code>xs:decimal</code>: Translates to <code>gnu.math.RealNum</code>.</li>
 </ul>
 
@@ -43,10 +43,13 @@ All axes (including optional ones, except the namespace axis) are implemented.
 
 <h3>Other expressions</h3>
 
-<p>FLWOR expression should work, except for <code>order by</code> clauses.</p>
+<p>FLWOR expressions should work, except for <code>order by</code> clauses.</p>
 
 <p>No support for validation, and incomplete support for type testing.
 <code>typeswitch</code> works to the extent that Qexo understands the types.</p>
+
+<p>The <code>ordered</code> and <code>unordered</code> expressions
+are not implemented.</p>
 
 <p>Except as noted, other expressions should work.</p>
 
@@ -312,7 +315,7 @@ nothing uses it.  Also, only the default (code-point) collation works.</li>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Mon Dec 13 17:03:18 PST 2004 -->
 <!-- hhmts start -->
-Last modified: Wed Dec 22 22:06:55 PST 2004
+Last modified: Wed Dec 22 22:17:37 PST 2004
 <!-- hhmts end -->
   </body>
 </html>
