@@ -119,7 +119,7 @@ run the script <code>$CATALINA_HOME/bin/bin/startup.sh</code>.
 You may need to set the environment variable <code>JAVA_HOME</code>
 to point to where Java is installed on your machine.
 (On Mac OS X 10.2 this
-is <code>/System/Library/Frameworks/JavaVM.framework/Home</code>.)
+is <code>/Library/Java/Home</code>.)
 If you haven't changed any of the defaults,
 you should now be able to point your browser at
 <a href="http://localhost:8080/"><code>http://localhost:8080/</code></a>,
@@ -232,151 +232,14 @@ the updated forms will show 16 and 3.  And so on.
 
 <h2>Development and Debugging</h2>
 
-Qexo provides help for developing and debugging your applications.
-
-<h3>XQuery syntax errors</h3/
-<p>
-If you request <code>adder.xql</code> after editing it,
-<code>KawaPageServlet</code> will automatically re-compile it.
-This makes it easy to test out changes.
-If you make a syntax error, the result sent to the browser
-will include error messages from the compiler.
-For example, supposed you have the file <code>min-cats.xql</code>
-with the following semi-nonsense:</p>
-<pre>
-define function min-cats($x, $y) {
-let $z in " cats" return
-  if (x < $y)
-    $x else $y
-  " cats"
-(: returns number of cats
-}
-min-cats(3, 4)
-</pre>
-If you request this file, you'll see in your browser
-the following error log instead:
-<pre>
-min-cats.xql:2:17: missing ':=' in 'let' clause
-min-cats.xql:3:9: node test when focus is undefined
-min-cats.xql:4:5: missing 'then'
-min-cats.xql:5:9: missing '}' or ','
-min-cats.xql:9:1: non-terminated comment starting at line 6
-</pre>
-<p>
-This gives you the filename, line number, and column number
-each place Qexo found a syntax error.  Sometimes an earlier error
-will cause multiple error, but in this case each message
-results from a separate error.  (They should all be easy to figure out,
-except perhaps the second one, where the <code>$x</code> mistyped
-as <code>x</code> is interpreted as a node-test in a path expression,
-but Qexo can catch this as its is an undefined context for such a node-test.)
-
-<h3>Run-time exceptions</h3>
-<p>
-If you cause a run-time error, you will get a stack trace
-that will hopefully help you track down the error.
-Here is an application <a href="list-data.xql"><code>list-data.xql</code></a>
-that looks for a non-existant <code>"data.txt"</code>:
-<pre>
-define function listing($url) {
-  (: doc($url) replaced document($url) in the May'03 spec. :)
-  &lt;pre&gt;{ doc($url) }&lt;/pre&gt;
-}
-listing("data.txt"), ""
-</pre>
-<p>
-If you try to run this file, Tomcat will return a Java execution
-stack trace.  Look for the <code>root cause</code>,
-which looks like:
-<pre>
-java.io.FileNotFoundException: http://localhost:8080/data.txt
-    at sun.net.www.protocol.http.HttpURLConnection
-       .getInputStream(HttpURLConnection.java:707)
-    at gnu.kawa.xml.XMLParser.(XMLParser.java:57)
-    at gnu.kawa.xml.XMLParser.(XMLParser.java:49)
-    at gnu.kawa.xml.XMLParser.(XMLParser.java:42)
-    at gnu.kawa.xml.Document.parse(Document.java:52)
-    at gnu.kawa.xml.Document.apply(Document.java:94)
-    at gnu.mapping.CallContext.runUntilDone(CallContext.java:258)
-    at gnu.mapping.CallContext.runUntilValue(CallContext.java:290)
-    at listData.listing$T(list-data.xql:3)
-    at listData.apply(list-data.xql)
-    at gnu.mapping.CpsMethodProc.apply(CpsMethodProc.java:49)
-    at gnu.mapping.CallContext.runUntilDone(CallContext.java:258)
-    at gnu.mapping.CallContext.runUntilValue(CallContext.java:290)
-    at listData.apply(list-data.xql:5)
-    at gnu.kawa.servlet.KawaPageServlet.apply(KawaPageServlet.java:51)
-    at gnu.kawa.servlet.KawaServlet.doGet(KawaServlet.java:57)
-    at javax.servlet.http.HttpServlet.service(HttpServlet.java:740)
-    at javax.servlet.http.HttpServlet.service(HttpServlet.java:853)
-    at org.apache.catalina.core.ApplicationFilterChain
-       .internalDoFilter(ApplicationFilterChain.java:247)
-    ... <i>lots of Tomcat internals</i> ...
-    at org.apache.tomcat.util.threads.ThreadPool$ControlRunnable
-       .run(ThreadPool.java:619)
-    at java.lang.Thread.run(Thread.java:554)
-</pre>
-<p>
-The cause is a <code>FileNotFoundException</code>, and the
-exception message names the URL it was looking for.  (The <code>data.txt</code>
-is a relative URL that gets resolved to that of the web application.)
-The first few lines are within Kawa run-time routines, but then we get
-to two lines in the <code>listData</code> class, which is the Java
-"mangling" of the <code>list-data.xql</code> file.
-The first one specifies that we're at line 3, in method <code>listing$T</code>,
-which is the Java "mangling" of the <code>listing</code> function.
-And that is indeed where the bad call to <code>doc</code> is.
-A little further down you will see a
-call at <code>list-data.xql</code> line 5, which is where
-<code>listing</code> gets called.  (There are some calls in
-between for technical reasons.)
-<p>
-Note how we append an empty (<code>, ""</code>) after the call to
-<code>listing</code>.  This is to suppress tail-call-optimization,
-which is an optimization done when the last thing in a function is
-a call to another function.  The optimization allows some kinds of
-recursion to execute without a stack overflow, but the disadvantage is
-that stack traces can be confusing.  So when debugging, if may sometimes
-be helpful to append some empty value so <em>that</em> becomes
-the last expression in the function.
-
-<h3>Adding trace output</h3>
-<p>
-Sometimes it is difficult to understand what an application is
-doing, in which case it is useful to add print statements for debugging
-purposes.  XQuery is a side-effect-free language, so it doesn't
-really have print statements.
-However, the May 2003 draft specification added a <code>trace</code>
-which takes two parameters.  The first parameter
-can be an arbitary value that is returned
-as the result of the <code>trace</code> call.  The other parameter
-is descriptive string.  Both values are written to a "trace data set"
-in an implementation-defined manner.  For example you could
-replace the <code>num-parameter</code> implementation
-of <code>adder.xql</code> by the following:
-<pre>
-define function num-parameter($name, $default) {
-  trace (
-  number(request-parameter($name, $default))
-  , concat("num-parameter of '", $name, "' is:"))
-}
-</pre>
-<p>
-That writes the following output to Qexo's standard error output
-(<code>System.err</code>).  Tomcat re-directs the error output
-to the file <code>$CATALINA_HOME/logs/catalina.out</code>,
-where you can read it.
-<pre>
-XQuery-trace: num-parameter of 'sum1' is: 0
-XQuery-trace: num-parameter of 'sum2' is: 0
-XQuery-trace: num-parameter of 'sum2' is: 1
-</pre>
+Information on errors and debugging your applications has
+been <a href="servlet.html"#debugging">moved<a>.
 
     <hr>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Mon May  5 20:28:35 PDT 2003 -->
 <!-- hhmts start -->
-Last modified: Tue Jun 10 07:21:35 PDT 2003
+Last modified: Mon Jun 16 22:23:27 PDT 2003
 <!-- hhmts end -->
   </body>
 </html>
