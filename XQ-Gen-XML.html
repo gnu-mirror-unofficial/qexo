@@ -53,6 +53,15 @@ for the viewer. This approach also makes it easier to just upload a collection o
 </ul>
 <p>We will show how you can use XQuery for either approach, starting out with how to generate static web pages in advance. The software, with usage and installation instructions, is
 available at <a href="http://www.gnu.org/software/qexo/qalbum/">http://www.gnu.org/software/qexo/qalbum/</a>.</p>
+<p>
+For larger <q>web applications</q> it is a good idea to separate out the
+<q>presentation</q> (web page layout) from <q>logic</q> (calculating what
+to present and performing requested actions).  This is especially
+important when different people are responsible for the different
+aspects of the application.  For this modest application we're
+more interested in simplicity, but it is still a good idea to put
+HTML element constructors in different functions than the ones
+that contain non-trivial logic.</p>
 <p>For each album, we start with an XML file that contains a list of JPEG image files, with some information about each picture. This XML file can be generated using a script that scans
 the JPEG files in a directory, or it can be created with a text editor. I use a combination of scripts and manual editing, as described at the web address above, but that's not relevant to our goal
 of learning and using XQuery.</p>
