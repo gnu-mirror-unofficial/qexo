@@ -74,7 +74,7 @@ We use <code>$ </code> to stand for the prompt for your
 command-line processor (shell or console), and
 we use boldface for commands you type.</p>
 <p>
-Alternatively, you can place the <code>kawa.tar</code> file in your
+Alternatively, you can place the <code>kawa-1.7.jar</code> file in your
 class path, and just type '<code>java kawa.repl --xquery</code>'
 instead of '<code>qexo</code>':
 <pre>
@@ -90,7 +90,7 @@ with user input shown in <b>bold</b>.
 
 <pre>
 $ <b>qexo</b>
-{-- 1--} <b>for $i in 1 to 3 return 10*$i</b>
+(: 1 :) <b>for $i in 1 to 3 return 10*$i</b>
 10 20 30
 </pre>
 <p>
@@ -112,29 +112,27 @@ for more input.</p>
 <p>
 Let us continue, this time with some multi-line expression:</p>
 <pre>
-{-- 2--} <b>(3+</b>
-{--(3--} <b>10)</b>
+(: 2 :) <b>(3</b>
+(: 3(:) <b>+10)</b>
 13
-{-- 4--} <b>if (3&lt;2)</b>
-{--i5--} <b>then "it's true"</b>
-{--i6--} <b>else "it's false"</b>
+(: 4 :) <b>if (3&lt;2)</b>
+(: 5i:) <b>then "it's true"</b>
+(: 6i:) <b>else "it's false"</b>
 it's false
 </pre>
 
 <p>Notice how the prompt changes to <code>'('</code> or an <code>'i'</code>
 to indicate that we're inside an incomplete parenthetical
-or <code>if</code> expression, respectively.
-<em>This is only implemented in the CVS version of Qexo, not in 1.6.99.</em>
-</p>
+or <code>if</code> expression, respectively.</p>
 
 <p>Next some examples of syntax errors.</p>
 
 <pre>
-{-- 7--} <b>(for $x := 10 return $x</b>
+(: 7 :) <b>(for $x := 10 return $x</b>
 &lt;stdin&gt;:7:9: missing 'in' in 'for' clause
-{-- 8--} <b>%+1</b>
+(: 8 :) <b>%+1</b>
 &lt;stdin&gt;:8:1: invalid character '%'
-{-- 9--} <b>= 5</b>
+(: 9 :) <b>= 5</b>
 &lt;stdin&gt;:9:1: missing expression
 </pre>
 
@@ -146,8 +144,8 @@ more specific than <code>missing expression</code>.</p>
 Next is an example of an element constructor expression.
 Notice how the prompt changes to an XML comment.</p>
 <pre>
-{-- 2--} <b>&lt;a&gt;</b>
-&lt;!--3--&gt;  <b>&lt;b&gt;{for $i in 1 to 3 return 10*$i}&lt;/b&gt;</b>
+(: 2 :) <b>&lt;a&gt;</b>
+&lt;!--3--&gt;<b>&lt;b&gt;{for $i in 1 to 3 return 10*$i}&lt;/b&gt;</b>
 &lt;!--4--&gt;<b>&lt;/a&gt;</b>
 &lt;a&gt;
   &lt;b&gt;10 20 30&lt;/b&gt;
@@ -156,12 +154,12 @@ Notice how the prompt changes to an XML comment.</p>
 <p>
 You can also define XQuery functions interactively:</p>
 <pre>
-{-- 5--} <b>define function repeat ($count, $values) {</b>
-{--{6--}   <b>for $i in 1 to $count return $values</b>
-{--{7--} <b>}</b>
-{-- 8--} <b>"[", repeat(4, (1,2)), "]"</b>
+(: 5 :) <b>define function repeat ($count, $values) {</b>
+(: 6{:)   <b>for $i in 1 to $count return $values</b>
+(: 7{:) <b>}</b>
+(: 8 :) <b>"[", repeat(4, (1,2)), "]"</b>
 [1 2 1 2 1 2 1 2]
-{-- 9--}
+(: 9 :)
 </pre>
 
 <h2>Running XQuery programs</h2>
@@ -200,8 +198,8 @@ $ <b>qexo --output-format scheme -e '&lt;img src="file.png"&gt;&lt;/img&gt;'</b>
 
 <h2>Compiling an XQuery program to an application</h2>
 <p>
-If yuu have an application you'll be running repeatedly,
-it makes sense to compile, and save the compiled form for future use.
+If you have an application you'll be running repeatedly,
+it makes sense to compile it and save the compiled form for future use.
 If you run Qexo with the <code>-C</code> flag followed by one or more
 filenames, then those files will be compiled,
 producing or more <code>.class</code> files.
@@ -240,8 +238,6 @@ and <a href="http://www.gnu.org/software/qexo/XQ-Gen-XML.html">chapter 12</a>
 for more information and examples of servlets using Qexo.</p>
 
 <h2>Calling Java methods from XQuery</h2>
-<p><em>This is only implemented in the CVS version of Qexo,
-not in 1.6.99.</em></p>
 <p>
 A Qexo extension allows you to call an arbitary Java method
 in an XQuery expression, using XQuery function call notation.
@@ -305,8 +301,6 @@ For more information, see
 <a href="http://www.gnu.org/software/qexo/Extensions.html#Calling-Java-Methods">here</a>.
 
 <h2>Calling XQuery Expressions from Java</h2>
-<p><em>Most of this should work in version 1.6.99,
-but some of it may only work with the CVS version.</em></p>
 <p>
 Often XQuery will be used as part of a larger Java application.
 In this section we will see how you can use Qexo
@@ -678,7 +672,7 @@ in this case is a <code>CountElements</code> object.</p>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sun Dec  8 10:58:11 PST 2002 -->
 <!-- hhmts start -->
-Last modified: Wed Feb 26 08:33:27 PST 2003
+Last modified: Mon Jun  9 12:25:01 PDT 2003
 <!-- hhmts end -->
   </body>
 </html>
