@@ -1,3 +1,9 @@
+{--
+declare namespace exif-extractor = "class:com.drew.imaging.exif.ExifExtractor"
+declare namespace exif-loader = "class:com.drew.imaging.exif.ExifLoader"
+declare namespace ImageInfo = "class:com.drew.imaging.exif.ImageInfo"
+--}
+
 define function make-img($picture, $scale) {
   <img border="1" src="{$picture}" width="{number($picture/@width) * $scale}"
     height="{number($picture/@height) * $scale}" />
@@ -42,8 +48,8 @@ define function format-row($row) {
 
 {-- Process a sequence of <picture> elements, grouping them into
  -- rows of at most 3, for the thumbnail page.
- -- $prev:  An integer giving the number of <pictures> previously processed
- --   in this current sequence.
+ -- $prev:  An integer giving the number of <pictures> in
+ --   this current sequence that precede those in $pictures.
  -- $pictures:  Remaining <picture> elements to processes.
  -- Returns formatted HTML for the input $pictures.
  --}
@@ -62,7 +68,7 @@ define function make-rows($prev, $pictures) {
 }
 
 {-- Process the children of a <group>, grouping thumbnails into rows.
- -- $pictures:  A sequence of consequtive seen <picture> elements.
+ -- $pictures:  Sequence of <picture>s that need to be split into rows.
  -- $unseen: sequence of remaining children we have not processed yet.
  --}
 define function find-rows($pictures, $unseen) {
@@ -120,9 +126,23 @@ define function nav-bar($picture, $name, $prev, $next, $style) {
     <td width="100" align="left">{
       if ($next) then
         <span class="button">{make-link($next/@id, $style, " Next > ")}</span>
-      else ()}</td>
+      else ()
+    }</td>
   </tr>
 </table>
+}
+
+define function get-image-info ($name)
+{
+{--
+<pre>{
+  let $info := exif-loader:getImageInfo(java.io.File:new(concat($name,".jpg")))
+  for $i in iterator-items(ImageInfo:getTagIterator($info)) return
+ ( "
+", ImageInfo:getTagName($i),": ", ImageInfo:getDescription($info, $i))
+}</pre>
+--}
+  document(concat($name,"-info.txt"))
 }
 
 define function raw-jpg-link($image, $description) {
@@ -133,7 +153,9 @@ define function raw-jpg-link($image, $description) {
 
 {-- Generate a page picture image with links etc.
  -- $picture:  The <picture> node to use.
- -- $group:  The enclosing <group>
+ -- $group:  The enclosing <group>.
+ -- $name:  The string-value of the picture's id attribute.
+ -- $preamble: Paragraphs that lead-in to this (gorup of) pictures.
  -- $prev:  The previous <picture> or the empty sequence there is none.
  -- $next:  The next <picture> or the empty sequence there is none.
  -- $date:  The date the picture was taken, as a string, or the empty sequence.
@@ -141,7 +163,7 @@ define function raw-jpg-link($image, $description) {
  --   or "info".  The "info" style show a thumbnail, plus EXIF information,
  --   plus links to the raw JPGs.
  --}
-define function picture($picture, $group, $name, $prev, $next, $date, $style) {
+define function picture($picture, $group, $name, $preamble, $prev, $next, $date, $style) {
 {-- FIXME add documentheader and DO NOT EDIT comment --}
 <html>
   <head>
@@ -182,8 +204,9 @@ define function picture($picture, $group, $name, $prev, $next, $date, $style) {
         return routeEvent(e); }}
     </script>
   </head>
-  <body bgcolor="#00AAAA">
+  <body bgcolor="#00DDDD">
 { nav-bar($picture, $name, $prev, $next, $style)}
+{ $preamble }
 { make-header($picture, $group)}
 { picture-text($picture)}
 { if (empty($date)) then () else <p>Date taken: {$date}.</p>}
@@ -193,7 +216,7 @@ define function picture($picture, $group, $name, $prev, $next, $date, $style) {
   if ($style = "info") then (
     <table><tr>
       <td style="padding: 20 20 20 10">{make-thumbnail($picture)} </td>
-      <td>{document(concat($name,"-info.txt"))}</td>
+      <td>{get-image-info($name)}</td>
     </tr></table>,
     <table><tr><td>Plain JPEG images:</td>
     {raw-jpg-link($picture/full-image, "Original")}
@@ -221,6 +244,8 @@ define function make-group-page($group) {
 <html>
   <head>
     {$group/title}
+    <link rel="up" href="../index.html" />
+    <link rel="top" href="../../index.html" />
     <style type="text/css">
       a.textual {{ text-decoration: none }}
       img {{ border: 0 }}
@@ -234,24 +259,39 @@ define function make-group-page($group) {
 </html>
 }
 
+define function loop-pictures($group, $pictures, $i, $count, $style, $texts, $unseen) {
+  if (empty($unseen)) then ()
+  else
+    let $cur := item-at($unseen, 1),
+        $rest := sublist($unseen, 2)
+    return
+      typeswitch ($cur)
+      case element row return
+        (loop-pictures($group, $pictures, $i, $count, $style, $texts, $cur/*),
+         loop-pictures($group, $pictures, $i, $count, $style, (), $rest))
+      case element text return
+        loop-pictures($group, $pictures, $i, $count, $style,
+                      ($texts,<p>{$cur/node()}</p>), $rest)
+      case element picture return
+        let $prev := if ($i > 1) then item-at($pictures, $i - 1) else (),
+            $next := if ($i < $count) then item-at($pictures, $i + 1) else (),
+            $date := if ($cur/date) then $cur/date else $group/date,
+	    $name := string($cur/@id)
+        return
+        (write-to(picture($cur,  $group, $name,
+		    $texts, $prev, $next, $date, $style),
+                  concat($name, $style, ".html")),
+         loop-pictures($group, $pictures, $i+1, $count, $style, (),  $rest))
+      default return
+         loop-pictures($group, $pictures, $i, $count, $style, $texts,  $rest)
+}
+
 let $group := document("index.xml")/group,
-    $group-date := $group/date,
     $group-name := $group/title,
     $pictures := $group//picture,
     $count := count($pictures)
   return (
     write-to(make-group-page($group), "index.html"),
-    for $i in 1 to $count
     for $style in ("", "info", "large")
-    let $picture := item-at($pictures,$i),
-        $prev := if ($i > 1) then item-at($pictures, $i - 1) else (),
-        $next := if ($i < $count) then item-at($pictures, $i + 1) else (),
-        $date := if ($picture/date) then $picture/date else $group-date ,
-        $name := (if ($picture/caption) then $group-name
-          else concat(string($group/title), " - ", string($picture/caption)))
-      return
-      write-to(
-        picture($picture, $group, string($picture/@id),
-          $prev, $next, $date, $style),
-	  concat(string($picture/@id), $style, ".html"))
-)
+    return
+    loop-pictures($group, $pictures, 1, $count, $style, (), $group/*))
