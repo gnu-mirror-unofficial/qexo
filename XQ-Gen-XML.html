@@ -1,0 +1,1072 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Generating XML and HTML using XQuery</title>
+  </head>
+
+  <body>
+    <h1>Generating XML and HTML using XQuery</h1>
+
+<p><i>Material from this article will appear in a book on XQuery to be
+published by Sam's publishing.  If you find a mistake, or something unclear,
+I would appreciate hearing about it, so I can fix the text.</i>
+
+<p>Most people think of XQuery as a query language for processing
+XML "data-bases".  But it is also a very nice language for
+<em>generating</em> XML and HTML, including web pages.
+In this article<!--BOOK: chapter-->
+we will look at XQuery from this angle.</p>
+<p>
+There are many tools for generating web pages. Many of these
+are based on <dfn>templates</dfn>:  You write an HTML page, but you
+can embed within it expressions that get calculated by the
+web server.
+<ul>
+<li><b>JSP:</b><br />
+<code>&lt;p&gt;3*4 is: &lt;%= 3*4%&gt;.&lt;/p&gt;</code>
+<br />
+JSP or "Java Server Pages" (<a href="http://java.sun.com/products/jsp/">http://java.sun.com/products/jsp/</a>)
+is a format where Java expressions and commands
+are imbedded in HTML pages.  A JSP page is automatically translated
+into a special kind of Java class, a <dfn>servlet</dfn>.  A servlet can
+be executed by a Web server to execute when receiving Web requests.
+<li><b>PHP:</b><br />
+<code>&lt;p&gt;3*4 is: &lt;?php echo 3+4 ?&gt;.&lt;/p&gt;</code>
+<br />
+PHP (<a href="http://www.php.net/">http://www.php.net/</a>) is a relatively new scripting language
+that is especially popular for server applications.
+<li><b>ASP:</b><br />
+<code>&lt;p&gt;3*4 is: &lt;%= 3*4%&gt;.&lt;/p&gt;</code>
+<br />
+ASP (or "Active Server Pages") from Microsoft supports embedded
+interpreted VBScript and JScript code;
+ASP.NET (<a href="http://www.asp.net/">http://www.asp.net/</a>)
+supports other compiled <code>.NET</code> languages.
+<li><b>BRL:</b><br />
+<code>&lt;p&gt;3*4 is: [(+ 3 4)].&lt;/p&gt;</code>
+<br />
+The Beautiful Report Language (<a href="http://brl.sourceforge.net/">http://brl.sourceforge.net/</a>) allows
+expressions in the Scheme language to be embedded inside templates.
+BRL is similar to JSP in that it generates Java servlets.
+</ul>
+<!--BOOK: By now you know you can do the same-->
+You can do the same thing with XQuery:</p>
+<pre>
+&lt;p&gt;3*4 is: {3*4}.&lt;/p&gt;
+</pre>
+
+<p>
+There is one important difference between XQuery and most template
+systems:  In the former you can nest expressions in some programming
+language inside HTML.  With XQuery additionally
+nest HTML inside expressions.  For example, this loop:</p>
+<pre>
+for $i in (1 to 10) return
+   &lt;p&gt;{$i}*4 is: {$i+4}&lt;/p&gt;
+</pre>
+<p>
+With XQuery, you can also define functions that return HTML fragments,
+and you can pass those fragments though to other functions.
+With most template systems, you can only create output fragemnts as strings,
+and pass them around as strings.</p>
+
+<h2>A Photo-album Application</h2>
+<p>
+As an example of how to generate Web pages using XQuery
+we will show a photo album application.  There are lots of
+such applications around, and while they differ in features,
+they all have the same basic idea:
+You throw a bunch of digtal images (JPEG files) at it, and
+it generates a bunch of web pages.  The overview page shows
+many smaller "thumbnail" images; if you click on one, you
+get a bigger version of that image.</p>
+<p>
+There are two basic approaches to doing this:
+<ul>
+<li>A program which generates all the web pages in advance.
+This is nice, because you can use a browser to view the
+pages on your local disk using a <code>file:</code> URL,
+even if you aren't running a server.  You can even burn
+the web pages onto a CD-ROM and browse the pages from there.
+Also, you may have an ISP allows you to put up web pages,
+but running server scripts may be an extra-cost option.
+</li>
+<li>A module or script added to a a web server that generates
+the web pages when requested by a browser.
+This saves disk space for the HTML files, though that is trivial
+compared to the disk space for the JPEG images.  More valuable
+is that the server can present the viewer with multiple styles
+and preferences,  This is most valueable if the server will
+re-size the JPEG images as suitable for the viewer.
+</li>
+</ul>
+<p>
+We will show how you can do either using XQuery, starting out
+with how to generate static web pages in advance.</p>
+<p>
+For each album, we have an XML file that contains a
+list of JPEG images files, with some information about each
+picture.  This XML file can be generated using a scripts
+that scans the JPEG files in a directory, or it can be edited
+by a text editor.  I use a combination of scripts and manual
+editing, but that's not relevant to our goal of learning and
+using XQuery.</p>
+<p>This sample <code>index.xml</code> file
+describes six digital pictures from a car trip to the West Coast
+of Norway in the Summer of 2001.
+Each photograph is described by a <code>&lt;picture&gt;</code> element.
+Each picture is available in three resolutions:
+<ul>
+<li> The <code>&lt;full-image&gt;</code> element gives the
+name (and size in pixels) of the original full-size image.
+<li> The <code>&lt;image&gt;</code> element gives the
+name and size of the image scaled suitable for viewing in a web page by
+itself when browsing.
+<li> The <code>&lt;small-image&gt;</code> element gives the
+name and size of a thumbnail image.
+</ul>
+<pre>
+&lt;group&gt;
+&lt;title&gt;Trip to Norway&lt;/title&gt;
+&lt;text&gt;July 28-30, 2001 Nathan, Per, and John took a quick round trip to the
+Norwegian fjord country.  Here are some highlights.&lt;/text&gt;
+
+&lt;picture id="Lillehammer22"&gt;
+&lt;caption&gt;Lillehammer: Ski-jump practice&lt;/caption&gt;
+&lt;date&gt;2001-07-28&lt;/date&gt;
+&lt;text&gt;The Lillehammer olympic 90m ski-jumping hill is used for Summer practice.
+You can see a jumper landing.&lt;/text&gt;
+&lt;full-image width="1280" height="960"&gt;Lillehammer22.jpg&lt;/full-image&gt;
+&lt;image width="740" height="555"&gt;Lillehammer22p.jpg&lt;/image&gt;
+&lt;small-image width="240" height="180"&gt;Lillehammer22t.jpg&lt;/small-image&gt;
+&lt;/picture&gt;
+
+&lt;picture id="WedingCabinHike1"&gt;
+&lt;caption&gt;Hike with family&lt;/caption&gt;
+&lt;date&gt;2001-07-28&lt;/date&gt;
+&lt;text&gt;We stayed at the cabin of Agnes (Per's cousing "Mimmi") and Kjell
+Weding at G&amp;#229;l&amp;#229; near Ringebu, and
+we went for an evening hike with them.&lt;/text&gt;
+&lt;full-image width="1280" height="960"&gt;WedingCabinHike1.jpg&lt;/full-image&gt;
+&lt;image width="740" height="555"&gt;WedingCabinHike1p.jpg&lt;/image&gt;
+&lt;small-image width="240" height="180"&gt;WedingCabinHike1t.jpg&lt;/small-image&gt;
+&lt;/picture&gt;
+
+&lt!-- <i>more picture elements as desired</i> --&gt;
+
+&lt;picture id="ViaValdres2"&gt;
+&lt;caption&gt;Valdres valley&lt;/caption&gt;
+&lt;full-image width="1280" height="960"&gt;ViaValdres2.jpg&lt;/full-image&gt;
+&lt;image width="740" height="555"&gt;ViaValdres2p.jpg&lt;/image&gt;
+&lt;small-image width="240" height="180"&gt;ViaValdres2t.jpg&lt;/small-image&gt;
+&lt;/picture&gt;
+
+&lt;/group&gt;
+</pre>
+<h2>Generating the overview page</h2>
+
+<p>
+Our first task is to generate the overview page.
+We want at most three thumbnails per line,
+producing something like the following page.</p>
+<img src="XQ-overview.jpg"/>
+<p>
+This is a nice example that illustrates the kind of non-trivial re-arranging
+that would be difficult to do with a template system or with XSLT,
+and tedious to do with a language like Java.</p>
+<p>Here is the "main program" to generate the overview page:</p>
+<pre>
+let $group := document("index.xml")/group
+  return
+    make-group-page($group)
+</pre>
+<p>
+This is simple enough:  We call the <code>document</code> function
+to read the <code>index.xml</code> file.  This returns the
+document root, so we do <code>/group</code> to select the top-level
+<code>group</code> node, which we pass to the <code>make-group-page</code>
+function, which does the actual work of creating the web page.
+<pre>
+define function make-group-page($group) {
+&lt;html&gt;&lt;head&gt;
+&lt;title&gt;{children($group/title)}&lt;/title&gt;
+&lt;style type="text/css"&gt;
+a.textual {{ text-decoration: none }}
+img {{ border: 0 }}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body bgcolor="#00AAAA"&gt;
+&lt;h2&gt;{children($group/title)}&lt;/h2&gt;
+{make-row(0, $group/picture)}
+&lt;/body&gt;&lt;/html&gt;
+}
+</pre>
+<p>
+The value returned by a call to <code>make-group-page</code> is
+calculated by an <dfn>element constructor expression</dfn>,
+which looks like normal XML data,
+except you can use <code>{</code><i>curely braces</i><code>}</code>
+to embed XQuery expressions.
+For example both the <code>&lt;title&gt;</code> and <code>&lt;h2&gt;</code>
+HTML elements contain XQuery expressions that select
+the <code>&lt;title&gt;</code> child of the <code>$group</code> parameter,
+and then select the children (usually a text node).of that
+<code>&lt;title&gt;</code> child.
+Note that <code>{{</code><i>double curly braces</i><code>}}</code>
+are used for curly braces that should appear as is in
+the <code>&lt;style&gt;</code> element.</p>
+<p>
+Things start to get interesting when we get to the
+call to <code>make-row</code>.  This is a recursive helper used
+to divide a sequence of <code>&lt;picture&gt;</code> elements
+into rows of at most three.  It's quite straight-forward
+if you're comfortable with recursive functions.  (If you're not
+comfortable using recursion, it may seem mysterious - but it does work.)
+The <code>$picture</code> parameter is a sequence of the
+<code>&lt;picture&gt;</code> elements we haven't dealt with yet.
+If the list is empty, we return nothing (i.e. the empty
+sequence <code>()</code>).  
+If there are 3 or fewer pictures, we pass them the <code>format-row</code>
+function, which make a single row of thumbnail picture.
+If there are exactly 4 pictures total,
+we take the first two pictures, and pass them the
+<code>format-row</code> functions, which puts 2 thumbnail pictures in one row,
+and then we do the same with the remaining 2 pictures.
+Otherwise, there are more than 3 pictures, so we take the first 3 pictures,
+put them in a row using <code>format-row</code>,
+then we take the rest of the pictures (starting at picture 4),
+and recursively call <code>make-row</code>.
+This preocesses the rest of the pictures in the same way,
+putting 3 pictures in a row each time, until we come to the end.</p>
+
+<pre>
+{-- Process a sequence of &lt;picture&gt; elements, grouping them into
+ -- rows of at most 3, for the thumbnail page.
+ -- $prev:  An integer giving the number of &lt;pictures&gt; previously processed
+ --   in this current sequence.
+ -- $pictures:  Remaining &lt;picture&gt; elements to processes.
+ -- Returns a &lt;table&gt; (as created by format-row) for group of at most 3.
+ --}
+define function make-row($prev, $pictures) {
+  let $count := count($pictures) return
+  if ($count = 0) then ()
+  else if ($count &lt; 3) then
+      format-row($pictures)
+  {-- A special case:  If there are 4 pictures in a row, then group them
+   -- as 2 rows of 2 rather than 3 + 1. --}
+  else if ($count = 4 and $prev = 0) then
+     (format-row(sublist($pictures, 1,2)),
+      format-row(sublist($pictures, 3,2)))
+  else
+     (format-row(sublist($pictures, 1,3)),make-row($prev+3,sublist($pictures,4)))
+}
+</pre>
+
+<p>
+The <code>format-row</code> function loops over a sequence
+of <code>&lt;picture&gt;</code> elements, and calls
+<code>make-thumbnail</code> on each one.  If the <code>&lt;picture&gt;</code>
+has a <code>&lt;caption&gt;</code> child, that is placed underneath
+the thumbnail.  We wrap each thumbnail+caption inside an <code>&lt;a&gt;</code>
+HTML link wrapped in side an HTML <code>&lt;table&gt;</code>, finally
+wrapping the entire row in another HTML <code>&lt;table&gt;</code>.
+
+<pre>
+define function format-row($row) {
+  {-- emit a newline for readabilty --} "
+",&lt;table width="90%"&gt;&lt;tr&gt;{
+  for $pic in $row return
+  &lt;td&gt;
+   &lt;table bgcolor="black" cellpadding="0" frame="border"
+      border="0" rules="none" vspace="10"&gt;
+      &lt;tr&gt;
+        &lt;td align="center"&gt;&lt;a href="{$pic/@id}.html"&gt;{make-thumbnail($pic)}&lt;/a&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      { if ($pic/caption) then
+      &lt;tr&gt;
+        &lt;td bgcolor="#FFFF99" align="center"&gt;
+          &lt;a class="textual" href="{$pic/@id}.html"&gt;{children($pic/caption)}&lt;/a&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      else ()}
+    &lt;/table&gt;
+  &lt;/td&gt;
+  }&lt;/tr&gt;&lt;/table&gt;
+}
+</pre>
+<p>
+Finally, the <code>make-thumbnail</code> looks for a
+<code>&lt;small-image&gt;</code> child that contains the
+actual name of the JPEG file, and calls <code>make-img</code>
+to emit the <code>&lt;img&gt;</code> image link.
+If there is no <code>&lt;small-image&gt;</code>, we look for
+a <code>&lt;image&gt;</code> or a <code>&lt;full-image&gt;</code> element,
+and scale that instead.
+
+<pre>
+define function make-thumbnail($pic) {
+  if ($pic/small-image) then
+    make-img($pic/small-image, 1.0)
+  else if ($pic/image) then
+    make-img($pic/small-image, 0.5)
+  else if ($pic/full-image) then
+    make-img($pic/full-image, 0.2)
+  else
+  ( "(missing small-image)", string($pic), ")" )
+}
+
+define function make-img($picture, $scale) {
+  &lt;img border="1" src="{$picture}" width="{number($picture/@width) * $scale}" height="{number($picture/@height) * $scale}" /&gt;
+}
+</pre>
+
+<h2>A slight refinement</h2>
+<p>
+The code so far ignores any children of the top-level
+<code>&lt;group&gt;</code> except for <code>&lt;picture&gt;</code>.
+However, if you look at the original <code>index.xml</code> example,
+you'll see that the <code>&lt;group&gt;</code> has a <code>&lt;text&gt;</code>
+child.  We'd like to place any such <code>&lt;text&gt;</code> contents
+in the appropriate place on the overview page.
+Another sometimes useful feature is to be able to explicitly
+specify how the pictures are to be origanized into rows,
+rather than depend on the default maximum-three-per-row.
+You can do that by putting a <code>&lt;row&gt;</code> element
+around one or more <code>&lt;pciture&gt;</code> elements to
+specify that these shoudl go in a row my themselves.</p>
+<pre>
+define function make-group-page($group) {
+&lt;html&gt;&lt;head&gt;
+<i>... rest as before ..</i>
+&lt;h2&gt;{children($group/title)}&lt;/h2&gt;
+&lt;/body&gt;&lt;/html&gt;
+}
+</pre>
+<pre>
+{-- Process the children of a &lt;group&gt;, grouping thumbnails into rows.
+ -- $pictures:  A sequence of consequtive seen &lt;picture&gt; elements.
+ -- $unseen: sequence of remaining children we have not processed yet.
+ --}
+define function find-rows($pictures, $unseen) {
+  if (empty($unseen)) then make-row(0, $pictures)
+  else
+    let $next := item-at($unseen, 1),
+        $rest := sublist($unseen, 2)
+    return
+      typeswitch ($next)
+      case element row return
+        (make-row(0, $pictures),format-row($next/*),find-rows((), $rest))
+      case element date return {-- ignore &lt;date&gt; children here. --}
+        (make-row(0, $pictures),find-rows((), $rest))
+      case element title return {-- ignore &lt;title&gt; children here. --}
+        (make-row(0, $pictures),find-rows((), $rest))
+      case element text return {-- format &lt;text&gt; as a paragraph. --}
+        (make-row(0, $pictures),&lt;p&gt;{children($next)}&lt;/p&gt;,find-rows((), $rest))
+      default return
+        find-rows(($pictures,$next), $rest)
+}
+</pre>
+<p>
+The initial call to <code>find-rows</code> sets
+<code>$pictures</code> to the empty sequence,
+and <code>$unseen</code> to the sequence of all the child elements of
+the top-level <code>&lt;group&gt;</code>.
+If <code>$unseen</code> is the empty sequence, we're done, and we
+just call <code>make-row</code> to wrap things up
+the last row.
+Otherwise, we look at the first element of <code>$unseen</code>.</p>
+<p>
+We use a <code>typeswitch</code> expression to do the appropriate thing
+depending on the type of that first element.
+A <code>typeswitch</code> evaluates a expression (in this case
+<code>$next</code>, the first value of the <code>$unseen</code> sequence).
+Then it searches through the <code>case</code> clauses,
+each of which specifies a type.  The first <code>case</code> clause
+such that the <code>$next</code> value is an instance of the type is
+selected, and the corresponding <code>return</code> expression evaluated.
+If there is no matching <code>case</code>, the <code> default return</code>
+expression is evaluated instead.</p>
+<p>
+So if the next value is a <code>&lt;row&gt;</code> element,
+we first pass any previously seen <code>$pictures</code>
+to <code>make-row</code> so it can split those into rows;
+then we pass the children of the <code>&lt;row&gt;</code> element
+to <code>format-row</code> to create a single row; and then we
+recursively call <code>find-rows</code> to process the <code>$rest</code>
+of the sequence.
+The next two cases are to just skip any <code>&lt;title&gt;</code>
+and <code>&lt;date&gt;</code> elements since they are handled elsewhere.
+The logic for handling a <code>&lt;text&gt;</code> element is
+similar to that for <code>&lt;row&gt;</code> except that we
+wrap the contents of the <code>&lt;text&gt;</code> in a <code>&lt;p&gt;</code>
+paragraph.  Finally, the default case handles <code>&lt;picture&gt;</code>
+elements with a recursive call that moves the <code>$next</code>
+element over to the <code>$pictures</code> sequence.
+</p>
+
+<h2>Generating the picture pages</h2>
+<p>
+Now let us look at how we can generate a web page for each picture,
+something like this following figure.</p>
+<img src="XQ-Skjolden.jpg"/>
+<p>
+The first tricky part is dealing with the links for the previous
+and next picture.  The other tricky part is that we want to support
+multiple <dfn>styles</dfn>.  The existing code supports three styles
+that each image can be displayed in:</p>
+<ul>
+<li>"<tt>Medium image</tt>" is the default style.  It display the image at
+at around 640 pixels wide, which is fine for most screens and browsers.
+<li>"<tt>Large image</tt>" gives you at a larger resolution,
+about 1024-1280 pixels wide. (For most of the pictures I take
+1280 pixes wide is the original camera resolution.
+From which you can infer my camera is a few years old.)
+<li>The "<tt>Info</tt>" style shows the thumbnail image, EXIF camera
+information from the JPEG, and links to the orginal JPEG files.
+</ul>
+<p>
+Thus we need to generate 3 HTML pages times the number
+of <code>&lt;picture&gt;</code> elements. Exactly how to
+write all these files is somewhat implementation dependent.
+There are (at least) three ways to do it:
+<ul>
+<li>
+Write a script or driver program (perhaps a batch script) that
+loops through the pictures, calling the XQuery implementation once
+for each desired output file.  You need to pass the derired
+file as some kind of parameter that XQuery can access.
+The standard function <code>inputs</code>
+is one way to tell the XQuery program which file to generate.
+The output from XQuery is re-directed to the intended HTML file.
+<li>We generate all the HTML output files in a single XQuery run,
+by puttting them in a single large XML object, like this:
+<pre>
+&lt;outputs&gt;
+  &lt;output-file filename="picture1.htlm"&gt;
+    &lt;html&gt;<i>contents of picture1.html</i>&lt;/html&gt;
+  &lt;/output-file&gt;
+  &lt;output-file filename="picture2.htlm"&gt;
+    &lt;html&gt;<i>contents of picture2.html</i>&lt;/html&gt;
+  &lt;/output-file&gt;
+  <i>... and so on ...</i>
+&lt;/outputs&gt;
+</pre>
+It is then easy to write a post-processor to split this into
+separate XML files.
+<li>We generate all the HTML output files in a single XQuery run,
+but we use some non-standard function to write to HTML separately.
+While non-standard, it is the simplest, so it is what I will use.
+</ul>
+<p>
+The Qexo implementation of XQuery includes a <code>write-to</code>
+builtin-function.  It takes two parameters:  A value (normally
+an element node), and a file name and writes the former
+to the latter, using HTML-compatible XML (XHTML) syntax.
+It returns an empty sequence.  Other XQuery implementations
+may have similar functions.
+The overmost expression of our new XQuery program
+writes both the <code>index.html</code>
+overview file, and each of the individual picture pages, the latter
+in each of the 3 styles.
+Writing the picture pages is done by two nested loops, the outermost
+own looping over <code>&lt;picture&gt;</code> elements, and the
+inner loop loops over the 3 styles.  Each then calls the <code>picture</code>
+function to generate each picture page, and uses <code>write-to</code>
+to write the HTML to the appropriate file.  The file names are generated
+by concatenating the picture's <code>id</code> attribute, the style string,
+and the <code>.html</code> extension.
+</p>
+<pre>
+let $group := document("index.xml")/group,
+    $group-date := $group/date,
+    $group-name := $group/title,
+    $pictures := $group//picture,
+    $count := count($pictures)
+  return (
+    write-to(make-group-page($group), "index.html"),
+    for $i in 1 to $count
+    for $style in ("", "info", "large")
+    let $picture := item-at($pictures,$i),
+        $prev := if ($i &gt; 1) then item-at($pictures, $i - 1) else (),
+        $next := if ($i &lt; $count) then item-at($pictures, $i + 1) else (),
+        $date := if ($picture/date) then $picture/date else $group-date ,
+        $name := (if ($picture/caption) then $group-name
+          else concat(string($group/title), " - ", string($picture/caption)))
+      return
+      write-to(
+        picture($picture, $group, string($picture/@id),
+          $prev, $next, $date, $style),
+	  concat(string($picture/@id), $style, ".html"))
+)
+</pre>
+<p>
+The builtin function <code>item-at</code> selects a value from
+a sequence using a index (starting at one).
+We've already looked at <code>make-group-page</code>.
+Next is the big <code>picture</code> function which returns
+a single picture page as an <code>&lt;html&gt;</code> element.</p>
+<pre>
+{-- Generate a page picture image with links etc.
+ -- $picture:  The &lt;picture&gt; node to use.
+ -- $group:  The enclosing &lt;group&gt;
+ -- $prev:  The previous &lt;picture&gt; or the empty sequence there is none.
+ -- $next:  The next &lt;picture&gt; or the empty sequence there is none.
+ -- $date:  The date the picture was taken, as a string, or the empty sequence.
+ -- $style:  The style and size,  Currently only "large" or "" (medium)
+ --   or "info".  The "info" style show a thumbnail, plus EXIF information,
+ --   plus links to raw the JPGs.
+ --}
+define function picture($picture, $group, $name, $prev, $next, $date, $style) {
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/&gt;
+&lt;link rel="up"  href="index.html" /&gt;
+{if (empty($prev)) then () else &lt;link rel="prev" href="{$prev/@id}{$style}.html" /&gt;}
+{if (empty($next)) then () else &lt;link rel="next" href="{$next/@id}{$style}.html" /&gt;}
+&lt;title&gt;{make-title($picture,$group)}&lt;/title&gt;
+&lt;style type="text/css"&gt;
+a {{ padding: 1 4; text-decoration: none; }}
+td {{ padding-left: 0; border-style: none }}
+span.button {{ border-width: thin; background-color: #FFFF99; border-style: solid }}
+&lt;/style&gt;,
+&lt;script language="JavaScript"&gt;
+  document.onkeypress = handler;
+  function handler(e) {{
+    var key = navigator.appName == 'Netscape' ? e.which : window.event.keyCode;
+{ if (empty($next)) then () else
+  concat('    if (key == 110) { location="',
+  string($next/@id), $style, '.html"; return true; }
+'),
+  if (empty($prev)) then () else
+  concat('    if (key == 112) { location="',
+  string($prev/@id), $style, '.html"; return true; }
+')}    return routeEvent(e); }}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body bgcolor="#00AAAA"&gt;
+{nav-bar($picture, $name, $prev, $next, $style)}
+{make-header($picture, $group)}
+{picture-text($picture)}
+{if (empty($date)) then () else &lt;p&gt;Date taken: {$date}.&lt;/p&gt;}
+{let $full-image := $picture/full-image,
+     $image := $picture/image
+  return
+  if ($style = "info") then (
+    make-thumbnail($picture),
+    document(concat($name,"-info.txt")),
+    &lt;table&gt;&lt;tr&gt;&lt;td&gt;Plain JPEG images:&lt;/td&gt;
+    {raw-jpg-link($picture/full-image, "Original")}
+    {raw-jpg-link($picture/image,
+    if ($full-image) then "Scaled" else "Original")}
+    {raw-jpg-link($picture/small-image, "Thumbnail")}
+    &lt;/tr&gt;&lt;/table&gt;
+  )
+  else if ($style="large" and $full-image) then
+    make-img($full-image, 1)
+  else if ($style="large" and $image
+           and number($image/@width) &lt;= 640 and number($image/@height) &lt;= 640) then
+    make-img($image, 2)
+  else if ($full-image) then
+    make-img($full-image, 0.5)
+  else
+    make-img($image, 1)
+}
+&lt;/body&gt;
+&lt;/html&gt;
+}
+</pre>
+<p>
+The basic structure of this should by now be familiar.
+The JavaScript function goes to the next or previous page
+if <code>'n'</code> or </code>'p'</code> is pressed.
+(The strange layout of the code is to make the generated HTML look nice.)
+Note how we check the <code>$style</code> parameter
+to select which JPEG image to show, and whether we need to scale it.
+The <code>"info</code> style generates a picture with information
+about the picture itself, as in this figure.
+This so-called EXIF information is generated by the camera, and
+has been extracted from the the JPEG file using the <code>jhead</code> program
+(<a href="http://www.sentex.net/~mwandel/jhead/">http://www.sentex.net/~mwandel/jhead/</a>).
+</p>
+<img src="XQ-Skjolden-info.jpg"/>
+<p>
+The navigation bar (i.e. the row of buttons on the top of the page)
+is generated by the <code>nav-bar</code> function.</p>
+<pre>
+{-- Create a 1-row navigation-bar: next, prev etc --}
+
+define function nav-bar($picture, $name, $prev, $next, $style) {
+&lt;table&gt;&lt;tr&gt;
+&lt;td&gt;&lt;span class="button"&gt;&lt;a href="index.html"&gt;Index&lt;/a&gt;&lt;/span&gt;&lt;/td&gt;
+{if ($style="info") then () else
+&lt;td&gt;&lt;span class="button"&gt;{make-link($name, "info", "Info")}&lt;/span&gt;&lt;/td&gt;}
+{if ($style="large") then () else
+&lt;td width="200" align="left"&gt;&lt;span class="button"&gt;{make-link($name, "large", "Large image")}&lt;/span&gt;&lt;/td&gt;}
+{if ($style="") then () else
+&lt;td width="200" align="left"&gt;&lt;span class="button"&gt;{make-link($name, "", "Medium image")}&lt;/span&gt;&lt;/td&gt;}
+&lt;td width="100" align="right"&gt;{
+if ($prev) then
+&lt;span class="button"&gt;{make-link($prev/@id, $style, " &lt; Previous ")}&lt;/span&gt;
+else ()}&lt;/td&gt;
+&lt;td width="100" align="left"&gt;{ if ($next) then
+&lt;span class="button"&gt;{make-link($next/@id, $style, " Next &gt; ")}&lt;/span&gt;
+else ()}&lt;/td&gt;
+&lt;/tr&gt;&lt;/table&gt;
+}
+</pre>
+<p>
+This is standard use of HTML tables to arrange the clickable buttons in
+a row.
+The <code>&lt;span class="button"&gt;</code>
+acts with the toplevel <code>&lt;style&gt;</code>.
+Notice the use of conditionals to only generate the buttons that make sense.
+</p>
+<p>
+Finally, the last 5 "small" functions:
+<pre>
+define function picture-text($picture) {
+  for $text in $picture/text return &lt;p&gt;{children($text)}&lt;/p&gt;
+}
+
+define function make-title($picture, $group) {
+  concat(string($group/title), " - ",
+         if (empty($picture/caption)) then string($picture/@id)
+         else string($picture/caption))
+}
+
+define function make-header($picture, $group) {
+  &lt;h2&gt;{children(if ($picture/caption) then $picture/caption else $group/title)}&lt;/h2&gt;
+}
+
+define function raw-jpg-link($image, $description) {
+  if (empty($image)) then () else
+  &lt;td&gt;&lt;span class="button"&gt;&lt;a href="{$image}"&gt;{$description} ({string($image/@width)}x{string($image/@height)})&lt;/a&gt;&lt;/span&gt;&lt;/td&gt;
+}
+
+define function make-link($picture-name, $style, $text) {
+  &lt;a href="{$picture-name}{$style}.html"&gt;{$text}&lt;/a&gt;
+}
+</pre>
+
+<h2>Servlets and Java Server Pages</h2>
+<p>
+Servlets are a popular framework for having a web server
+process a web (http) request.  It is both efficient and
+powerful, and it part of the Java Enterprise framework.
+JSP (Java Server Pages, mentioned earlier) is built on top of servlets.
+A JSP page is an HTML template that can contain embedded Java
+expressios and commands.  A JSP-capable web server
+automatically translates (if needed) a JSP "page",
+creating from it a Java servlet class.
+Such a server has various ways you can configure it to select
+which servlet is executed for a given request url.
+<p>
+The photo-album application would be very difficult to
+write using JSP.  However, it is quite easy to do it using XQuery.
+There is at this time no standard for how web
+servers can cause XQuery programs be be executed in
+response to a web request, so we will look at how the Qexo
+implementation supports servets.</p>
+<p>
+<pre>
+<!-- FIXME
+let $group := document("/opt/Tomcat/webapps/pictures/data/index.xml")/group,
+-->
+let $group := document("index.xml")/group,
+    $group-date := $group/date,
+    $group-name := $group/title,
+    $pictures := get-pictures($group),
+    $path-info := substring(request-path-info(), 2),
+    $count := count($pictures)
+  return
+    if ($path-info = "index.html") then
+      make-group-page($group)
+    else
+      for $i in 1 to $count return
+        let $picture := item-at($pictures,$i),
+          $id := string($picture/@id),
+          $prev := if ($i &gt; 1) then item-at($pictures, $i - 1) else (),
+          $next := if ($i &lt; $count) then item-at($pictures, $i + 1) else (),
+          $date := if ($picture/date) then $picture/date else $group-date,
+          $name := (if (empty($picture/caption)) then $group-name
+            else concat(string($group/title), " - ", string($picture/caption)))
+        return
+          if ($path-info = concat(string($picture/@id), ".html")) then
+            picture($picture, $group, string($picture/@id),
+              $prev, $next, $date, "")
+          else if ($path-info = concat(string($picture/@id), "info.html")) then
+            picture($picture, $group, string($picture/@id),
+              $prev, $next, $date, "info")
+          else if ($path-info = concat(string($picture/@id), "large.html")) then
+            picture($picture, $group, string($picture/@id),
+              $prev, $next, $date, "large")
+          else
+	    ()
+</pre>
+<p>
+The <code>request-path-info</code> returns the request URL,
+relative the servlet context.  We strip off the initial <code>'/'</code>,
+and that becomes the <code>$path-info</code> variable.
+Depending on <code>$path-info</code>'s value
+we either call <code>make-group-page</code> (if <code>"index.html"</code>
+was requested), or loop through the pictures looking for a matching
+<code>&lt;picture&gt;</code> element.
+This search loop isn't the most efficient implementation,
+but it's simple and fast enough for this application.
+<p>
+[[Show how we can modify the photo album example
+to run as a servlet under Qexo.  This includes both the
+modifications to the XQuery code, and how we can compile
+and install it in Tomcat.]]</p>
+<p>
+[[Some other Qexo features useful for servlet/web applications]]</p>
+<p>
+Summary of advantages of XQuery vs JSP and similar template systems:</p>
+<ul>
+<li>Better integration than JSP's HTML+Java.</li>
+<li>XQuery is a true expression langauge; can pass fragments
+around so can do more complex calculations.</li>
+<li>etc</li>
+</ul>
+
+<h2>Running XQuery programs from CGI scripts</h2>
+<p>
+CGI (Common Gateway Interface) scripts or programs or scripts
+that are executed by a Web server in response to a request.
+The request parameters are passwd to the script as environment
+variable.  The script writes the result parameters followed by the
+data (typically an HTML page) to standard output, and the server
+takes that ourput and sends it back as an HTTP response.
+</p>
+<p>
+You can have a CGI script call a XQuery processer, and that way
+use XQuery to generate the result.
+Using CGI scripts will not give you high performance, especially
+if you have to start up an XQuery processor on each request.
+On the plus side, it does not requie any server modifications or
+configuration, and it may be fast enough for some applications.
+It may be most useful for testing simple Xquery applications.</p>
+<p>
+Another problem running XQuery from CGI scripts is that there is
+no standard for accessing request parameters from XQuery.
+The Qexo implementation provides a set of functions that is a
+subset of the servlet functionality.  Qexo provides a wrapper
+scipt that runs a servlet, and using the CGI environment
+variable to provide a subset of the servlet functionality.
+For example, you can write a little XQuery program like this:
+<pre>
+response-content-type("text/html"),
+&lt;html&gt;
+&lt;p&gt;The request URL was: request-url()&lt;/p&gt;
+&lt;p&gt;{let $query := request-query-string() return
+    if ($query)
+    then ("The query string was: ",$query)
+    else "There was no query string."}&lt;/p&gt;
+&lt;/html&gt;
+</pre>
+<p>
+If this is in the file <code>hello.xql</code>,
+you compile it to a servlet this:
+<pre>
+kawa --servlet --xquery -C hello.xql
+</pre>
+<p>
+The copy the resulting <code>.class</code> file(s) to your
+web server's CGI directory.  On Red Hat GNU/Linux using the
+Apache server, you can do the following (as root):
+<pre>
+cp hello*.class /var/www/cgi-bin/
+</pre>
+<p>
+Next find the <code>cgi-servlet</code> program that Kawa builds and installs.
+If you installed Kawa in the default place, it will be in
+<code>/usr/local/bin/cgi-servlet</code>.
+(You'll have this if you installed Kawa from source, but not
+if you're just using Kawa <code>.jar</code> file.)
+Copy this program into the same CGI directory:
+<pre>
+cp /usr/local/bin/cgi-servlet /var/www/cgi-bin/
+</pre>
+<p>
+Make sure the files have the correct permissions:
+<pre>
+chmod a+r /var/www/cgi-bin/hello*.class /var/www/cgi-bin/hello
+chmod a+x /var/www/cgi-bin/hello
+</pre>
+<p>
+Now you should be able to run the Kawa program,
+using the URL <code>http://localhost/cgi-bin/hello</code>.
+It may take a few seconds to get the reply, mainly because of the
+start-up time of the Java VM.  That is why servlets are
+preferred.  Using the CGI interface can still be useful
+for testing or when you can't run servlets.
+
+<h2>Comparing XSLT vs XQuery</h2>
+<p>
+XSLT (XSL Transformations, where XSL stands for XML Stylesheet Language)
+is popular and powerful langauge for transforming an input XML document
+into an output document, which can be XML, HTML, or plain text.
+XSLT became a W3C recommendation (standard) in 1999; it is being
+revised in conjunction with the XQuery standardization process.
+This is because XSLT uses XPath for expresions and patterns, and
+XPath is also a subset of XQuery.
+<p>
+The most obvious difference between XSLT and XQuery is that an XSLT
+"program" (a <dfn>stylesheet</dfn>) is actually also an XML document.
+This can sometimes be useful, but it has the big disadvantage that
+XSLT stylesheets, in spite of their simplocity, can be both verbose
+and hard to read.</p>
+<p>
+The more signification difference betwen XSLT and XQuery is
+in the execution model, specifically the flow of control.
+XQuery is relatively "normal" programming language, except
+for the unusual data types, with explicit control flow.
+In contrast, executing an XSLT stylesheet is controlled
+by a <dfn>template processor</dfn>,
+which matches a node against a set of template, selects the
+template whose pattern most closely matches the input node,
+and then executes that template.  This process may then be
+repeated by the xslt:<code>&lt;apply-templates&gt;</code>
+instruction, which recursively calls the template processor
+on the child nodes of the current node.
+<p>
+Using pattern matching to drive the execution in this way is
+very powerful and usually convenient.  It works best when
+doing relatively simple conversion that can be expressed
+using pattern.  You can do more complex programming using
+XSLT, but it can quickly become very awkward and verbose.
+<p>
+As an example application we will look at converting Docbook to HTML,
+using both XSLT and XQuery.  Docbook is a popular SGML/XML format
+for writing technical documentation.  Groups that use it for
+manuals and help files include the Linux Documentation
+Project and the Gnome project.
+<p>
+First is a simple (and incomplete) XSLT stylesheet for translating
+Docbook to HTML:
+<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"&gt;
+
+&lt;xsl:template match="sect1/title"&gt;
+&lt;h2 class="title"&gt;&lt;xsl:apply-templates/&gt;&lt;/h2&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="sect2/title"&gt;
+&lt;h3 class="title"&gt;&lt;xsl:apply-templates/&gt;&lt;/h3&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="artheader/title"&gt;
+&lt;h1&gt;&lt;xsl:apply-templates/&gt;&lt;/h1&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="artheader/subtitle"&gt;
+&lt;h2&gt;&lt;xsl:apply-templates/&gt;&lt;/h2&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="artheader/authorgroup"&gt;
+&lt;h3&gt;&lt;i&gt;&lt;xsl:apply-templates/&gt;&lt;/i&gt;&lt;/h3&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="biblioentry/abbrev"&gt;[&lt;xsl:apply-templates/&gt;]&lt;/xsl:template&gt;
+&lt;xsl:template match="biblioentry/title"&gt;&lt;cite&gt;&lt;xsl:apply-templates/&gt;&lt;/cite&gt;&lt;/xsl:template&gt;
+&lt;xsl:template match="biblioentry/authorgroup"&gt;&lt;xsl:apply-templates/&gt;.&lt;/xsl:template&gt;
+
+&lt;xsl:template match="article"&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;xsl:if test="artheader/title"&gt;
+&lt;title&gt;&lt;xsl:value-of select="artheader/title"/&gt;&lt;/title&gt;
+&lt;/xsl:if&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;xsl:apply-templates/&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="title"&gt;
+&lt;title&gt;&lt;xsl:apply-templates/&gt;&lt;/title&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="abstract"&gt;
+&lt;div type='abstract'&gt;&lt;h3&gt;Abstract&lt;/h3&gt;&lt;xsl:apply-templates/&gt;&lt;/div&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="element"&gt;
+&lt;p&gt;&lt;xsl:apply-templates/&gt;&lt;/p&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="para"&gt;
+&lt;p&gt;&lt;xsl:apply-templates/&gt;&lt;/p&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="screenshot"&gt;
+&lt;img src='{mediaobject/imageobject/imagedata[@format="PNG"]/@fileref}' /&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="caption"&gt;
+&lt;p&gt;&lt;b&gt;&lt;xsl:apply-templates/&gt;&lt;/b&gt;&lt;/p&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="emphasis"&gt;&lt;em&gt;&lt;xsl:apply-templates/&gt;&lt;/em&gt;&lt;/xsl:template&gt;
+
+&lt;xsl:template match="citation"&gt;[&lt;xsl:apply-templates/&gt;]&lt;/xsl:template&gt;
+
+&lt;xsl:template match="quote"&gt;"&lt;xsl:apply-templates/&gt;"&lt;/xsl:template&gt;
+
+&lt;xsl:template match="classname"&gt;&lt;code&gt;&lt;xsl:apply-templates/&gt;&lt;/code&gt;&lt;/xsl:template&gt;
+
+&lt;xsl:template match="function"&gt;&lt;code&gt;&lt;xsl:apply-templates/&gt;&lt;/code&gt;&lt;/xsl:template&gt;
+
+&lt;xsl:template match="itemizedlist"&gt;
+&lt;ul&gt;&lt;xsl:apply-templates/&gt;&lt;/ul&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="listitem"&gt;
+&lt;li&gt;&lt;xsl:apply-templates/&gt;&lt;/li&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="sect1"&gt;
+&lt;div class="sect1"&gt;
+&lt;xsl:apply-templates/&gt;
+&lt;/div&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="sect2"&gt;
+&lt;div class="sect2"&gt;
+&lt;xsl:apply-templates/&gt;
+&lt;/div&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="programlisting"&gt;
+&lt;pre&gt;&lt;xsl:apply-templates/&gt;&lt;/pre&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="bibliography"&gt;
+&lt;div class="bibliography"&gt;&lt;h2&gt;Bibliography&lt;/h2&gt;&lt;xsl:apply-templates/&gt;&lt;/div&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="biblioentry"&gt;
+&lt;p&gt;&lt;xsl:apply-templates/&gt;&lt;/p&gt;
+&lt;/xsl:template&gt;
+
+&lt;/xsl:stylesheet&gt;
+</pre>
+<p>
+In contrast, here is an XQuery program for doing the same
+Docbook-to-HTML translation.  Since XQuery doesn't have XSLT's
+template-matching driver, we have write explicit control
+flow using recursive function calls.
+The <code>typeswitch</code> expression is useful for selecting
+between different node types, but unfortuntely XQuery type
+expressions are not as expressive as XPath patterns, so more
+comple patterns may need explicit logic.
+<p>
+Note especially how context patterns like <code>artheader/title</code>.
+The idea is that in place of the XSLT rules that use
+the <code>artheader</code> "context" we have a <code>convert-artheader</code>
+function.
+<p>
+An alternative method for handling "context" is to pass it as an explicit
+parameterm like the <code>$level</code>parameter
+of <code>convert-title</code>..
+<pre>
+define function convert-children ($x) {
+  for $y in children($x) return convert-node($y)
+}
+
+define function convert-title($x, $level) {
+  if ($level &lt;= 1) then &lt;h1 class="title"&gt;{children($x)}&lt;/h1&gt;
+  else if ($level = 2) then &lt;h2 class="title"&gt;{children($x)}&lt;/h2&gt;
+  else if ($level = 3) then &lt;h3 class="title"&gt;{children($x)}&lt;/h3&gt;
+  else if ($level = 4) then &lt;h4 class="title"&gt;{children($x)}&lt;/h4&gt;
+  else if ($level = 5) then &lt;h5 class="title"&gt;{children($x)}&lt;/h5&gt;
+  else &lt;h6 class="title"&gt;{children($x)}&lt;/h6&gt;
+}
+
+define function convert-div-children ($x, $level) {
+  for $y in children($x) return
+    typeswitch ($y)
+      case element title return convert-title($y, $level)
+      default return convert-node($y)
+}
+
+define function convert-artheader ($x) {
+  for $y in children($x) return
+    typeswitch ($y)
+      case element title return &lt;h1&gt;{convert-children($y)}&lt;/h1&gt;
+      case element subtitle return &lt;h2&gt;{convert-children($y)}&lt;/h2&gt;
+      case element authorgroup return &lt;h3&gt;&lt;i&gt;{convert-children($y)}&lt;/i&gt;&lt;/h3&gt;
+      default return ( )
+}
+
+define function convert-biblioentry ($x) {
+  for $y in children($x) return
+    typeswitch ($y)
+      case element abbrev return ('[',convert-children($y),']')
+      case element title return (&lt;cite&gt;{convert-children($y)}&lt;/cite&gt;,'.')
+      case element authorgroup return (convert-node($y),'.')
+      default return convert-node($y)
+}
+
+define function convert-node ($x) {
+  typeswitch ($x)
+    case element article return &lt;html&gt;{convert-children($x)}&lt;/html&gt;
+    case element artheader return convert-artheader($x)
+    case element title return &lt;title&gt;{convert-children($x)}&lt;/title&gt;
+    case element authorgroup return convert-children($x)
+    case element author return convert-children($x)
+    case element abstract return &lt;div type='abstract'&gt;&lt;h3&gt;Abstract&lt;/h3&gt;{convert-children($x)}&lt;/div&gt;
+    case element para return &lt;p&gt;{convert-children($x)}&lt;/p&gt;
+    case element screenshot return &lt;img src="{string($x/mediaobject/imageobject/imagedata[@format="PNG"]/@fileref)}" /&gt;
+    case element caption return &lt;p&gt;&lt;b&gt;{convert-children($x)}&lt;/b&gt;&lt;/p&gt;
+    case element emphasis return &lt;em&gt;{convert-children($x)}&lt;/em&gt;
+    case element citation return ('[',convert-children($x),']')
+    case element quote return ('"',convert-children($x),'"')
+    case element classname return &lt;code&gt;{convert-children($x)}&lt;/code&gt;
+    case element function return &lt;code&gt;{convert-children($x)}&lt;/code&gt;
+    case element itemizedlist return &lt;ul&gt;{convert-children($x)}&lt;/ul&gt;
+    case element listitem return &lt;li&gt;{convert-children($x)}&lt;/li&gt;
+    case element sect1 return &lt;div class="sect1"&gt;{convert-div-children($x, 2)}&lt;/div&gt;
+    case element sect2 return &lt;div class="sect2"&gt;{convert-div-children($x, 3)}&lt;/div&gt;
+    case element programlisting return &lt;pre&gt;{convert-children($x)}&lt;/pre&gt;
+    case element informalfigure return convert-children($x)
+    case element bibliography return &lt;div class="bibliography"&gt;&lt;h2&gt;Bibliography&lt;/h2&gt;{convert-children($x)}&lt;/div&gt;
+    case element biblioentry return &lt;p&gt;{convert-biblioentry($x)}&lt;/p&gt;
+    case element firstname return convert-children($x)
+    case element surname return convert-children($x)
+    default return ($x)
+}
+
+let $doc := input()
+let $artheader := $doc/article/artheader
+let $title := $artheader/title
+return
+&lt;html&gt;
+&lt;head&gt;
+{if ($title) then &lt;title&gt;{convert-children($title)}&lt;/title&gt; else ()}
+&lt;/head&gt;
+&lt;body&gt;
+{convert-children($doc)}
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>
+This two "stylesheets" are of comparable size and complexity.
+The XSLT is slightly shorter if counting characaters (2731 vs 3431),
+but the difference is minor, and this is the kind of application
+that is XSLT's strength.  So my advice is:  If you have a task that
+matches XSLT's strength, by all means use XSLT.  However, if you
+have a task that is a mix of XSLT-style transformation combined
+with some control logic, consider using XQuery, even for the part
+of the task that is "XSLT-like".  The photo-album is an example
+of a task much easier solved using XQuery.
+
+    <hr>
+    <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
+<!-- Created: Fri Apr 26 12:32:59 PDT 2002 -->
+<!-- hhmts start -->
+Last modified: Sun May 19 14:30:41 PDT 2002
+<!-- hhmts end -->
+  </body>
+</html>
