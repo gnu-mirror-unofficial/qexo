@@ -58,4 +58,4 @@ do
   scale t small-image 240 250
 done
 $scriptdir/sizes.sh $group
-$scriptdir/group.sh $group
+$scriptdir/group.sh
