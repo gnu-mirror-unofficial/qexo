@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Compiled XSLT stylesheet support in Kawa</title>
+  </head>
+
+  <body>
+    <h1>Compiled XSLT stylesheet support in Kawa</h1>
+
+<p>The <a href="http://www.gnu.org/sofwtare/kawa/">Kawa framework</a>
+includes some support for <a href="http://www.w3.org/Style/XSL/">XSLT</a>,
+XSL (Extensible StyleSheet Language) Tranformations.
+XSLT is a popular language for transforming (including selecting
+and re-organizing) XML documents.
+The Kawa implementation treats an XSLT stylesheet as a program
+in the XSLT programming language, in the same way that other
+Kawa-sofftered languages (Scheme, XQuery, Emacs Lisp, and Common Lisp).
+Thus an XSLT stylesheets gets translated to Java bytecodes before execution,
+either on-the-fly, or saved to (one or more) <code>.class</code> files.</p>
+
+<p>
+The current implementation is little more than a proof-of-concept.
+However, the following is an example of a working stylesheet:</p>
+<pre>
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+&lt;xsl:template match="users"&gt;
+&lt;table border="1"&gt;
+&lt;thead&gt;&lt;tr&gt;&lt;th&gt;userid&lt;/th&gt;&lt;th&gt;name&lt;/th&gt;&lt;th&gt;rating&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+&lt;xsl:apply-templates/&gt;
+&lt;/table&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="user_tuple"&gt;
+&lt;tr&gt;&lt;xsl:apply-templates/&gt;&lt;/tr&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="userid"&gt;
+&lt;td&gt;&lt;xsl:apply-templates/&gt;&lt;/td&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="name"&gt;
+&lt;td&gt;&lt;xsl:apply-templates/&gt;&lt;/td&gt;
+&lt;/xsl:template&gt;
+
+&lt;xsl:template match="rating"&gt;
+&lt;td&gt;&lt;xsl:apply-templates/&gt;&lt;/td&gt;
+&lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
+</pre>
+<p>
+Assuming this is a file named <code>MakeTable.xsl</code>,
+and you have installed Kawa as the command/script <code>kawa</code>,
+you can compile the stylesheet using this command:</p>
+<pre>
+kawa --xslt --main -C MakeTable.xsl
+</pre>
+This creates the compiled file <code>MakeTable.class</code>.
+This is a Java application, with a <code>main</code> method.
+<p>
+Now suppose you have a data file <code>users.xml</code>:</p>
+<pre>
+&lt;users&gt;
+  &lt;user_tuple&gt;
+    &lt;userid&gt;U01&lt;/userid&gt;
+    &lt;name&gt;Tom Jones&lt;/name&gt;
+    &lt;rating&gt;B&lt;/rating&gt;
+  &lt;/user_tuple&gt;
+  &lt;user_tuple&gt;
+    &lt;userid&gt;U02&lt;/userid&gt;
+    &lt;name&gt;Mary Doe&lt;/name&gt;
+    &lt;rating&gt;A&lt;/rating&gt;
+  &lt;/user_tuple&gt;
+&lt;/users&gt;
+</pre>
+<p>
+If you run this:
+<pre>
+java MakeTable users.xml
+</pre>
+you will get the resulting HTML code:
+<table border="1">
+<thead><tr><th>userid</th><th>name</th><th>rating</th></tr></thead>
+<tr>
+<td>U01</td>
+<td>Tom Jones</td>
+<td>B</td>
+</tr>
+<tr>
+<td>U02</td>
+<td>Mary Doe</td>
+<td>A</td>
+</tr>
+</table>
+    <hr>
+    <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
+<!-- Created: Wed Jun 12 12:55:25 PDT 2002 -->
+<!-- hhmts start -->
+Last modified: Wed Jun 12 16:46:56 PDT 2002
+<!-- hhmts end -->
+  </body>
+</html>
