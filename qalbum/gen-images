@@ -24,7 +24,8 @@ function scale {
     test -z "$height" && height=$maxheight
     test -z "$width" && width=$maxwidth
     echo scaling $img to $scimg maxsize: ${width}x${height} 
-    $JAVA -cp $PICLIBDIR Thumbnail $img $scimg $maxwidth
+    $JAVA -Djava.awt.headless=true -cp $PICLIBDIR \
+      Thumbnail $img $scimg $maxwidth
 #    cp $img $scimg
 #    mogrify -geometry ${width}x${height} $scimg
   fi
