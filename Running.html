@@ -610,6 +610,51 @@ produces a calls to <code>writeInt</code> or <code>writeObject</code>
 is up to the Qexo implementation and how clever it is.</p>
 
 <h2>The TreeList DOM class</h2>
+<p>
+When Qexo needs to store a document in a data structure it uses
+an instance of the class <code>gnu.lists.TreeList</code>.
+The name of the class isn't <code>Document</code> because
+it's actually a lot more general than what is needed for
+plain XML documents.  It can handle typed values, and
+it is also used to represent sequences containing multiple items.</p>
+<p>
+The <code>TreeList</code> class is used to implement a Document
+Object Model (DOM), but it does not implement the standard
+<code>org.w3c.dom.Node</code> or <code>org.w3c.dom.Document</code>
+interfaces.  The reason for that is that the W3C DOM APIs
+use a separate <code>Node</code> object for each conceptual node
+(element, attribute, etc) in a document.  This is very inefficient,
+as it wastes a lot of space and makes a lot of work for the garbage collector.
+Instead, <code>TreeList</code> uses a much more compact array-based
+representation, using one <code>char</code> array and
+one <code>Object</code> array for the entire document.
+A "node" is just an index into the former array, which
+makes it efficient to traverse a document.
+<p>
+The following example shows how you can modify the <code>CountElements</code>
+application so that the command line arguments are the URLs of XML files
+(instead of XQuery expressions).
+Replace the <code>main</code> method by the following, leaving the
+rest of the <code>CountElements</code> class as before.
+Each URL is opened and parsed as an XML file, to create a
+<code>TreeList</code> object.  You can now do a lot of things
+with this <code>TreeList</code>; in this example all we do
+is invoke its <code>consume</code> method, which "writes out"
+all of its data to a <code>Consumer</code>, which
+in this case is a <code>CountElements</code> object.</p>
+<pre>
+  public static void main(String[] args) throws Throwable
+  {
+    CountElements counter = new CountElements();
+    for (int i = 0;  i &lt; args.length;  i++)
+      {
+	String url = args[i];
+	TreeList doc = gnu.kawa.xml.Document.parse(url);
+	doc.consume(counter);
+      }
+    counter.dump(System.out);
+  }
+</pre>
 
 <!--<img src="qexo-interactive.jpg" img>-->
 
@@ -617,7 +662,7 @@ is up to the Qexo implementation and how clever it is.</p>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sun Dec  8 10:58:11 PST 2002 -->
 <!-- hhmts start -->
-Last modified: Sun Dec 15 15:20:08 PST 2002
+Last modified: Sun Dec 15 16:07:55 PST 2002
 <!-- hhmts end -->
   </body>
 </html>
