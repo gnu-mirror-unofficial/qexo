@@ -1,5 +1,9 @@
 #! /bin/bash
-scriptdir=$(dirname $(which $0))
+if test -z "$1"
+then cmd="$0"
+else cmd="$1"
+fi
+scriptdir=$(dirname $(which $cmd))
 #JAVA_HOME=/opt/jdk1.3.1
 JAVA_HOME=/opt/j2sdk1.4.1
 PICLIBDIR=${scriptdir}
@@ -10,7 +14,7 @@ JAVAC=${JAVAC-javac}
 #export CLASSPATH
 #XSL="${JAVA} org.apache.xalan.xslt.Process"
 JHEAD=jhead
-#KAWAJAR=${KAWAJAR-/usr/local/lib/kawa.jar}
-KAWAJAR=/Users/bothner/Kawa/build-head/kawa-1.7beta1.jar
+#KAWAJAR=/Users/bothner/Kawa/build-head/kawa-1.7beta2.jar
+KAWAJAR=${KAWAJAR-${scriptdir}/kawa.jar}
 KAWA="$JAVA -cp ${KAWAJAR} kawa.repl"
 
