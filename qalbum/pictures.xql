@@ -203,6 +203,10 @@ declare function picture($picture, $group, $name, $preamble, $prev, $next, $date
           concat('
         if (key == 112) { location="',
           string($prev/@id), $style, '.html"; return true; }')}
+        if (key == 117) {{ location="index.html"; return true; }}
+        if (key == 105) {{ location="{string($next/@id)}info.html"; return true; }}
+        if (key == 108) {{ location="{string($next/@id)}large.html"; return true; }}
+        if (key == 109) {{ location="{string($next/@id)}.html"; return true; }}
         return routeEvent(e); }}
     </script>
   </head>
@@ -262,6 +266,14 @@ declare function make-group-page($group) {
       img {{ border: 0 }}
       table.row {{ padding: 10px }}
     </style>
+    <script language="JavaScript">
+      document.onkeypress = handler;
+      function handler(e) {{
+        var key = navigator.appName == 'Netscape' ? e.which
+          : window.event.keyCode;
+        if (key == 117) {{ location="../index.html"; return true; }}
+        return routeEvent(e); }}
+    </script>
   </head>
   <body bgcolor="#00AAAA">
     <h2>{$group/title/node()}</h2>
