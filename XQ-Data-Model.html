@@ -263,8 +263,15 @@ mystical patterns.</p>
   &lt;/xsd:simpleType&gt;
 &lt;/xsd:schema&gt;</pre>
 <p>This is verbose, and may be a bit intimidating, but it is relatively straightforward. It contains a top-level <i>element declaration</i> for the root element <code>&lt;die-tests&gt;</code>,
-as well as <i>type definitions</i> for types named <code>die-test-type</code> and <code>die6-result</code>. The difference between a <i>complex type</i> (such as <code>die-test-type</code>) and a <i>simple type</i>
-(such as <code>die6-result</code>) is that a simple type can only be expressed as character data, while a complex type can consist of sub-elements and attribute specifications. The type of an attribute can
+as well as <i>type definitions</i> for types named <code>die-test-type</code> and <code>die6-result</code>.
+A <i>simple type</i> (such as <code>die6-result</code>)
+can only be expressed as character data.
+A <i>complex type</i> (such as <code>die-test-type</code>)
+can consist of attribute specifications,
+and either sub-elements (<code>complexContent</code>),
+character data (<code>simpleContent</code>),
+or a mixture of these (<code>complexContent, mixed="true"</code>).
+ The type of an attribute can
 only be a simple type, while the type of an element can be either a simple type (if it only contains text data), or it can be a complex type. All pre-defined types (such as <code>xsd:integer</code>) are
 simple.</p>
 <p>The top-level element declaration for <code>die-tests</code> says that any element with the <code>die-tests</code> tag has the structure and type specified: It is a complex type consisting of a
