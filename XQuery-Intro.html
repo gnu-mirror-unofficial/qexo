@@ -231,7 +231,7 @@ compactly and readably using XQuery.
 A <code>for</code> expression lets you "loop" over the
 elements of a sequence:
 <pre>
-for $x in (1 to 3) return $x,10+$x
+for $x in (1 to 3) return ($x,10+$x)
 </pre>
 <p>
 The <code>for</code> expression first evaluates the
@@ -443,7 +443,7 @@ tool for analyzing or generating XML.
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Thu May  2 11:02:20 PDT 2002 -->
 <!-- hhmts start -->
-Last modified: Tue May 28 16:19:01 PDT 2002
+Last modified: Mon Jul  1 21:44:00 PDT 2002
 <!-- hhmts end -->
   </body>
 </html>
