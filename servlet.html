@@ -8,9 +8,13 @@
     <h1>Compiling XQuery to a Servlet</h1>
 
 <p>
-Using Qexo, you can compile an <a href="index.html">XQuery</a>
-program to a Servlet.
+Using Qexo, you can run an <a href="index.html">XQuery</a>
+program as a Servlet.
 This makes it easy to have them be executed by a web server.</p>
+
+<h2>Simplest way to run XQuery in a web server</h2>
+<p><em>See <a href="simple-xquery-webapp.html">this article</a>
+for a simpler how-to for deploying a servlet.</em></p>
 
 <h2>How to write and compile an XQuery servlet</h2>
 <p>Suppose the file <code>hello.xql</code> contains an XQuery "program".
@@ -20,9 +24,9 @@ You compile  <code>hello.xql</code> to servlet using the following command.</p>
 $KAWA --xquery --servlet -C hello.xql
 </pre>
 Here <code>$KAWA</code> is how you invoke the Kawa application.
-For example if you use <code>kawa-1.6.97.jar</code>, you can do:
+For example if you use <code>kawa-1.7.jar</code>, you can do:
 <pre>
-java -jar kawa-1.6.97.jar --xquery --servlet -C hello.xql
+java -jar kawa-1.7.jar --xquery --servlet -C hello.xql
 </pre>
 <p>The <code>-C</code> flag tells Kawa to compile the following source
 files.  The <code>--xquery</code> flags tells Kawa that the source files are
@@ -48,8 +52,8 @@ The instructions here assume version 4.0 of Tomcat,
 and that <code>$CATALINA_HOME</code> is where Tomcat is installed.</p>
 <p>
 You first need to install the Kawa jar file
-<code>kawa-1.6.97.jar</code> somewhere where Tomcat can find it.
-For example install it in <code>$CATALINA_HOME/lib/kawa-1.6.97.jar</code>.</p>
+<code>kawa-1.7.jar</code> somewhere where Tomcat can find it.
+For example install it in <code>$CATALINA_HOME/lib/kawa-1.7.jar</code>.</p>
 <p>
 You next need to install your servlet.
 In Tomcat (and the Servlet specification) a servlet is part of a
@@ -184,7 +188,7 @@ using the URL <code>http://localhost:8080/myutils/servlet/hello/mypath</code>.
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sun Nov 25 13:24:52 PST 2001 -->
 <!-- hhmts start -->
-Last modified: Tue May 14 11:59:12 PDT 2002
+Last modified: Sat Jun 14 11:54:17 PDT 2003
 <!-- hhmts end -->
   </body>
 </html>
