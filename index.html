@@ -13,6 +13,8 @@ Qexo is a partial implementation of the
 It achieves high performance because a query is compiled
 down to Java bytecodes using the
 <a href="http://www.gnu.org/software/kawa/">Kawa</a> framework.
+Kawa also includes a proof-of-concept implementation
+of <a href="xslt.html">XSLT</a>.
 <p>
 You can read a short <a href="XQuery-Intro.html">introduction to XQuery</a>.
 <p>
@@ -219,7 +221,7 @@ available in the CVS version.
 <tr><td>string literal</td><td>Ok</td></tr>
 <tr><td><code>{--</code> comment <code>--}</code></td><td>Ok</td></tr>
 <tr><td><code>and</code></td><td>Ok</td></tr>
-<tr><td><code>or</code></td><td>Ok, in CVS</td></tr>
+<tr><td><code>or</code></td><td>Ok</td></tr>
 <tr><td><code>+</code></td><td>Ok</td></tr>
 <tr><td>binary <code>-</code></td><td>Ok</td></tr>
 <tr><td>unary <code>-</code></td><td>Missing</td></tr>
@@ -236,13 +238,13 @@ available in the CVS version.
 <tr><td><code>!==</code></td><td>Missing</td></tr>
 <tr><td>nodes<code>/</code>element-name</td><td>Ok</td></tr>
 <tr><td>nodes<code>//</code>element-name</td><td>Ok</td></tr>
-<tr><td>nodes<code>//</code>element-name<code>[</code>predicate<code>]</code></td><td>Ok, in CVS</td></tr>
+<tr><td>nodes<code>//</code>element-name<code>[</code>predicate<code>]</code></td><td>Ok</td></tr>
 <tr><td>nodes<code>/*</code></td><td>Ok</td></tr>
 <tr><td>nodes<code>/@</code>attribute-name</td><td>Ok</td></tr>
 <tr><td>nodes<code>/@*</code></td><td>Ok</td></tr>
 <tr><td>nodes<code>/</code>expression</td><td>Ok</td></tr>
-<tr><td><code>node()</code></td><td>Ok, in CVS</td></tr>
-<tr><td><code>text()</code></td><td>Ok, in CVS</td></tr>
+<tr><td><code>node()</code></td><td>Ok</td></tr>
+<tr><td><code>text()</code></td><td>Ok</td></tr>
 <tr><td>values<code>[</code>index<code>]</code></td><td>Ok</td></tr>
 <tr><td>values<code>[</code>low-index <code>to</code> high-index<code>]</code></td><td>Ok</td></tr>
 <tr><td>values<code>[</code>boolean<code>]</code></td><td>Ok</td></tr>
@@ -273,11 +275,11 @@ available in the CVS version.
 <tr><td><code>sublist</code> function</td><td>Ok</td></tr>
 <tr><td><code>sublist</code> function</td><td>Ok</td></tr>
 <tr><td><code>count</code> function</td><td>Ok</td></tr>
-<tr><td><code>min</code> function</td><td>Ok, in CVS</td></tr>
-<tr><td><code>max</code> function</td><td>Ok, in CVS</td></tr>
-<tr><td><code>sum</code> function</td><td>Ok, in CVS</td></tr>
-<tr><td><code>avg</code> function</td><td>Ok, in CVS</td></tr>
-<tr><td><code>position</code> function</td><td>Ok, in CVS</td></tr>
+<tr><td><code>min</code> function</td><td>Ok</td></tr>
+<tr><td><code>max</code> function</td><td>Ok</td></tr>
+<tr><td><code>sum</code> function</td><td>Ok</td></tr>
+<tr><td><code>avg</code> function</td><td>Ok</td></tr>
+<tr><td><code>position</code> function</td><td>Ok</td></tr>
 <tr><td><code>write-to</code> extension function</td><td>Ok</td></tr>
 <tr><td>element constructors</td><td>Ok</td></tr>
 <tr><td>function call</td><td>Ok</td></tr>
@@ -290,7 +292,7 @@ available in the CVS version.
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sat Aug 18 14:08:13 PDT 2001 -->
 <!-- hhmts start -->
-Last modified: Tue May 14 11:16:22 PDT 2002
+Last modified: Wed Jun 12 16:49:35 PDT 2002
 <!-- hhmts end -->
   </body>
 </html>
