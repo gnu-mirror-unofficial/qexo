@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Developing and Debugging of XQuery</title>
+  </head>
+
+  <body>
+    <h1>Developing and Debugging of XQuery</h1>
+
+Qexo provides help for developing and debugging your applications.
+<p>
+See <a href="servlet.html#debugging">this link</a> for some notes
+specifically relating to servlets.
+
+<h3>XQuery syntax errors</h3>
+<p>
+Running an XQuery program has two parts: compile-time and run-time.
+If Qexo find any errors at compile-time (i.e. errors it can detect
+statically before trying read any data files), it will stop,
+and write out error messages.  These usually include line and
+sometimes column number where Qexo believes the error to be.
+Sometimes Qexo will be confused and emit a confusing error message.
+(If so, let us know, and maybe we can improve the situation.)
+However, most of the time you should hopefully be able to quickly
+figure what is wrong.  (If there are multiple errors messages, concentrate
+on the first one, since the others may be because Qexo got confused
+after the first error.)
+<p>
+As an example assume the file <code>min-cats.xql</code>
+contains the following semi-nonsense:</p>
+<pre>
+define function min-cats($x, $y) {
+let $z in " cats" return
+  if (x < $y)
+    $x else $y
+  " cats"
+(: returns number of cats
+}
+min-cats(3, 4)
+</pre>
+If you ask Qexo to process this file, you'll see the following error log:
+<pre>
+min-cats.xql:2:17: missing ':=' in 'let' clause
+min-cats.xql:3:9: node test when focus is undefined
+min-cats.xql:4:5: missing 'then'
+min-cats.xql:5:9: missing '}' or ','
+min-cats.xql:9:1: non-terminated comment starting at line 6
+</pre>
+<p>
+This gives you the filename, line number, and column number
+each place Qexo found a syntax error.  Sometimes an earlier error
+will cause multiple errors, but in this case each message
+results from a separate error.  (They should all be easy to figure out,
+except perhaps the second one, where the <code>$x</code> mistyped
+as <code>x</code> is interpreted as a node-test in a path expression,
+but Qexo can catch this as its is an undefined context for such a node-test.)
+
+<h3 id="run-time-exceptions">Run-time exceptions</h3>
+<p>
+If you cause a run-time error, you may get an uncaught run-time exception
+with a stack trace.
+This shows which methods were active when the exception was created.
+The methods that Qexo compiles
+from your XQuery program will be in that stack trace with
+(if you're lucky) line numbers referring to the lines in your XQuery program.
+You may have to dig through the stack trace, and ignore methods belonging
+to Kawa or whatever run-time environment you're running in.
+You may sometimes get two or more more stack traces.  In that case the
+last stack trace showing the <i>root cause</i> will probably be most helpful.
+<p>
+Here is an application <a href="list-data.xql"><code>list-data.xql</code></a>
+that looks for a non-existant <code>"data.txt"</code>:
+<pre>
+define function listing($url) {
+  &lt;pre&gt;{ doc($url) }&lt;/pre&gt;
+}
+listing("data.txt"), ""
+</pre>
+<p>
+Let's assume you try to run this file as a servlet using
+the <code>KawaPageServlet</code> under the Tomcat web server.
+In that case Tomcat will return a Java execution
+stack trace to your browser.  Look for the <code>root cause</code>,
+which looks like:
+<pre>
+java.io.FileNotFoundException: http://localhost:8080/data.txt
+    at sun.net.www.protocol.http.HttpURLConnection
+       .getInputStream(HttpURLConnection.java:707)
+    at gnu.kawa.xml.XMLParser.(XMLParser.java:57)
+    at gnu.kawa.xml.XMLParser.(XMLParser.java:49)
+    at gnu.kawa.xml.XMLParser.(XMLParser.java:42)
+    at gnu.kawa.xml.Document.parse(Document.java:52)
+    at gnu.kawa.xml.Document.apply(Document.java:94)
+    at gnu.mapping.CallContext.runUntilDone(CallContext.java:258)
+    at gnu.mapping.CallContext.runUntilValue(CallContext.java:290)
+    at listData.listing$T(list-data.xql:2)
+    at listData.apply(list-data.xql)
+    at gnu.mapping.CpsMethodProc.apply(CpsMethodProc.java:49)
+    at gnu.mapping.CallContext.runUntilDone(CallContext.java:258)
+    at gnu.mapping.CallContext.runUntilValue(CallContext.java:290)
+    at listData.apply(list-data.xql:4)
+    at gnu.kawa.servlet.KawaPageServlet.apply(KawaPageServlet.java:51)
+    at gnu.kawa.servlet.KawaServlet.doGet(KawaServlet.java:57)
+    at javax.servlet.http.HttpServlet.service(HttpServlet.java:740)
+    at javax.servlet.http.HttpServlet.service(HttpServlet.java:853)
+    at org.apache.catalina.core.ApplicationFilterChain
+       .internalDoFilter(ApplicationFilterChain.java:247)
+    ... <i>lots of Tomcat internals</i> ...
+    at org.apache.tomcat.util.threads.ThreadPool$ControlRunnable
+       .run(ThreadPool.java:619)
+    at java.lang.Thread.run(Thread.java:554)
+</pre>
+<p>
+The cause is a <code>FileNotFoundException</code>, and the
+exception message names the URL it was looking for.  (The <code>data.txt</code>
+is a relative URL that gets resolved to that of the web application.)
+The first few lines are within Kawa run-time routines, but then we get
+to two lines in the <code>listData</code> class, which is the Java
+"mangling" of the <code>list-data.xql</code> file.
+The first one specifies that we're at line 2, in method <code>listing$T</code>,
+which is the Java "mangling" of the <code>listing</code> function.
+And that is indeed where the bad call to <code>doc</code> is.
+A little further down you will see a
+call at <code>list-data.xql</code> line 4, which is where
+<code>listing</code> gets called.  (There are some calls in
+between for technical reasons.)
+<p>
+Note how we append an empty (<code>, ""</code>) after the call to
+<code>listing</code>.  This is to suppress tail-call-optimization,
+which is an optimization done when the last thing in a function is
+a call to another function.  The optimization allows some kinds of
+recursion to execute without a stack overflow, but the disadvantage is
+that stack traces can be confusing.  So when debugging, if may sometimes
+be helpful to append some empty value so <em>that</em> becomes
+the last expression in the function.
+
+<h3>Adding trace output</h3>
+<p>
+Sometimes it is difficult to understand what an application is
+doing, in which case it is useful to add print statements for debugging
+purposes.  XQuery is a side-effect-free language, so it doesn't
+really have print statements.
+However, the May 2003 draft specification added a <code>trace</code>
+which takes two parameters.  The first parameter
+can be an arbitary value that is returned
+as the result of the <code>trace</code> call.  The other parameter
+is descriptive string.  Both values are written to a "trace data set"
+in an implementation-defined manner.  For example you could
+replace the <code>num-parameter</code> implementation
+of <code>adder.xql</code> by the following:
+<pre>
+define function num-parameter($name, $default) {
+  trace (
+  number(request-parameter($name, $default))
+  , concat("num-parameter of '", $name, "' is:"))
+}
+</pre>
+<p>
+That writes the following output to Qexo's standard error output
+(<code>System.err</code>):
+<pre>
+XQuery-trace: num-parameter of 'sum1' is: 0
+XQuery-trace: num-parameter of 'sum2' is: 0
+XQuery-trace: num-parameter of 'sum2' is: 1
+</pre>
+
+    <hr>
+    <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
+<!-- Created: Mon Jun 16 19:44:29 PDT 2003 -->
+<!-- hhmts start -->
+Last modified: Mon Jun 16 22:06:30 PDT 2003
+<!-- hhmts end -->
+  </body>
+</html>
