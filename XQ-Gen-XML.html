@@ -602,8 +602,9 @@ write a little XQuery program like this:</p>
 <p>Copy the resulting <code>.class</code> file(s) to your web server's CGI directory. On Red Hat GNU/Linux using the Apache server, you can do the following (as root):</p>
 <pre>cp hello*.class /var/www/cgi-bin/</pre>
 <p>Next find the <code>cgi-servlet</code> program that Kawa builds and installs. If you installed Kawa in the default place, it will be in <code>/usr/local/bin/cgi-servlet</code>. (You'll have this if
-you installed Kawa from source, but not if you're just using the Kawa <code>.jar</code> file.) Copy this program into the same CGI directory:</p>
-<pre>cp /usr/local/bin/cgi-servlet /var/www/cgi-bin/</pre>
+you installed Kawa from source, but not if you're just using the Kawa <code>.jar</code> file.) Copy or link this program into the same CGI directory,
+renaming it to <code>hello</code>:</p>
+<pre>cp /usr/local/bin/cgi-servlet /var/www/cgi-bin/hello</pre>
 <p>Make sure the files have the correct permissions:</p>
 <pre>chmod a+r /var/www/cgi-bin/hello*.class /var/www/cgi-bin/hello
 chmod a+x /var/www/cgi-bin/hello</pre>
