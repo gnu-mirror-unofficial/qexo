@@ -134,7 +134,7 @@ without information loss. Furthermore, any valid XPath 1 expression will behave 
 <li><p> A <i>derived type</i> is based on some other type, its <i>base type</i>.</p></li>
 </ul>
 <p>A derived atomic type is a <i>restriction</i> of its base type, because it is a restriction (sub-set) of the set of atomic values that belong to the base type.</p>
-<p>Following is a complete list of the builtin types defined by XML Schema. We will only list them briefly; for more information see the W3C Recommendation (02 May 2001) of X<i>ML Schema
+<p>Following is a complete list of the built-in types defined by XML Schema. We will only list them briefly; for more information see the W3C Recommendation (02 May 2001) of X<i>ML Schema
 Part 2: Datatypes</i> (<a href="http://www.w3.org/TR/xmlschema-2/">http://www.w3.org/TR/xmlschema-2/</a>). This specifies for each type its <i>value space</i> (the abstract values that belong to the type), its <i>lexical space</i> (the text
 representation of values using printable characters), and its facets (properties of the type itself).</p>
 <p>XML Schema defines the following builtin types:</p>
@@ -242,7 +242,7 @@ that a given element tag can be have different types in different contexts, but 
 <p>To <i>validate</i> an XML document against a schema means to scan the document, verifying that the document satisfies the constraints specified in the schema.  The result is a
 <i>post-schema validation infoset</i> (PSVI), which is an info set (as defined earlier) with additional <i>type annotations</i>.   A type annotation is the QName of a type named in a
 schema.</p>
-<p>An XQuery processor may optionally implement the <i>Schema import feature</i>. If it does, it must be import definitions from external schemas, and be able to validate node trees.</p>
+<p>An XQuery processor may optionally implement the <i>Schema import feature</i>. If it does, it must be able to import definitions from external schemas and validate node trees.</p>
 <p>Each element or attribute in XQuery has a <i>type annotation</i>, which is its <i>dynamic type</i>. If an element has not been validated, or otherwise been given a type annotation, then
 it has the default type annotation <code>xsd:anyType</code>. The corresponding default for an attribute node is the type <code>xsd:anySimpletype</code>. These are also the types for nodes created using element
 or attribute constructor expressions.</p>
@@ -251,7 +251,7 @@ cast <code>xsd:anySimpleType</code> to a more specific type, such as <code>xsd:d
 then a run-time error may be signaled.</p>
 <p>An XQuery application can use a validate expression:</p>
 <pre>validate ( EXPR )</pre>
-<p>This takes a sequence of elements, strip off any existing type annotations, and adds type annotations as specified by the <i>in-context scheme definitions</i>. The latter are all the
+<p>This takes a sequence of elements, strips off any existing type annotations, and adds type annotations as specified by the <i>in-context scheme definitions</i>. The latter are all the
 scheme element declarations and type definitions that are imported by schema import declarations. (You can optionally specify a SchemaContext that can be used with context-dependent schema
 types.)</p>
 <p>A schema import declaration appears in the Query Prolog of an XQuery program. For example:</p>
@@ -285,7 +285,7 @@ corresponding expression.</p>
 <h2>Static typing</h2>
 <p>An XQuery implementation may optionally implement the <i>Static Typing Feature</i>. This means that the implementation is required to detect static type errors at analysis (compile)
 time. At the time of this writing, the specification has a number of unresolved issues, and I don't know of any implementation that actually does implement static typing. (However, some of the
-pre-cursor languages that inspired XQuery do implement static typing.) For these reasons, plus the fact that the specification of static typing is big and formal, I won't go beyond mentioning a few
+precursor languages that inspired XQuery do implement static typing.) For these reasons, plus the fact that the specification of static typing is big and formal, I won't go beyond mentioning a few
 of the concepts.</p>
 <p>The static type system defined in the XQuery formal semantics (<a href="http://www.w3.org/TR/query-semantics/">http://www.w3.org/TR/query-semantics/</a>) goes far beyond what you can express as a S<code>equenceType</code>. It includes
 most of the type specification concepts of XML Schema. The formal semantics defines extra declarations <code>define type</code>, <code>define element</code>, and <code>define attribute</code>. These are <i>not</i> in
