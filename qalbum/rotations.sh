@@ -7,8 +7,7 @@
 # Also update <full-image> in index.xml to use the rotated name.
 # (Can also be invoked as: rotations.sh index PIC PIC.jpg ROT
 # where ROT is 90 or 270;  however, this is only mean for internal use.)
-scriptdir=$(dirname $(which $0))
-. $scriptdir/setup.sh
+
 group=${1:-index}
 tmp=/tmp/$$
 if test $# -ge 2 ;
@@ -34,6 +33,8 @@ echo img: $img rot: $rot rotimg: $rotimg
   fi
 else
 echo scanning to $tmp.xml
+  scriptdir=$(dirname $(which $0))
+  . $scriptdir/setup.sh
   xsltproc $scriptdir/rotations.xsl $group.xml \
     | grep rotated= \
     | sed -e 's|rotated="left"/>| 90|' -e 's|rotated="right"/>| 270|' \
