@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app>
+  <display-name>XQuery Utils</display-name>
+
+  <servlet>
+    <servlet-name>KawaPageServlet</servlet-name>
+    <servlet-class>gnu.kawa.servlet.KawaPageServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>KawaPageServlet</servlet-name>
+    <url-pattern>*.xql</url-pattern>
+  </servlet-mapping>
+</web-app>
+
