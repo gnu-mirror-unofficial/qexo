@@ -50,10 +50,20 @@ the command you use to start up Qexo.  There are a number of
 ways you can actually run Qexo.
 If you have downloaded Kawa as a <code>jar</code> file
 (for example <code>kawa-1.7.jar</code>), you can start up
-Qexo using the command <code>java -cp kawa-1.7.jar --xquery</code>.
-On a Unix or GNU/Linux system, you can make an alias like the following,
+Qexo using the either command:
 <pre>
-$ <b>alias qexo='java -cp kawa.jar --xquery'</b>
+<b>java -cp kawa-1.7.jar kawa.repl --xquery</b>
+</pre>
+or
+<pre>
+<b>java -jar kawa-1.7.jar --xquery</b>
+</pre>
+<p>
+In the following we'll assuming you've defined <code>qexo</code>
+as an alias for one of the above.
+On a Unix or GNU/Linux system, you can make an alias like this,
+<pre>
+$ <b>alias qexo='java -jar kawa-1.7.jar --xquery'</b>
 </pre>
 and then just do:
 <pre>
@@ -64,7 +74,7 @@ We use <code>$ </code> to stand for the prompt for your
 command-line processor (shell or console), and
 we use boldface for commands you type.</p>
 <p>
-Alternatively, you can place the <code>kawa.tar</code> file in you
+Alternatively, you can place the <code>kawa.tar</code> file in your
 class path, and just type '<code>java kawa.repl --xquery</code>'
 instead of '<code>qexo</code>':
 <pre>
@@ -668,7 +678,7 @@ in this case is a <code>CountElements</code> object.</p>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sun Dec  8 10:58:11 PST 2002 -->
 <!-- hhmts start -->
-Last modified: Tue Jan 14 18:55:14 PST 2003
+Last modified: Sun Jan 26 14:06:58 PST 2003
 <!-- hhmts end -->
   </body>
 </html>
