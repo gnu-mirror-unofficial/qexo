@@ -19,13 +19,12 @@ Our application presents to the user a form like the following:</p>
 <img src="webapp-adder-1.png" title="Figure 1"
 alt="First screenshot of adder webapp"
 longdesc="webapp-adder-1.html"/>
-<p>.
+<p>
 You can edit either field, perhaps to 10 and 3.
 When you click <code>Submit</code>,
 you get an updated form showing the sum of the two fields:</p>
 <img src="webapp-adder-2.png" title="Figure 2"
-alt="First screenshot of adder webapp"
-longdesc="webapp-adder-2.html"/>
+alt="Second screenshot of adder webapp, after Submit"/>
 <p>
 The application uses HTTP <dfn>parameters</dfn> to "remember" the sum from
 one request to the next.  A more interesting application
@@ -168,13 +167,13 @@ will be handled by the class <code>gnu.kawa.servlet.KawaPageServlet</code>.
 <p>
 So far this has all been boiler-plate.  Now finally we just need
 to install our XQuery program <code>adder.xql</code> into
-the <code>utils</code> web application, by copying to the file:
+the <code>utils</code> web application, by copying to the file
 <code>$CATALINA_HOME/webapps/utils/adder.xql</code>.
 
 <h2>Accessing our web application</h2>
 <p>
 To access the web application, point you favorite browser at
-<code>http://localhost:8080/utils/adder.xql</code>.
+<a href="http://localhost:8080/utils/adder.xql"><code>http://localhost:8080/utils/adder.xql</code></a>.
 Tomcat will receive this request, use the <code>utils</code> part
 to determine that it is for the <code>utils</code> web application,
 and use the <code>utils/WEB-INF/web.xml</code> configuration file.
@@ -190,7 +189,7 @@ the first time you request it each time you re-start Tomcat,
 but the Kawa compiler is fast enough that there is no real gain in
 keeping the compiled class around.  (Kawa also gives you the
 option of <a href="http://www.gnu.org/software/qexo/servlet.html">manually compiling to a servlet</a>).
-(If you're cursious about the class that <code>KawaPageServlet</code> creates,
+(If you're curious about the class that <code>KawaPageServlet</code> creates,
 add a <code>qexo-save-class</code> parameter to the <em>initial</em> request,
 as in <a href="http://localhost:8080/utils/adder.xql?qexo-save-class"><code>http://localhost:8080/utils/adder.xql?qexo-save-class</code></a>.
 This will write out the compiled class to
@@ -205,9 +204,9 @@ initial values in the <code>&lt;input&gt;</code> fields
 will be 0 and 1 respectively.
 The result of evaluating <code>adder.xql</code> will be some XHTML,
 which will be sent as the HTTP response back to your browser,
-which will display as in teh first image above.
+which will display as in the first image above.
 <p>
-In your browser you can edit the input fields,
+Use your browser to edit the input fields,
 changing them to (say) 10 and 3.
 When you click <code>Submit</code> those values are used
 to set the HTTP request parameters <code>sum1</code> and <code>sum2</code>,
@@ -221,17 +220,17 @@ for the parameters <code>sum1</code> and <code>sum2</code>,
 so when the new form is returned to the browser the initial
 values of the two fields are 13 and 3,
 whihc will display the second image above.
-If you leave the fields as-is and click <code>Submit</code>,
+If you leave the fields as-is and again click <code>Submit</code>,
 the updated forms will show 16 and 3.  And so on.
 
 <h2>Development and Debugging</h2>
 <p>
-If you request <code>adder.xql</code> after ading it,
+If you request <code>adder.xql</code> after editing it,
 <code>KawaPageServlet</code> will automatically re-compile it.
 This makes it easy to test out changes.
 If you make a syntax error, the result sent to the browser
 will include error messages from the compiler.
-If you cuase a run-time error, you will get a stack trace
+If you cause a run-time error, you will get a stack trace
 that will hopefully help you track down the error.
 <p>
 The latest XQuery draft specification includes a <code>trace</code>
@@ -241,7 +240,7 @@ function that may be useful.
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Mon May  5 20:28:35 PDT 2003 -->
 <!-- hhmts start -->
-Last modified: Wed May  7 13:49:01 PDT 2003
+Last modified: Wed May  7 14:01:24 PDT 2003
 <!-- hhmts end -->
   </body>
 </html>
