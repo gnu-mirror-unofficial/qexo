@@ -1,0 +1,61 @@
+#! /bin/bash
+# Usage:  gen-images group
+# For each picture, generates correspdinding <image> and <small-image>
+# thumbnails - but only if the scaled files don't already exist.
+# If the image files don't exist, but the tags specify height or weigth
+# attributes, those are used as the maximum size for the scaled images.
+# Otherwise the defaults are 750x750 and 250x250, respectively.
+# Updates $group.xml with updated <image> and <small-image> elements.
+# Fially, runs group.sh $group.xml
+scriptdir=$(dirname $(which $0))
+. $scriptdir/setup.sh
+group=${1:-index}
+
+quote='"'"'"
+function scale {
+  code=$1
+  tag=$2
+  maxwidth=$3
+  maxheight=$4
+  scimg=`echo $img | sed -e 's/\([^rtp]\)[rtp]*[.]j/\1'$code'.j/'`
+  if test ! -f $scimg ; then
+    height=`sed -n -e 's|<'$tag' [^>]*height=[^0-9]*\([0-9]*\)[^>]*>'$scimg'</'$tag'>|\1|p' <$group.xml`
+    width=`sed -n -e 's|<'$tag' [^>]*width=[^0-9]*\([0-9]*\)[^>]*>'$scimg'</'$tag'>|\1|p' <$group.xml`
+    test -z "$height" && height=$maxheight
+    test -z "$width" && width=$maxwidth
+    echo scaling $img to $scimg maxsize: ${width}x${height} 
+    $JAVA -cp $PICLIBDIR Thumbnail $img $scimg $maxwidth
+#    cp $img $scimg
+#    mogrify -geometry ${width}x${height} $scimg
+  fi
+  # First delete any old tags for <$tag ...>$scimg</$tag>, then add new ones.
+  sed -e '/^ *<'$tag'[^>]*>'$scimg'<[/]'$tag'> *$/d' \
+      -e 's|<'$tag'[^>]*>'$scimg'<[/]'$tag'>||' <$group.xml | \
+    sed -e 's|\(<[a-z-]*image[^>]*>'$img'</[a-z-]*image>\)|\1\
+<'$tag'>'$scimg'</'$tag'>|' >tmp.xml
+    cat <tmp.xml >$group.xml
+}
+
+test $PICLIBDIR/Thumbnail.class -ot $PICLIBDIR/Thumbnail.java && (\
+  cd $PICLIBDIR
+  echo Re-compiling $PICLIBDIR/Thumbnail.class
+  ${JAVAC} -g Thumbnail.java
+)
+
+for fullimg in `sed -n -e 's|<full-image[^>]*>\([^<]*\)</full-image>|\1|p' <$group.xml`
+do
+  img=$fullimg
+  pimg=`echo $img | sed -e 's/\([^rtp]\)[rtp]*[.]j/\1p.j/'`
+  test -f $pimg -a '!' -f $img && img=$pimg
+  scale t small-image 240 250
+  scale p image 740 750
+done
+for fullimg in `sed -n -e 's|<image[^>]*>\([^<]*\)</image>|\1|p' <$group.xml`
+do
+  img=$fullimg
+  pimg=`echo $img | sed -e 's/\([^rtp]\)[rtp]*[.]j/\1p.j/'`
+  test -f $pimg -a '!' -f $img && img=$pimg
+  scale t small-image 240 250
+done
+$scriptdir/sizes.sh $group
+$scriptdir/group.sh $group
