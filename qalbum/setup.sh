@@ -4,17 +4,21 @@ then cmd="$0"
 else cmd="$1"
 fi
 scriptdir=$(dirname $(which $cmd))
-#JAVA_HOME=/opt/jdk1.3.1
-JAVA_HOME=/opt/j2sdk1.4.1
 PICLIBDIR=${scriptdir}
-#JAVA=${JAVA_HOME}/bin/java
+
 JAVA=${JAVA-java}
 JAVAC=${JAVAC-javac}
-#CLASSPATH=/home/bothner/Java/xalan_0_19_3D03/xalan.jar:/home/bothner/Java/xerces-1_0_1/xerces.jar:$CLASSPATH
-#export CLASSPATH
-#XSL="${JAVA} org.apache.xalan.xslt.Process"
+if test -z "$JAVA_HOME"
+then
+  java_bindir=$(dirname $(type -p java))
+  case "$java_bindir"
+  */bin) JAVA_HOME=$(echo $java_bindir|sed sed 's|/bin$||')
+  *) JAVA_HOME=/opt/JavaHome
+  esac
+fi
+PATH=$JAVA_HOME/bin:$PATH
+
 JHEAD=jhead
-#KAWAJAR=/Users/bothner/Kawa/build-head/kawa-1.7beta2.jar
 KAWAJAR=${KAWAJAR-${scriptdir}/kawa.jar}
 KAWA="$JAVA -cp ${KAWAJAR} kawa.repl"
 
