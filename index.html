@@ -1,0 +1,290 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Kawa-XQuery</title>
+  </head>
+
+  <body>
+    <h1>Kawa-XQuery</h1>
+
+<p>
+Kawa-XQuery is a partial implementation of the
+<a href="http://www.w3c.org/XML/Query">XML Query language</a>.
+It achieves high performance because a query is compiled
+down to Java bytecodes using the
+<a href="http://www.gnu.org/software/kawa/">Kawa</a> framework.
+
+<h2>Benefits</h2>
+<ul>
+<li>XQuery allows convenient mixing of output xml or html fragments
+with calculations, like JSP and PHP do.  However, XQuery is an
+expression-oriented language, so you don't need to clutter up
+your code with print or echo statements.  More importantly,
+you can treat a document fragment as input to a function,
+which can then be processed by another function, and so on.
+<li>
+Kawa-XQuery optimizes sequences and element constructors to
+avoid actually creating temporary values.  In many cases
+the output will be written directly as xml/html, without
+constructing actual node or sequence objects.
+<li>
+Other common html- and xml-generating frameworks (such as cgi scripts)
+are interpreted.  Kawa-XQuery is compled to Java bytecode, so it benefits
+from highly-tuned JVMs.  It does analysis and optimizations at compile-time.
+You also have the option of compiling down
+to native code using <a href="http://gcc.gnu.org/java/">GCJ</a>.</li>
+<li>
+XQuery is staticly typed (in contrast to xslt).  This can help in
+producing better and earlier (compile-time) error messages, and it can
+aid the compiler in generating more efficient code.</li>
+<li>
+With Kawa-XQuery you have a choice of compiling a program
+ahead of time, or you can read and evaluate it on the fly.
+In the latter case, it will still be compiled, but without
+the overhead of having to invoke an external compiler.
+</ul>
+
+<h2>Examples</h2>
+
+<h3>Data conversion</h3>
+
+<p>Here is a program for converting a table:
+<pre>
+let $newline := "
+",
+$result := (document("tab.xml")/result)
+  return
+    (&lt;table&gt;
+{for $x in ($result/row)
+      return (&lt;tr&gt;{
+        for $y in ($x/fld1) return (&lt;td&gt;&lt;b&gt;{children($y)}&lt;/b&gt;&lt;/td&gt;),
+        for $y in ($x/fld2) return (&lt;td&gt;{list(100,children($y))}&lt;/td&gt;)}&lt;/tr&gt;,
+        $newline)
+}&lt;/table&gt;,$newline)
+</pre>
+<p>
+This will convert an input table like this:
+<pre>
+&lt;result&gt;
+&lt;row&gt;
+&lt;fld1&gt;a1&lt;/fld1&gt;
+&lt;fld2&gt;12&lt;/fld2&gt;
+&lt;/row&gt;
+&lt;row&gt;
+&lt;fld1&gt;b1&lt;/fld1&gt;
+&lt;fld2&gt;22&lt;/fld2&gt;
+&lt;/row&gt;
+&lt;/result&gt;
+</pre>
+yielding an output table like this:
+<pre>
+&lt;table&gt;
+&lt;tr&gt;&lt;td&gt;&lt;b&gt;a1&lt;/b&gt;&lt;/td&gt;&lt;td&gt;&lt;list&gt;100 12&lt;/list&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;b&gt;b1&lt;/b&gt;&lt;/td&gt;&lt;td&gt;&lt;list&gt;100 22&lt;/list&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+
+<h3>Formatted table generation</h3>
+
+<p>The following program generates a 10x10 multiplication table:
+
+<pre>
+&lt;table&gt;{
+  for $y in 1 to 10 return (
+    &lt;tr&gt;{
+      for $x in 1 to 10 return
+        let $bg:=(if($x mod 2 + $y mod 2 &lt;= 0) then "lightgreen"
+                  else if ($y mod 2 &lt;= 0) then "yellow"
+                  else if ($x mod 2 &lt;= 0) then "lightblue"
+                  else "white"),
+            $prod:=$x*$y
+          return &lt;td align="right" bgcolor="{$bg}"&gt;{
+            if ($x &gt; 1 and $y &gt; 1) then $prod else &lt;b&gt;{$prod}&lt;/b&gt;}&lt;/td&gt;
+    }&lt;/tr&gt;,
+    "
+")
+}&lt;/table&gt;,"
+"
+</pre>
+
+<p>
+This is the result:
+<table><tr><td align="right" bgcolor="white"><b>1</b></td><td align="right" bgcolor="lightblue"><b>2</b></td><td align="right" bgcolor="white"><b>3</b></td><td align="right" bgcolor="lightblue"><b>4</b></td><td align="right" bgcolor="white"><b>5</b></td><td align="right" bgcolor="lightblue"><b>6</b></td><td align="right" bgcolor="white"><b>7</b></td><td align="right" bgcolor="lightblue"><b>8</b></td><td align="right" bgcolor="white"><b>9</b></td><td align="right" bgcolor="lightblue"><b>10</b></td></tr>
+<tr><td align="right" bgcolor="yellow"><b>2</b></td><td align="right" bgcolor="lightgreen">4</td><td align="right" bgcolor="yellow">6</td><td align="right" bgcolor="lightgreen">8</td><td align="right" bgcolor="yellow">10</td><td align="right" bgcolor="lightgreen">12</td><td align="right" bgcolor="yellow">14</td><td align="right" bgcolor="lightgreen">16</td><td align="right" bgcolor="yellow">18</td><td align="right" bgcolor="lightgreen">20</td></tr>
+<tr><td align="right" bgcolor="white"><b>3</b></td><td align="right" bgcolor="lightblue">6</td><td align="right" bgcolor="white">9</td><td align="right" bgcolor="lightblue">12</td><td align="right" bgcolor="white">15</td><td align="right" bgcolor="lightblue">18</td><td align="right" bgcolor="white">21</td><td align="right" bgcolor="lightblue">24</td><td align="right" bgcolor="white">27</td><td align="right" bgcolor="lightblue">30</td></tr>
+<tr><td align="right" bgcolor="yellow"><b>4</b></td><td align="right" bgcolor="lightgreen">8</td><td align="right" bgcolor="yellow">12</td><td align="right" bgcolor="lightgreen">16</td><td align="right" bgcolor="yellow">20</td><td align="right" bgcolor="lightgreen">24</td><td align="right" bgcolor="yellow">28</td><td align="right" bgcolor="lightgreen">32</td><td align="right" bgcolor="yellow">36</td><td align="right" bgcolor="lightgreen">40</td></tr>
+<tr><td align="right" bgcolor="white"><b>5</b></td><td align="right" bgcolor="lightblue">10</td><td align="right" bgcolor="white">15</td><td align="right" bgcolor="lightblue">20</td><td align="right" bgcolor="white">25</td><td align="right" bgcolor="lightblue">30</td><td align="right" bgcolor="white">35</td><td align="right" bgcolor="lightblue">40</td><td align="right" bgcolor="white">45</td><td align="right" bgcolor="lightblue">50</td></tr>
+<tr><td align="right" bgcolor="yellow"><b>6</b></td><td align="right" bgcolor="lightgreen">12</td><td align="right" bgcolor="yellow">18</td><td align="right" bgcolor="lightgreen">24</td><td align="right" bgcolor="yellow">30</td><td align="right" bgcolor="lightgreen">36</td><td align="right" bgcolor="yellow">42</td><td align="right" bgcolor="lightgreen">48</td><td align="right" bgcolor="yellow">54</td><td align="right" bgcolor="lightgreen">60</td></tr>
+<tr><td align="right" bgcolor="white"><b>7</b></td><td align="right" bgcolor="lightblue">14</td><td align="right" bgcolor="white">21</td><td align="right" bgcolor="lightblue">28</td><td align="right" bgcolor="white">35</td><td align="right" bgcolor="lightblue">42</td><td align="right" bgcolor="white">49</td><td align="right" bgcolor="lightblue">56</td><td align="right" bgcolor="white">63</td><td align="right" bgcolor="lightblue">70</td></tr>
+<tr><td align="right" bgcolor="yellow"><b>8</b></td><td align="right" bgcolor="lightgreen">16</td><td align="right" bgcolor="yellow">24</td><td align="right" bgcolor="lightgreen">32</td><td align="right" bgcolor="yellow">40</td><td align="right" bgcolor="lightgreen">48</td><td align="right" bgcolor="yellow">56</td><td align="right" bgcolor="lightgreen">64</td><td align="right" bgcolor="yellow">72</td><td align="right" bgcolor="lightgreen">80</td></tr>
+<tr><td align="right" bgcolor="white"><b>9</b></td><td align="right" bgcolor="lightblue">18</td><td align="right" bgcolor="white">27</td><td align="right" bgcolor="lightblue">36</td><td align="right" bgcolor="white">45</td><td align="right" bgcolor="lightblue">54</td><td align="right" bgcolor="white">63</td><td align="right" bgcolor="lightblue">72</td><td align="right" bgcolor="white">81</td><td align="right" bgcolor="lightblue">90</td></tr>
+<tr><td align="right" bgcolor="yellow"><b>10</b></td><td align="right" bgcolor="lightgreen">20</td><td align="right" bgcolor="yellow">30</td><td align="right" bgcolor="lightgreen">40</td><td align="right" bgcolor="yellow">50</td><td align="right" bgcolor="lightgreen">60</td><td align="right" bgcolor="yellow">70</td><td align="right" bgcolor="lightgreen">80</td><td align="right" bgcolor="yellow">90</td><td align="right" bgcolor="lightgreen">100</td></tr>
+</table>
+
+<h3>Defining a function</h3>
+
+<p>Here is an example of defining and using a recursive function:
+
+<pre>
+define function descendent-or-self ($x) {
+  $x, for $z in children($x) return descendent-or-self($z) }
+descendent-or-self (&lt;a&gt;text1&lt;b&gt;text2&lt;/b&gt;&lt;/a&gt;)
+</pre>
+
+The result is: <code>&lt;a&gt;text1&lt;b&gt;text2&lt;/b&gt;&lt;/a&gt;text1&lt;b&gt;text2&lt;/b&gt;text2</code>
+
+<h3>Photo album</h3>
+
+I re-wrote from XML to XQuery
+<a href="http://pics.bothner.com/scripts/">my scripts</a> for organizing
+my <a href="http://pics.bothner.com/">digital photos</a>. The new
+<a href="http://pics.bothner.com/scripts/group.sh">shell script</a> which
+calls <a href="http://pics.bothner.com/scripts/pictures.xql">pictures.xql</a>
+is more readable, has similar size, yet provide more functionality.
+Here is an <a href="http://pics.bothner.com/2002/FremontOlderJan/index.html">an
+example of the output</a> (optimized for Mozilla).
+
+<h2>How to get and install Kawa-XQuery</h2>
+<p>Kawa-XQuery is part of Kawa.  The easiest way to try it out it to
+download a <a href="ftp://ftp.gnu.org/pub/gnu/kawa/kawa-1.6.98.jar">runnable jar</a>
+from the Kawa ftp site
+<a href="ftp://ftp.gnu.org/pub/gnu/kawa/">ftp://ftp.gnu.org/pub/gnu/kawa/"</a>
+or a <a href="http://www.gnu.org/order/ftp.html">mirror</a>
+However, XQuery is new and constantly changing, so you might
+prefer to get Kawa from the CVS repository, as described
+in the <a href="http://www.gnu.org/software/kawa/">Kawa manual</a>.
+</p>
+
+<h2>Usage</h2>
+<p>You run Kawa-XQuery just the way you run Kawa, except you need
+to specify the <code>--xquery</code> flag to specify the language.
+(By default Kawa expects Scheme source code.)
+<p>For example you can type in xquery expression directly at the command
+line.  If the end of a the line occurs where the seen input is a
+valid XQuery expression, then that expression will be treated as
+a complete expression.  (However, when parsing a file the entire
+file is parsed.)
+<pre>
+$ java -jar kawa-1.6.98.jar --xquery
+xquery[1]: for $x in (3,4,5) return &lt;a&gt;{$x}&lt;/a&gt;
+&lt;a&gt;3&lt;/a&gt;&lt;a&gt;4&lt;/a&gt;&lt;a&gt;5&lt;/a&gt;
+xquery[2]: string-value(&lt;a&gt;3+5 is {3+5}&lt;/a&gt;)
+ 3+5 is 8
+xquery[3]:
+</pre>
+<p>
+You can also compile an XQuery program to a Java application:
+<pre>
+$ java -jar kawa-1.6.98.jar --xquery --main -C prog.xql
+$ java -cp .:kawa-1.6.98.jar prog
+</pre>
+
+<h2>Generating and Running Servlets</h2>
+<p>
+You can compile an XQuery program to a Servlet, as described
+<a href="servlet.html">here</a>.  The servlet can be run
+in a servlet-aware web server, or as a CGI script.
+
+<h2>License</h2>
+<p>Kawa-XQuery is available under the
+<a href="http://www.gnu.org/software/kawa/License.html">Kawa licence</a>,
+which is the GNU General Public License with some extra options.
+
+<h2>Status</h2>
+
+<p>Some things work; many things don't.
+For example many of standard XQuery functions have not been implemented yet.
+Those that are implemented may only work on simple values of the expected type.
+Implemented features include some simple expressions;
+element content (element "literals" like <code>&lt;a&gt;...&lt;/a&gt;</code>);
+FLWR expressions (<code>let</code> and <code>for</code> forms).
+Many complex 'for'- and other expressions now generate inlined code.
+<p>
+In this table "Ok" means that the feature works in both the
+released (source and jar) versions listed above, and also in CVS;
+"Ok, in CVS" means the feature/fix is so recent it is only
+available in the CVS version.
+<p>
+<table border>
+<thead><th><strong>Feature</strong></th>
+  <th><strong>Implementation status</strong></th>
+  </thead>
+<tr><td>numeric literal</td><td>Ok</td></tr>
+<tr><td>string literal</td><td>Ok</td></tr>
+<tr><td><code>{--</code> comment <code>--}</code></td><td>Ok</td></tr>
+<tr><td><code>and</code></td><td>Ok</td></tr>
+<tr><td><code>or</code></td><td>Ok, in CVS</td></tr>
+<tr><td><code>+</code></td><td>Ok</td></tr>
+<tr><td>binary <code>-</code></td><td>Ok</td></tr>
+<tr><td>unary <code>-</code></td><td>Missing</td></tr>
+<tr><td><code>*</code></td><td>Ok</td></tr>
+<tr><td><code>div</code></td><td><code>6 div 4</code> yields <code>3/2</code></td></tr>
+<tr><td><code>mod</code></td><td>Ok</td></tr>
+<tr><td><code>=</code></td><td>Ok</td></tr>
+<tr><td><code>!=</code></td><td>Ok</td></tr>
+<tr><td><code>&lt;</code></td><td>Ok</td></tr>
+<tr><td><code>&gt;</code></td><td>Ok</td></tr>
+<tr><td><code>&lt;=</code></td><td>Ok</td></tr>
+<tr><td><code>&gt;=</code></td><td>Ok</td></tr>
+<tr><td><code>==</code></td><td>Missing</td></tr>
+<tr><td><code>!==</code></td><td>Missing</td></tr>
+<tr><td>nodes<code>/</code>element-name</td><td>Ok</td></tr>
+<tr><td>nodes<code>//</code>element-name</td><td>Ok</td></tr>
+<tr><td>nodes<code>//</code>element-name<code>[</code>predicate<code>]</code></td><td>Ok, in CVS</td></tr>
+<tr><td>nodes<code>/*</code></td><td>Ok</td></tr>
+<tr><td>nodes<code>/@</code>attribute-name</td><td>Ok</td></tr>
+<tr><td>nodes<code>/@*</code></td><td>Ok</td></tr>
+<tr><td>nodes<code>/</code>expression</td><td>Ok</td></tr>
+<tr><td><code>node()</code></td><td>Ok, in CVS</td></tr>
+<tr><td><code>text()</code></td><td>Ok, in CVS</td></tr>
+<tr><td>values<code>[</code>index<code>]</code></td><td>Ok</td></tr>
+<tr><td>values<code>[</code>low-index <code>to</code> high-index<code>]</code></td><td>Ok</td></tr>
+<tr><td>values<code>[</code>boolean<code>]</code></td><td>Ok</td></tr>
+<tr><td>element-name <i>(not following a '/')</i></td><td>Ok</td></tr>
+<tr><td><code>@</code>attribute-name <i>(not following a '/')</i></td><td>Ok</td></tr>
+<tr><td><code>instanceof</code></td><td>Ok, but DataType limited</td></tr>
+<tr><td><code>instanceof only</code></td><td>Missing</td></tr>
+<tr><td><code>cast as</code></td><td>Missing</td></tr>
+<tr><td><code>treat as</code></td><td>Missing</td></tr>
+<tr><td><code>for</code></td><td>Ok</td></tr>
+<tr><td><code>let</code></td><td>Ok</td></tr>
+<tr><td><code>if</code></td><td>Ok</td></tr>
+<tr><td><code>to</code></td><td>Ok</td></tr>
+<tr><td><code>sortby</code></td><td>Missing</td></tr>
+<tr><td><code>typeswitch</code></td><td>OK</td></tr>
+<tr><td><code>element</code> type</td><td>OK</td></tr>
+<tr><td><code>,</code>(sequence concatenate)</td><td>Ok</td></tr>
+<tr><td><code>document</code> function</td><td>Ok</td></tr>
+<tr><td><code>children</code> function</td><td>Ok</td></tr>
+<tr><td><code>attributes</code> function</td><td>Ok</td></tr>
+<tr><td><code>empty</code> function</td><td>Ok</td></tr>
+<tr><td><code>false</code> function</td><td>Ok</td></tr>
+<tr><td><code>true</code> function</td><td>Ok</td></tr>
+<tr><td><code>number</code> function</td><td>Ok</td></tr>
+<tr><td><code>string</code> function</td><td>Ok</td></tr>
+<tr><td><code>string-value</code> function</td><td>Ok</td></tr>
+<tr><td><code>item-at</code> function</td><td>Ok</td></tr>
+<tr><td><code>sublist</code> function</td><td>Ok</td></tr>
+<tr><td><code>sublist</code> function</td><td>Ok</td></tr>
+<tr><td><code>count</code> function</td><td>Ok</td></tr>
+<tr><td><code>min</code> function</td><td>Ok, in CVS</td></tr>
+<tr><td><code>max</code> function</td><td>Ok, in CVS</td></tr>
+<tr><td><code>sum</code> function</td><td>Ok, in CVS</td></tr>
+<tr><td><code>avg</code> function</td><td>Ok, in CVS</td></tr>
+<tr><td><code>position</code> function</td><td>Ok, in CVS</td></tr>
+<tr><td><code>write-to</code> extension function</td><td>Ok</td></tr>
+<tr><td>element constructors</td><td>Ok</td></tr>
+<tr><td>function call</td><td>Ok</td></tr>
+<tr><td>function definition</td><td>Ok, except parameter and return type specification</td></tr>
+<tr><td><code>namespace</code> definition</td><td>Ok</td></tr>
+<tr><td><code>default namespace</code> definition</td><td>Ok</td></tr>
+</table>
+
+    <hr>
+    <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
+<!-- Created: Sat Aug 18 14:08:13 PDT 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Apr 19 18:57:14 PDT 2002
+<!-- hhmts end -->
+  </body>
+</html>

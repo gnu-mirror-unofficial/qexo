@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Compiling XQuery to a Servlet</title>
+  </head>
+
+  <body>
+    <h1>Compiling XQuery to a Servlet</h1>
+
+<p>
+You can compile a <a href="../xquery/index.html">Kawa-XQuery</a>
+program to a Servlet.
+This makes it easy to have them be executed by a web server.</p>
+
+<h2>How to write and compile an XQuery servlet</h2>
+<p>Suppose the file <code>hello.xql</code> contains an XQuery "program".
+(Below we show an example of what you can do with Kawa-XQuery servlets.)
+You compile  <code>hello.xql</code> to servlet using the following command.</p>
+<pre>
+$KAWA --xquery --servlet -C hello.xql
+</pre>
+Here <code>$KAWA</code> is how you invoke the Kawa application.
+For example if you use <code>kawa-1.6.97.jar</code>, you can do:
+<pre>
+java -jar kawa-1.6.97.jar --xquery --servlet -C hello.xql
+</pre>
+<p>The <code>-C</code> flag tells Kawa to compile the following source
+files.  The <code>--xquery</code> flags tells Kawa that the source files are
+in the XQuery language.  (The default language is Scheme.)  The
+<code>--servlet</code> tells Kawa to generate a servlet.</p>
+
+<p>The result of the compilation is usually a single class file
+<code>hello.class</code> that implements
+<code>javax.servlet.http.HttpServlet</code>.
+Sometimes Kawa will need to generate some extra helper classes;
+these will all have the form <code>hello$XXX.class</code>.
+To copy or install all the generated classes you should
+type <code>hello*.class</code>.</p>
+
+<h2>Installing and running your servlet under Tomcat</h2>
+<p>There are a number of Web servers that can run servlets,
+and most of them have various fancy ways of creating "web applications".
+Here are some simple instructions for running your servlet
+under Tomcat.
+<a href="http://jakarta.apache.org/tomcat/">Tomcat</a> is a web server
+written in Java and released by the Apache Foundation's Jakarta project.
+The instructions here assume version 4.0 of Tomcat,
+and that <code>$CATALINA_HOME</code> is where Tomcat is installed.</p>
+<p>
+You first need to install the Kawa jar file
+<code>kawa-1.6.97.jar</code> somewhere where Tomcat can find it.
+For example install it in <code>$CATALINA_HOME/lib/kawa-1.6.97.jar</code>.</p>
+<p>
+You next need to install your servlet.
+In Tomcat (and the Servlet specification) a servlet is part of a
+"web application".  If you call your application <code>myutils</code>,
+you need to create directories <code>$CATALINA_HOME/webapps/myutils</code>,
+<code>$CATALINA_HOME/webapps/myutils/WEB-INF</code>, and
+<code>$CATALINA_HOME/webapps/myutils/WEB-INF/classes</code>.
+You then copy your servlet class files  <code>hello*.class</code>
+into the latter directory.
+<p>
+After you have started up Tomcat, it by default listens to port 8080.
+To try out your servlet, point a browser to the URL
+<code>http://localhost:8080/myutils/servlet/hello</code>.
+<p>
+See the <a href="http://jakarta.apache.org/tomcat/tomcat-4.0-doc/">Tomcat
+documentation</a> for how you can customize
+how Tomcat maps URLs to servlets and how they are executed.</p>
+
+<h2>More information</h2>
+
+The <a href="http://www.gnu.org/software/kawa/">Kawa manual</a> has
+more information.  Though it concentrates on writing Scheme programs,
+much of it also applies to XQuery programs.
+For example Kawa includes a <code>cgi-wrapper</code> program that lets you
+<a href="http://www.gnu.org/software/kawa/CGI-scripts.html">run servlets
+as if they were CGI scripts</a>.
+There are also useful functions for getting
+<a href="http://www.gnu.org/software/kawa/HTTP-requests.html">HTTP request
+information</a>,
+setting <a href="http://www.gnu.org/software/kawa/HTTP-response.html">HTTP
+response headers</a>,
+and the <code>unescaped-data</code> function for raw HTMP/XML output..
+
+<h2>An example servlet explained</h2>
+<p>This example generates a response listing some of the properties
+of the request.  An explanation follows.</p>
+<pre>
+define function invoke-row ($field,$style) {
+  &lt;tr&gt;&lt;td&gt;{$field}&lt;/td&gt;&lt;td&gt;&lt;{$style}&gt;{invoke($request,$field)}&lt;/&gt;&lt;/td&gt;&lt;/tr&gt;}
+
+define function do-invoke ($field,$style) {
+  invoke-row($field,$style),"
+" }
+
+&lt;p&gt;Hello, the request was {$request}.
+The response was {$response}.&lt;/p&gt;,
+&lt;pre&gt;The request URI was (using path) {$request/requestURI}.
+The request method (using path) was {$request/method}.
+The path-info (using path) was {$request/pathInfo}&lt;/pre&gt;,
+&lt;table&gt;
+&lt;tr&gt;&lt;th&gt;Field name (using invoke)&lt;/th&gt;&lt;th&gt;field value&lt;/th&gt;&lt;/tr&gt;
+{do-invoke("getRequestURI","strong"),
+do-invoke("getContentType","code"),
+do-invoke("getProtocol","u"),
+do-invoke("getRemoteAddr","code"),
+do-invoke("getRemoteHost","code"),
+do-invoke("getScheme","code"),
+do-invoke("getServerName","code"),
+do-invoke("getServerPort","code"),
+do-invoke("getAuthType","code"),
+do-invoke("getMethod","code"),
+do-invoke("getPathInfo","code"),
+do-invoke("getPathTranslated","code"),
+do-invoke("getQueryString","code"),
+do-invoke("getRemoteUser","code"),
+do-invoke("getRequestURI","code"),
+do-invoke("getServletPath","code")
+}&lt;/table&gt;
+</pre>
+<p>
+This program illustrates how you can use the prefined variables
+<code>$request</code> and <code>$response</code>.  The former is
+the most useful, as it contains the information that the browser
+sent to the servlet.  The <code>$response</code> variable has more
+exotic uses for controlling the response.
+Both variables are passed to the servlet by the servlet engine,
+and have the types <code>javax.servlet.http.HttpRequest</code>
+and <code>javax.servlet.http.HttpResponse</code> respectively.</p>
+<p>
+The program first defines the function <code>invoke-row</code>, which takes
+two parameters, in addition to the implicit <code>$request</code> parameter.
+The body of the function is an "element constructor expression"
+which contructs a table row (<code>&lt;tr&gt;</code>) element.
+This looks like plain HTML (actually XML), but you can nest arbitrary
+expressions in them using curly braces to "escape" nested expressions.
+The <code>$field</code> parameter is a string that names a 0-argument
+Java method of the <code>$request</code> object.
+The built-in Kawa method <code>invoke</code> takes an object, a
+Java method name, and optionally some methods args.  It calls the named
+method with the given arguments.
+The result from <code>invoke</code> is wrapped in an HTML style
+tag that is specified by the <code>$style</code> parameter.
+The result is made into a table row.</p>
+<p>
+The <code>do-invoke</code> function is just a simple wrapper that calls
+<code>invoke-row</code>.  It then appends a newline using the
+comma operator, which concatenates the operands to create a sequence.
+In this case the result is a sequence with two values:
+a <code>&lt;tr&gt;</code> element node, and a newline string.
+This effecticely adds a newline in the HTML after the
+<code>&lt;tr&gt;</code> element, which makes the HTML more readable.
+The other reason for adding the <code>do-invoke</code> function
+is to illustrate how you can pass complex values around, with the
+result of one function being "pasted" into the result of another.
+Note that the Kawa implementation does not actually do any
+copying in this case; the elements are written directly into the
+servlet result buffer.
+<p>
+The main body of the function is two "element constructor expressions",
+the <code>pre</code> and the <code>table</code> constuctors,
+which again are concatenated using the comma operator, resuling in
+a sequence consisting of two elements.
+<p>
+The <code>pre</code> element contaisn the nested
+expression <code>$request/requestURI</code>.  This is a convenience
+feature of Kawa-XQuery.  It means to extract the <code>requestURI</code>
+"property" of the <code>$request</code> object.
+A property name like <code>"requestURI"</code> is mapped into a
+method name <code>"getRequestURI"</code>, and basically the
+expression <code>$request/requestURI</code> is equivalent to
+<code>invoke(request, "getRequestURI")</code>.
+<p>
+The final part of the program just makes a lot of calls to
+<code>do-invoke</code> to build a big <code>&lt;table&gt;</code>.
+<p>
+The Kawa servlet wrapper automatically wraps the entire result
+in a <code>&lt;html&gt;...&lt;/html&gt;</code> wrapper.
+<p>
+You can see a <a href="hello-out.html">sample of the generated output</a>,
+using the URL <code>http://localhost:8080/myutils/servlet/hello/mypath</code>.
+    <hr>
+    <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
+<!-- Created: Sun Nov 25 13:24:52 PST 2001 -->
+<!-- hhmts start -->
+Last modified: Sun Feb 17 23:19:52 PST 2002
+<!-- hhmts end -->
+  </body>
+</html>
