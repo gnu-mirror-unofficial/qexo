@@ -11,9 +11,9 @@ JAVAC=${JAVAC-javac}
 if test -z "$JAVA_HOME"
 then
   java_bindir=$(dirname $(type -p java))
-  case "$java_bindir"
-  */bin) JAVA_HOME=$(echo $java_bindir|sed sed 's|/bin$||')
-  *) JAVA_HOME=/opt/JavaHome
+  case "$java_bindir" in
+  */bin) JAVA_HOME=$(echo $java_bindir|sed -e 's|/bin$||') ;;
+  *) JAVA_HOME=/opt/JavaHome ;;
   esac
 fi
 PATH=$JAVA_HOME/bin:$PATH
