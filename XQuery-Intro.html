@@ -33,7 +33,8 @@ So the following:</p>
 3+4
 </pre>
 <p>
-is a complete and valid XQuery that evaluates to the integer <code>7</code>
+is a complete and valid XQuery program that evaluates to
+the integer <code>7</code>
 <p>
 There are no side-effects or updates in the XQuery standard,
 though those will probably be added at a future date.
@@ -105,7 +106,7 @@ The most convenient way to do that is to use an
 <dfn>element constructor</dfn> expression,
 which looks just like regular XML data:
 <pre>
-&lt;p&gt;See &lt;a href="index.html"&lt;i&gt;here&lt;/i&gt;&lt;/a&gt; for info.&lt;/p&gt;
+&lt;p&gt;See &lt;a href="index.html"&gt;&lt;i&gt;here&lt;/i&gt;&lt;/a&gt; for info.&lt;/p&gt;
 </pre>
 You can use <code>{</code><dfn>curly braces</dfn><code>}</code>
 to embed XQuery expression inside element constructors:
@@ -120,7 +121,7 @@ creates:
 </pre>
 <p>
 Popular <dfn>template processors</dfn> such as JSP, ASP, and PHP allow
-you to embed expression is a programming language into HTML content.
+you to embed expressions in a programming language into HTML content.
 XQuery gives you that ability, plus
 the ability to embed XML/HTML forms inside expressions,
 and to have them be the value of variables and parameters.
@@ -206,7 +207,7 @@ $book//para[@class="warning"]
 The double slash is a convenience syntax to select all
 descendants (rather than just children) of <code>$book</code>,
 selecting only <code>&lt;para&gt;</code> element nodes
-that have an attribute code named <code>class</code> whose
+that have an attribute node named <code>class</code> whose
 value is <code>"warning"</code>
 <p>
 One difference to note between XPath and XQuery is that XPath
@@ -249,7 +250,7 @@ So the example evaluates to this 6-element sequence:
 Here is a more useful example.
 Assume again that <code>mybook.xml</code>
 is a <code>&lt;book&gt;</code> that contains
-some <code>&lt;chapter&gt;</code>.elements.
+some <code>&lt;chapter&gt;</code> elements.
 Each <code>&lt;chapter&gt;</code> has a <code>&lt;title&gt;</code>.
 The following will create a simple web page that just lists the titles:
 <pre>
@@ -318,7 +319,7 @@ define function descendant-or-self ($x)
 }
 descendant-or-self(&lt;a&gt;X&lt;b&gt;Y&lt;/b&gt;&lt;/a&gt;)
 </pre>
-evaluates to this sequence of length 4::
+evaluates to this sequence of length 4:
 <pre>
 &lt;a&gt;X&lt;b&gt;Y&lt;/b&gt;&lt;/a&gt;; "X"; &lt;b&gt;Y&lt;/b&gt;; "Y"
 </pre>
@@ -386,34 +387,39 @@ define function process-children($x) {
 <h2>Resources</h2>
 <p>
 The primary XQuery resource is
-<a href="http://www.w3.org/XML/Query">http://www.w3.org/XML/Query</a>
+<a href="http://www.w3.org/XML/Query">www.w3.org/XML/Query</a>
 at the World Wide Web Consortium.
 This has links to the draft standards, mailing lists, and implementations.
 The main documents are:
 <ul>
 <li>
 The actual XQuery specification
-(<a href="http://www.w3.org/TR/xquery/">http://www.w3.org/TR/xquery/</a>)
+(<a href="http://www.w3.org/TR/xquery/">www.w3.org/TR/xquery/</a>)
 is not difficult to read, and is probably where you should go next.
 <li>
 The Data Model specification
-(<a href="http://www.w3.org/TR/query-datamodel/">http://www.w3.org/TR/query-datamodel/</a>)
+(<a href="http://www.w3.org/TR/query-datamodel/">www.w3.org/TR/query-datamodel/</a>)
 goes into nodes and the functions you can use to manipulate them.
 <li>
 The Functions and Operators specification
-(<a href="http://www.w3.org/TR/xquery-operators/">http://www.w3.org/TR/xquery-operators/</a>) defines the other (non-node) functions, including
+(<a href="http://www.w3.org/TR/xquery-operators/">www.w3.org/TR/xquery-operators/</a>) defines the other (non-node) functions, including
 string and date/time functions.
 <li>
 The Use Cases document
-(<a href="http://www.w3.org/TR/xmlquery-use-cases">http://www.w3.org/TR/xmlquery-use-cases</a>)
+(<a href="http://www.w3.org/TR/xmlquery-use-cases">www.w3.org/TR/xmlquery-use-cases</a>)
 contains lots of useful examples of XQuery programs
 to solve specific problems.
 <li>
 The Formal Semantics specification
-(<a href="http://www.w3.org/TR/query-semantics/">http://www.w3.org/TR/query-semantics/</a>)
+(<a href="http://www.w3.org/TR/query-semantics/">www.w3.org/TR/query-semantics/</a>)
 uses formal mathematical notation and is not for the faint of heart.
 Most people should skip it.
 </ul>
+<p>
+My article <cite>Generating XML and HTML using XQuery</cite>
+(<a href="XQ-Gen-XML.html">www.gnu.org/software/qexo/XQ-Gen-XML.html</a>)
+explains further how to generate XML documents and HTML web pages using XQuery.
+</p>
 <p>
 There aren't many books on XQuery yet, mainly because there are significant
 loose ends in the specification.
@@ -423,11 +429,11 @@ I am working with other authors on a book for Sams we hope will be ready
 soon after the standard is finalized.
 <p>
 Obviously, there is no complete standards-conforming implementations either,
-but XQuery site lists known implementations, some of which
+but the XQuery site lists known implementations, some of which
 have executable demos.
 The only open-source implementation currently available
 seems to be my own Qexo implementation
-- see <a href="http://www.gnu.org/software/qexo/">http://www.gnu.org/software/qexo/</a>.
+- see <a href="http://www.gnu.org/software/qexo/">www.gnu.org/software/qexo/</a>.
 (The Qexo implementation is interesting in that it compiles XQuery
 programs on-the-fly directly to Java bytecodes.)
 I welcome you to experiment with it. But in any case, I do recommend
@@ -437,7 +443,7 @@ tool for analyzing or generating XML.
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Thu May  2 11:02:20 PDT 2002 -->
 <!-- hhmts start -->
-Last modified: Thu May 16 12:16:04 PDT 2002
+Last modified: Tue May 28 16:19:01 PDT 2002
 <!-- hhmts end -->
   </body>
 </html>
