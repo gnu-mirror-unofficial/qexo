@@ -184,11 +184,39 @@ in a <code>&lt;html&gt;...&lt;/html&gt;</code> wrapper.
 <p>
 You can see a <a href="hello-out.html">sample of the generated output</a>,
 using the URL <code>http://localhost:8080/myutils/servlet/hello/mypath</code>.
+
+<h2 id="debugging">Development and Debugging</h2>
+<p>
+The <a href="Debugging.html">Qexo debugging page</a> has some general
+notes on Qexo error behaviour and debugging.
+Here are some notes specific to using servlets and
+<code>KawaPageServlet</code>.
+<p>
+If you request an <code>.xql</code> after editing it,
+<code>KawaPageServlet</code> will automatically re-compile it.
+This makes it easy to test out changes.
+If you make a syntax error, the result sent to the browser
+will contain the error messages from the compiler.
+<p>
+If a run-time errors causes an uncaught run-time exception, Tomcat will
+return to your browser a stack trace showing which methods were active when
+the exception was created.
+The methods that <code>KawaPageServlet</code> compiles
+from your XQuery program will be in that stack trace with
+(if you're lucky) <a href="debugging.html#run-time-exceptions">line numbers<a>
+referring to the lines in your XQuery program.
+You may have to dig through the stack trace, and ignore methods belonging
+to the Kawa or Tomcat run-time environment.  You may also have to
+look for the <i>root cause</i>.
+<p>
+Tomcat re-directs the standard error output
+to the file <code>$CATALINA_HOME/logs/catalina.out</code>.
+This includes data written using the standard <code>trace</code> function.
     <hr>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sun Nov 25 13:24:52 PST 2001 -->
 <!-- hhmts start -->
-Last modified: Sat Jun 14 11:54:17 PDT 2003
+Last modified: Mon Jun 16 22:13:09 PDT 2003
 <!-- hhmts end -->
   </body>
 </html>
