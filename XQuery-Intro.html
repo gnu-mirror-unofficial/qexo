@@ -1,0 +1,443 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>What is XQuery?</title>
+  </head>
+
+  <body>
+    <h1>What is XQuery?</h1>
+
+<h3>Per Bothner</h3>
+
+<p>
+The World Wide Web Consortium is working on finalizing
+the specification for XQuery, aiming for a final release mid/late 2002.
+XQuery is a powerful and convenient language
+that is designed for processing XML data.
+That means not just files in XML format, but also other data
+(including databases) whose structure (nested named trees with attributes) is
+similar to XML.
+XQuery is an interesting language with some unusual ideas.
+This article is intended to give you a hawk's-eye-view
+of XQuery, introducing the main ideas you should understand before you
+go deeper or actually try to use it!
+
+<h2>An expression language</h2>
+<p>
+The first thing to notice is that in XQuery everything is
+an expression that evaluates to a value.
+An XQuery program or script is a just an expression, together
+with optionally some function and other definitions.
+So the following:</p>
+<pre>
+3+4
+</pre>
+<p>
+is a complete and valid XQuery that evaluates to the integer <code>7</code>
+<p>
+There are no side-effects or updates in the XQuery standard,
+though those will probably be added at a future date.
+The standard specifies the <em>result value</em> of an
+expression or program, but it does not specify <em>how</em>
+it is to be evaluated.  Therefore an implementation has
+considerable freedom in how it evaluates an XQuery program,
+and what optimizations it does.</p>
+<p>Here is a conditional expression that evaluates to a string:
+<pre>
+if (3 &lt; 4) then "yes!" else "no!"
+</pre>
+<p>
+You can define local variable definitions using a <code>let</code>-expression:
+<pre>
+let $x := 5 let $y := 6 return 10*$x+$6
+</pre>
+This evaluates to 56.
+
+<h2>Primitive data types</h2>
+<p>
+The primitives data types in XQuery are the same as for XML Schema.
+<ul>
+<li>Numbers, including integers and floating-point numbers.
+<li>The boolean values true and false.
+<!--XQuery doesn't have boolean literals in the usual sense,
+but these function calls are used instead:
+<code>false()</code>, <code>true()</code>.-->
+<li>
+Strings of characters, for example: <code>"Hello world!"</code>.
+These are immutable - i.e. you cannot modify a character in a string.
+<li>
+Various types to represent dates, times, and durations.
+<li>
+A few XML-related types.  For example a <dfn>QName</dfn>
+is a pair of a local name (like <code>template</code>)
+and a URL, which is used to
+represent a tag name like <code>xsl:template</code> after it has
+been namespace-resolved.
+</ul>
+<dfn>Derived types</dfn> are variations or restrictions of
+other types, for example range types.
+Primitive types and the types derived from them are
+known as <dfn>atomic types</dfn>, because an atomic value does
+not contain other values.  Thus a string is considered atomic
+because XQuery does not have character values.
+
+<h2>Node values and expressions</h2>
+<p>
+XQuery of course also has the necessary data types needed to
+represent XML values.
+It does this using <dfn>node</dfn> values,
+of which there are 7 kinds:
+element, attribute, namespace, text, comment, processing-instruction,
+and document (root) nodes.
+These are very similar to the corresponding DOM classes
+such as <code>Node</code>, <code>Element</code> and so on.
+Some XQuery implementations use DOM objects to implement node values,
+though implementations may use other representations.
+<p>
+Various standard XQuery functions create or return nodes.
+For example the <code>document</code> function
+reads an XML file specified by a URL argument,
+and returns a document root node.
+(The root element is a child of the root node.)
+<p>
+You can also create new node objects directly in the program.
+The most convenient way to do that is to use an
+<dfn>element constructor</dfn> expression,
+which looks just like regular XML data:
+<pre>
+&lt;p&gt;See &lt;a href="index.html"&lt;i&gt;here&lt;/i&gt;&lt;/a&gt; for info.&lt;/p&gt;
+</pre>
+You can use <code>{</code><dfn>curly braces</dfn><code>}</code>
+to embed XQuery expression inside element constructors:
+<pre>
+let $i := 2 return
+let $r := &lt;em&gt;Value &lt;/em&gt; return
+  &lt;p&gt;{$r} of 10*{$i} is {10*$i}.&lt;/p&gt;
+</pre>
+creates:
+<pre>
+&lt;p&gt;&lt;em&gt;Value &lt;/em&gt; of 10*2 is 20.&lt;/p&gt;
+</pre>
+<p>
+Popular <dfn>template processors</dfn> such as JSP, ASP, and PHP allow
+you to embed expression is a programming language into HTML content.
+XQuery gives you that ability, plus
+the ability to embed XML/HTML forms inside expressions,
+and to have them be the value of variables and parameters.
+<p>
+XQuery node values are immutable (you cannot modify a node after
+it has been created).
+<!--, but they do have <dfn>identity</dfn>.
+The latter is the main difference between a text node
+and a primitive string value.-->
+
+<h2>Sequences</h2>
+<p>
+We've seen atomic values (numbers, strings, etc),
+and node values (elements, attributes, etc).
+These are together known as <dfn>simple values</dfn>.
+XQuery expressions actually evaluate to <dfn>sequences</dfn> of
+simple values.
+The comma operator can be used to concatenate
+two values or sequences.  For example:
+<pre>
+3,4,5
+</pre>
+is a sequence consisting of 3 integers.
+Note that a sequence containing just single value is the same as
+that value by itself, and you cannot nest sequences.
+To illustrate this, we'll use
+the <code>count</code> function, which takes one argument,
+and returns the number of values in that sequence.
+So this expression:
+</pre>
+<pre>
+let $a := 3,4
+let $b := ($a, $a)
+let $c := 99
+let $d := ()
+return (count($a), count($b), count($c), count($d))
+</pre>
+evaluates to <code>(2, 4, 1, 0)</code>, because
+<code>$b</code> is the same as <code>(3,4,3,4)</code>.
+<p>
+Many of the standard functions for working with nodes
+return sequences.  For example, the <code>children</code> function
+returns a sequence of the child nodes of the argument:
+<pre>
+children(&lt;p&gt;This is &lt;em&gt;very&lt;/em&gt; cool.&lt;/p&gt;)
+</pre>
+returns this sequence of 3 values:
+<pre>
+"This is ", &lt;em&gt;very&lt;/em&gt;, " cool."
+</pre>
+
+<h2>Path expressions and relationship to XPath</h2>
+<p>
+XQuery borrows <dfn>path expressions</dfn> from XPath.
+In fact, XQuery can be viewed as a generalization of XPath:
+Except for some obscure forms (mostly unusual "axis specifiers"),
+all XPath expressions are also XQuery expressions.
+For this reason the XPath specification is also being revised
+by the XQuery committee, with the plan that XQuery 1.0 and XPath 2.0
+will be released about the same time.</p>
+<p>
+The following simple example assumes an XML file <code>"mybook.xml"</code>
+whose root element is a <code>&lt;book&gt;</code>,
+and it contains some <code>&lt;chapter&gt;</code> children:
+<pre>
+let $book := document("mybook.xml")/book
+return $book/chapter
+</pre>
+<p>
+The <code>document</code> function returns the root node of a document.
+The <code>/book</code> expression selects the child elements of the root
+that are named <code>book</code>, so <code>$book</code> gets set to
+the single root element.
+The <code>$book/chapter</code> selects the child elements of the
+top-level <code>book</code> elements, which results in a sequence
+of the second-level <code>chapter</code> nodes, in <dfn>document order</dfn>.
+<p>
+The next element includes a <dfn>predicate</dfn>.
+<pre>
+$book//para[@class="warning"]
+</pre>
+<p>
+The double slash is a convenience syntax to select all
+descendants (rather than just children) of <code>$book</code>,
+selecting only <code>&lt;para&gt;</code> element nodes
+that have an attribute code named <code>class</code> whose
+value is <code>"warning"</code>
+<p>
+One difference to note between XPath and XQuery is that XPath
+expressions may return a <dfn>node set</dfn>, whereas the same
+XQuery expression will return a node sequence.  For compatibility,
+these sequences will be in <dfn>document order</dfn> and with
+duplicates removed, which makes them equivalent to sets,
+<p>
+By the way:  XPath expressions are mostly used as patterns
+in XSLT <dfn>stylesheets</dfn>.  XSLT (XSL Transformation,
+where XSL stands for XML Stylesheet Language) is a rule-based
+language for transforming an input XML document into a result
+XML document.
+XSLT is very useful for expressing very simple transformations,
+but more complicated stylesheets (especially anything with
+non-trivial logic or programming) can often be written more
+compactly and readably using XQuery.
+
+<h2>Iterating over sequences</h2>
+<p>
+A <code>for</code> expression lets you "loop" over the
+elements of a sequence:
+<pre>
+for $x in (1 to 3) return $x,10+$x
+</pre>
+<p>
+The <code>for</code> expression first evaluates the
+expression following the <code>in</code>.
+Then for each value of the resulting sequence,
+the variable (in this case <code>$x</code>) is bound to the
+value, and the <code>return</code> expression evaluated
+using that variable binding.
+The value of the entire <code>for</code> expression is the
+concatenation of all values of the <code>return</code> expression, in order.
+So the example evaluates to this 6-element sequence:
+<pre>
+1,11,2,12,3,13
+</pre>
+<p>
+Here is a more useful example.
+Assume again that <code>mybook.xml</code>
+is a <code>&lt;book&gt;</code> that contains
+some <code>&lt;chapter&gt;</code>.elements.
+Each <code>&lt;chapter&gt;</code> has a <code>&lt;title&gt;</code>.
+The following will create a simple web page that just lists the titles:
+<pre>
+&lt;html&gt;{
+  let $book := document("mybook.xml")/book
+  for $ch in $book/chapter
+    return &lt;h2&gt;{$ch/title)&lt;/h2&gt;
+}&lt;/html&gt;
+</pre>
+<p>
+The term "FLWR expressions" includes both <code>for</code>
+and <code>let</code> expressions.  The acronym FLWR refers to
+the fact that it consists of one or more <code><u>f</u>or</code>
+and/or <code><u>l</u>et</code> clauses,
+an optional <code><u>w</u>here</code> clause,
+and a <code><u>r</u>esult</code> clause.
+A <code>where</code> clause causes the <code>result</code>
+clause to be evaluated only when the <codewhere</code>
+where expression is true.
+<p>
+Below is an example illustrating the <code>where</code>
+clause.  This example has a nested loop, allowing us to combine
+two sequences, one of customer elements , and the other of order elements.
+We want to find the name(s) of customers who have ordered
+the part whose <code>part_id</code> is <code>"xx"</code>.
+<pre>
+for $c in customers
+for $o in orders
+where $c.cust_id=$o.cust_id and $o.part_id="xx"
+return $c.name
+</pre>
+<p>
+<p>
+This is essentially a <dfn>join</dfn> of two <dfn>tables</dfn>,
+as commonly performed using relational databases.
+An important goal for XQuery is that it should be
+usable as a query language for "XML databases".
+Compare the corresponding SQL statement:
+<pre>
+select customers.name
+from customers, orders
+where customers.cust_id=orders.cust_id
+  and orders.part_id="xx"
+</pre>
+
+<h2>Functions</h2>
+<p>
+XQuery wouldn't be much of a programming language without
+user-defined functions.  Such function definitions appear
+in the <dfn>query prologue</dfn> of an XQuery program.
+It is worth noting that that function parameters and
+function results can be primitive values, nodes, or sequences of either.
+<p>
+Below we define a recursive utility function.
+It returns all the descendant nodes of the argument,
+including the argument node itself.
+It does a depth-first traversal of the argument,
+returning the argument, and then looping over the argument node's
+children, recursively calling itself for each child.
+<pre>
+define function descendant-or-self ($x)
+{
+  $x,
+  for $y in children($x)
+    return descendant-or-self($y)
+}
+descendant-or-self(&lt;a&gt;X&lt;b&gt;Y&lt;/b&gt;&lt;/a&gt;)
+</pre>
+evaluates to this sequence of length 4::
+<pre>
+&lt;a&gt;X&lt;b&gt;Y&lt;/b&gt;&lt;/a&gt;; "X"; &lt;b&gt;Y&lt;/b&gt;; "Y"
+</pre>
+
+<h2>Sorting and context</h2>
+<p>
+If you want to sort a sequence you can use a <code>sortby</code>
+expression. For example to sort a sequence of books
+in order of author name you can do:
+<pre>
+$books sortby (author/name)
+</pre>
+<p>
+The <code>sortby</code> takes an input sequence (in this
+case <code>$books</code>) and one or more <dfn>ordering expressions</dfn>.
+During sorting the implementation needs to compare two values
+from the input sequence to determinate which comes first.
+It does that by evaluating the ordering expression(s) in the
+<dfn>context</dfn> of a value from the input sequence.
+So the path expression <code>author/name</code> is evaluated
+many times, each time relative to a different book as
+the <dfn>context (or current) item</dfn>.
+<p>
+Path expressions also use and set the context.
+For example in <code>author/name</code> the <code>name</code>
+children that are returned are those of the context item,
+which is an <code>author</code> item.
+
+<h2>Type specification</h2>
+<p>
+XQuery is a strongly typed programming language.
+Like Java, C#, and other languages, it is a mix
+of static typing (type consistency checked at compile-time)
+and dynamic typing (run-time type tests).
+However, the types in XQuery are different from the classes
+familiar from object-oriented programming.
+Instead, it has types to match XQuery's data model,
+and allows you to import types form XML Schema.
+<pre>
+if ($child instance of element section)
+then process-section($child)
+else ( ) {--nothing--}
+</pre>
+<p>
+This invokes the <code>process-section</code> function
+if the value of <code>$child</code> is an element whose
+tag name is <code>section</code>.
+XQuery has a convenient <code>typeswitch</code>
+shorthand for matching a value against a number of types.
+Here is an example to convert a set of tag names to
+a different set.  It is a simple example of the kind of transformations
+that XSLT does well.
+<pre>
+define function convert($x) {
+  typeswitch ($x)
+    case element para return &lt;p&gt;{process-children($x)}&lt;/p&gt;
+    case element emph  return &lt;em&gt;{process-children($x)}&lt;/em&gt;
+    default return process-children($x)
+}
+define function process-children($x) {
+  for $ch in children($x) return convert($ch)
+}
+</pre>
+
+<h2>Resources</h2>
+<p>
+The primary XQuery resource is
+<a href="http://www.w3.org/XML/Query">http://www.w3.org/XML/Query</a>
+at the World Wide Web Consortium.
+This has links to the draft standards, mailing lists, and implementations.
+The main documents are:
+<ul>
+<li>
+The actual XQuery specification
+(<a href="http://www.w3.org/TR/xquery/">http://www.w3.org/TR/xquery/</a>)
+is not difficult to read, and is probably where you should go next.
+<li>
+The Data Model specification
+(<a href="http://www.w3.org/TR/query-datamodel/">http://www.w3.org/TR/query-datamodel/</a>)
+goes into nodes and the functions you can use to manipulate them.
+<li>
+The Functions and Operators specification
+(<a href="http://www.w3.org/TR/xquery-operators/">http://www.w3.org/TR/xquery-operators/</a>) defines the other (non-node) functions, including
+string and date/time functions.
+<li>
+The Use Cases document
+(<a href="http://www.w3.org/TR/xmlquery-use-cases">http://www.w3.org/TR/xmlquery-use-cases</a>)
+contains lots of useful examples of XQuery programs
+to solve specific problems.
+<li>
+The Formal Semantics specification
+(<a href="http://www.w3.org/TR/query-semantics/">http://www.w3.org/TR/query-semantics/</a>)
+uses formal mathematical notation and is not for the faint of heart.
+Most people should skip it.
+</ul>
+<p>
+There aren't many books on XQuery yet, mainly because there are significant
+loose ends in the specification.
+At the time of writing, there is one book:
+<cite>Early Adopter XQuery</cite> from Wrox.
+I am working with other authors on a book for Sams we hope will be ready
+soon after the standard is finalized.
+<p>
+Obviously, there is no complete standards-conforming implementations either,
+but XQuery site lists known implementations, some of which
+have executable demos.
+The only open-source implementation currently available
+seems to be my own Qexo implementation
+- see <a href="http://www.gnu.org/software/qexo/">http://www.gnu.org/software/qexo/</a>.
+(The Qexo implementation is interesting in that it compiles XQuery
+programs on-the-fly directly to Java bytecodes.)
+I welcome you to experiment with it. But in any case, I do recommend
+considering XQuery when you need a powerful and convenient
+tool for analyzing or generating XML.
+    <hr>
+    <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
+<!-- Created: Thu May  2 11:02:20 PDT 2002 -->
+<!-- hhmts start -->
+Last modified: Mon May  6 10:52:40 PDT 2002
+<!-- hhmts end -->
+  </body>
+</html>
