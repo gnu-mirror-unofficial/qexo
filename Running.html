@@ -1,0 +1,562 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Running Qexo</title>
+  </head>
+
+  <body>
+<h1>Qexo - an XQuery-to-Java compiler</h1>
+<p>
+Qexo runs on the Java<sup>TM</sup> platform.
+It is written in Java, and it compiles XQuery expressios and programs
+Java bytecodes (<code>.class</code> files).
+Qexo is Free Software (or open-source, if you prefer), available from
+the <a href="http://www.gnu.org/software/qexo/">Qexo website</a>.</p>
+<p>
+Qexo is based and an part of the
+<a href="http://www.gnu.org/software/kawa/">Kawa framework</a>.
+Kawa (no relation to the now-defunct IDE of the same name)
+was originally written in 1996 at Cygnus Solutions (now part of Red Hat)
+to compile the Scheme functional programming language to Java bytecodes.
+Since then Kawa has been generalized to handle other programming
+languages, including now XQuery.</p>
+<p>
+Kawa depends on a Java feature called a <code>ClassLoader</code>,
+which can take bytecode representation of a Java program
+(same format as a <code>.class</code> file, but stored in an
+array in memeory), and convert that into a runnable class in
+an existing Java exectable (or "virtual machine").  The same
+mechanism is use when a browser down-loads and runs an "applet".</p>
+<p>
+Compiling the bytecodes and then using a <code>ClassLoader</code>
+gives Qexo the best of both fast interactive responsiveness,
+and fast execution of repetitive code.  You can also save
+compiled code in a <code>.class</code> file so it available for
+future use, and it can even be compiled to machine code
+using a Java-to-machine-code compiler such
+as <a href="http://gcc.gnu.org/java/">GCJ</a>.</p>
+<p>
+The Qexo web site gives instructions for how you can get Qexo.
+The easiest way is to down-load the latest version of the Kawa
+<code>jar</code> file, for example <code>kawa-1.7.jar</code>,
+and put it in your class path.</p>
+
+<h1>Running Qexo</h1>
+
+<h2>Running the Qexo application</h2>
+<p>
+In the following, we write <code>qexo</code> to means
+the command you use to start up Qexo.  There are a number of
+ways you can actually run Qexo.
+If you have downloaded Kawa as a <code>jar</code> file
+(for example <code>kawa-1.7.jar</code>), you can start up
+Qexo using the command <code>java -cp kawa-1.7.jar --xquery</code>,
+using you have the <code>jar</code> command in your <code>PATH</code>.
+On a Unix of GNU/Linux system, you can make an alias like the following,
+We assume <code>$ </code> is the propt for you command-line
+processor (shell or console).
+<pre>
+$ <b>alias qexo='java -cp kawa.jar --xquery'</b>
+</pre>
+<p>
+<p>On Windows systems you can create a batch file <i>(test this)</i).</p>
+
+<h2>Interactive use</h2>
+
+<p>
+If you start up Qexo without specifying any file parameters,
+it will entern an inteactive loop.  Here are some examples,
+with user input shown in <b>bold</b>.
+
+<pre>
+$ <b>qexo</b>
+{-- 1--} <b>for $i in 1 to 3 return 10*$i</b>
+10 20 30
+</pre>
+
+<p>The command line prompt includes the current input line number,
+and the form of an XQuery comment, to make it easier to cut
+and paste.  Following the prompt type some complete XQuery expression,
+in the example <code>for $i in 1 to 3 return 10*$i</code>.
+and hit <key>Enter</key> (or <key>Return</key> on some keyboards).
+The Qexo processor evaluates the expression, and writes out the result,
+in this case a sequence of 4 integers.</p>
+
+<p>How does Qexo know when an expression is "complete"?  I.e. when
+should it evaluate what it has, as opposed to prompting for more input?
+The rule is that if current input line forms a complete valid expression,
+it evaluates it.  if It has seen a syntax error, it prints out a
+message and discards the input.  Otherwise, it print a prompt, and waits
+for more input.</p>
+
+<p>
+Let us continue, this time with some multi-line expression:</p>
+<pre>
+{-- 2--} <b>(3+</b>
+{--(3--} <b>10)</b>
+13
+{-- 4--} <b>if (3&lt;2)</b>
+{--i5--} <b>then "it's true"</b>
+{--i6--} <b>else "it's false"</b>
+it's false
+</pre>
+
+<p>Notice how the prompt changes to <code>'('</code> or an <code>'i'</code>
+to indicate that we're inside an incomplete parenthetical
+or <code>if</code> expression, respectively.</p>
+
+<p>Next some examples of syntax errors.</p>
+
+<pre>
+{-- 7--} <b>(for $x := 10 return $x</b>
+&lt;stdin&gt;:7:9: missing 'in' in 'for' clause
+{-- 8--} <b>%+1</b>
+&lt;stdin&gt;:8:1: invalid character '%'
+{-- 9--} <b>= 5</b>
+&lt;stdin&gt;:9:1: missing expression
+</pre>
+
+<p>Qexo prints out the "file name" of the error
+(in this case the standard console input), followed by the
+line and column numbers.  For the last error, it couldn't be
+more specific than <code>missing expression</code>.</p>
+
+<pre>
+{-- 2--} <b>&lt;a&gt;</b>
+&lt;!--3--&gt;  <b>&lt;b&gt;{for $i in 1 to 3 return 10*$i}&lt;/b&gt;</b>
+&lt;!--4--&gt;<b>&lt;/a&gt;</b>
+&lt;a&gt;
+  &lt;b&gt;10 20 30lt;/b&gt;
+&lt;/a&gt;
+</pre>
+
+<pre>
+{-- 5--} <b>define function repeat ($count, $values) {</b>
+{--{6--}   </b>for $i in 1 to $count return $values</b>
+{--{7--} <b>}</b>
+{-- 8--} <b>"[", repeat(4, (1,2)), "]"</b>
+[1 2 1 2 1 2 1 2]
+{-- 9--}
+</pre>
+
+<h2>Running XQuery programs</h2>
+
+<p>
+The XQuery specification defines a <i>program</i>, as a collection
+of declarations followed by a top-level expression.
+The "nromal" of running a program is to put it in a file,
+and evaluate it.  You can use the <code>-f</code> command-line flag
+to specify the name of a file containing a program:</p>
+<pre>
+$ <b>qexo -f pictures.xql</b>
+</pre>
+<p>
+You can also specify a (short!) XQuery program on the command line
+following a <code>-e</code> flag:</p>
+<pre>
+$ <b>qexo -e '&lt;img src="file.png"&gt;&lt;/img&gt;'</b>
+&lt;img src="file.png" /&gt;
+</pre>
+</p>
+The by default prints the output using the XHTML style, which is
+XML in a style that most HTML browsers can handle.
+You can override the output format using an <code>--output-format</code>
+option.  For example you can specify HTML format:</p>
+<pre>
+$ <b>qexo --output-format html -e '&lt;img src="file.png"&gt;&lt;/img&gt;'</b>
+&lt;img src="file.png"&gt
+</pre>
+<p>
+You can even specify a format for Scheme programmers:</p>
+<pre>
+$ <b>qexo --output-format scheme -e '&lt;img src="file.png"&gt;&lt;/img&gt;'</b>
+(img src: file.png )
+</pre>
+
+<h2>Compiling an XQuery program to an application</h2>
+<p>
+If yuu have an application you'll be running repeatedly,
+it makes sense to compile, and save the compiled form for future use.
+If you run Qexo with the <code>-C</code> followed by one or more filenames,
+those files will be compiled, producing or more <code>.class</code> files.
+The <code>--main</code> option species that Qexo should generate
+a <code>main</code> method, creating an application that can be
+run by the <code>java</code> command.
+Assume <code>pictures.xql</code> is the name of a file
+containing an XQuery progra,
+<pre>
+$ <b>qexo --main -C pictures.xql</b>
+</pre>
+<p>
+This creates a file <code>pictures.class</code>.  (It may in rare cases
+create some other classes, that have the form <code>pictures*.class</code>.)
+You can run this as follows:
+<pre>
+$ <b>java pictures</b>
+</pre>
+<p>
+This should be the same as, but faster than, running:
+<pre>
+$ <b>qexo -f pictures.xql</b>
+</pre>
+
+<h2>Run XQuery Servlets in a Web Server</h2>
+<p>
+A <dfn>servlet</dfn> is a Java class that can loaded into a
+Web server to process and answer HTTP requests.  It is an
+efficient way to provide server-side computation, because
+the servlet can be loaded and allocated once, and then
+process thousands of requests.
+An XQuery program can by compiled by Qexo info a servlet.
+See <a href="http://www.gnu.org/software/qexo/servlet.html">here</a>
+and <a href="http://www.gnu.org/software/qexo/XQ-Gen-XML.html">chapter 12</a>
+for more information and examples of servlets using Qexo.</p>
+
+<h2>Calling Java methods from XQuery</h2>
+<p>
+A Qexo extension allows you to call an arbitary Java method
+in an XQuery expression, using XQuery function call notation.
+<p>
+The following example uses Drew Noakes'
+<a href="http://www.drewnoakes.com/code/exif/">EXIF extraction library</a>
+for extracting EXIF meta-data (time-stamps, focal-lensgth, etc)
+commonly produced by digital cameras.
+The code assume that <code>exifExtractor.jar</code> is in your class path.
+The code first declares a number of namespaces as aliases for Java classes.
+<pre>
+declare namespace exif-extractor = "class:com.drew.imaging.exif.ExifExtractor"
+declare namespace exif-loader = "class:com.drew.imaging.exif.ExifLoader"
+declare namespace ImageInfo = "class:com.drew.imaging.exif.ImageInfo"
+declare namespace File = "class:java.io.File"
+</pre>
+<p>
+Remember that a namespace defines a prefix alias for a URL literal,
+which can be any string, used as a unique name.
+Qexo uses the convention that a URL string with the <code>class:</code>
+refers to a Java class.  Specifically, it acts as if all Java methods
+are pre-bound to a QName whose local name is the method name,
+and whose namespace URI is <code>class:</code> followed by the
+fully-qualified Java class name.
+For example, if the Qexo processor sees a call to a function
+<code>exif-loader:getImageInfo</code>, with the namespaces as
+defined above, then it will translate that into a call to
+a method named <code>getImageInfo</code> in the class
+<code>com.drew.imaging.exif.ExifLoader</code>.
+(Thisis assume you haven't explicitly defined a function
+by that name!)
+If there is overloaded, Qexo uses to arguemnyt types to select a method.
+The method name <code>new</code> is treated created a new objects,
+as is using a <code>new</code> expression.
+<pre>
+define function get-image-info ($filename as xs:string)
+{
+&lt;pre&gt;{
+  let $info := exif-loader:getImageInfo(File:new($filename))
+  for $i in iterator-items(ImageInfo:getTagIterator($info)) return
+ ( "
+", ImageInfo:getTagName($i),": ", ImageInfo:getDescription($info, $i))
+}&lt;/pre&gt;
+}
+</pre>
+<p>
+The function takes a single parameter: <code>$filename</code>, which is the
+name of a JPEG image file as a string.
+</p>
+<p>
+For more information, see
+<a href="http://www.gnu.org/software/qexo/Extensions.html#Calling-Java-Methods">here</a>.
+
+<h2>Calling XQuery Expressions from Java</h2>
+<p>
+Often XQuery will be used as part of a larger Java application.
+In this section we will see how you can use Qexo
+to evaluate an XQuery expression in a Java program.
+The following statement creates an XQuery evaluation
+context, and assigns it to the variable named <code>xq</code>:</p>
+<pre>
+  XQuery xq = new XQuery();
+</pre>
+<p>
+You can then use the <code>eval</code> method to evaluate
+an XQuery expression, returning a Java <code>Object</code>:
+<pre>
+  Object result = xq.eval(expression);
+</pre>
+<p>
+The following application reads the strings on the command line,
+evaluates them as XQuery expressions, and prints the result.</p>
+<pre>
+import gnu.xquery.lang.XQuery;
+public class RunXQuery
+{
+  public static void main (String[] args) throws Throwable
+  {
+    XQuery xq = new XQuery();
+    for (int i = 0;  i < args.length;  i++)
+      {
+	String exp = args[i];
+	Object result = xq.eval(exp);
+	System.out.print(exp);
+	System.out.print(" =&gt; ");
+	System.out.println(result);
+      }
+  }
+}
+</pre>
+<p>
+You can use these commands to compile and run this application,
+assuming that <code>kawa.jar</code> is in your class path:</p>
+<pre>
+$ <b>javac -g RunXQuery.java</b>
+$ <b>java RunXQuery '3+4' 'for $i in 1 to 5 return $i+10' '&lt;a&gt;{3+4}&lt;/a&gt;'</b>
+3+4 =&gt; 7
+for $i in 1 to 5 return $i+10 =&gt; 11, 12, 13, 14, 15
+&lt;a&gt;{3+4}&lt;/a&gt; =&gt; &lt;a&gt;7&lt;/a&gt;
+</pre>
+<p>
+The <code>println</code> method calls the generic <code>toString</code>
+method, which is fine for quick-and-dirty output (such as for debugging),
+but isn't recommended for printing real data.
+One reason is that it requires allocate a temporary strings,
+which then has to get copied into the <code>PrintStream</code>'s
+output buffer, which is wasteful for large data structures.
+Another reason is that none of the output shows up in the output
+until it has all been converted, which can also hurt performance.
+(If the <code>toString</code> gets into a loop, which is quite possible
+for cyclic data structures, you just sit there waiting with no idea
+what is going on!)
+Another reason to avoid <code>toString</code> is that it doesn't
+provide any control over the output format, such as whether
+you want characters like <code>'&lt;'</code> escaped as
+<code>'&amp;lt;'</code>, or whether you want HTML-style or XML-style output,
+for example.  Formatting to a specific line width is also difficult.</p>
+<p>
+In Qexo you can instead send the output to a special <code>Consumer</code>,
+which is something you can send data to.  It's like a <code>Writer</code>
+(or a SAX2 <code>ContentHandler</code>),
+but it works with abstract data rather than characters.
+The <code>gnu.xml.XMLPrinter</code> class implements <code>Consumer</code>
+and extends <code>PrintWriter</code>, so you can use it as either.
+It writes out the received data in XML format, though there are options
+to produce HTML and other styles.
+Below is a revised version of <code>RunXQuery</code>
+that uses an <code>XMLPrinter</code>:
+</p>
+<pre>
+import gnu.xquery.lang.XQuery;
+import gnu.xml.XMLPrinter;
+public class RunXQuery
+{
+  public static void main (String[] args) throws Throwable
+  {
+    XQuery xq = new XQuery();
+    XMLPrinter pp = new XMLPrinter(System.out);
+    for (int i = 0;  i < args.length;  i++)
+      {
+	String exp = args[i];
+	System.out.print(exp);
+	System.out.print(" => ");
+	Object x = xq.eval(exp);
+	pp.writeObject(x);
+	pp.println();
+	pp.flush();
+      }
+  }
+}
+</pre>
+<p>
+Note the <code>flush</code> call to make sure that the output from
+the <code>XMLPrinter</code> is sent to the <code>System.out</code>
+before we write anything on it directly.
+This produces mostly the same output as before, except that
+sequence item are sperated by space instead of comma-space.
+(Also, XML quoting is handled correctly.)
+<pre>
+$ <b>java RunXQuery 'for $i in 1 to 5 return $i+10'</b>
+for $i in 1 to 5 return $i+10 =&gt; 11 12 13 14 15
+</pre>
+<p>
+This still isn't the best way to evaluate-and-print.
+It is more efficient to have the evaluator print directly to the output,
+rather than create an intermediate data structure.
+To do that we can pass the <code>XMLPrinter</code> directly
+to the <code>eval</code> call.</p>
+<pre>
+import gnu.xquery.lang.XQuery;
+import gnu.xml.XMLPrinter;
+public class RunXQuery
+{
+  public static void main (String[] args) throws Throwable
+  {
+    XQuery xq = new XQuery();
+    XMLPrinter pp = new XMLPrinter(System.out);
+    for (int i = 0;  i < args.length;  i++)
+      {
+	String exp = args[i];
+	System.out.print(exp);
+	System.out.print(" => ");
+	xq.eval(exp, pp);
+	pp.println();
+	pp.flush();
+      }
+  }
+}
+</pre>
+<p>
+The produced the same output as before.  Whether it is more efficient
+will depend on the xpression you evaluate (and how clever Qexo is).
+But for XQuery programs that generate large XML data sets it can
+make a large difference, and in general it's a good idea to pass
+the <code>Consumer</code> directly to the evaluator.</p>
+<p>
+If the XQuery program is in a file, rather than a <code>String</code>,
+you can use an <code>eval</code> method that takes a <code>Reader</code>.
+<pre>
+  xq.eval (new FileReader("file.xql"), new XMLPrinter(System.out));
+</pre>
+<p>
+You can also call Qexo functions that ahve been compiled
+to <code>.class</code> files, directly using Java method invocation.
+How to do so is a bit complicated and likely to change,
+so check <a href="http://www.gnu.org/software/qexo/Running.html">here</a>
+for a future updates,</p>
+
+<h2>Using Qexo with SAX2</h2>
+<p>
+The Simple API for XML (SAX) is a set of classes for "copying" XML data
+(infosets) using method calls, not necessarily doing any physical
+copying.  It is a propular API because it is an efficient way
+to process large datasets.  The <code>Consumer</code> interface
+is similar to the SAX2 <code>ContentHandler</code> interface.
+If you have a class that implements <code>ContentHandler</code>
+you can use a <code>ContentConsumer</code> filter to convert
+it to a <code>Consumer</code>.  The following code snippet shows how you
+can pass the result of evaluating an XQuery expresion to
+a <code>ContentHandler</code>.
+<pre>
+import org.xml.sax.ContentHandler;
+  ...
+  ContentHandler ch = ...;
+  xq.eval(exp, new ContentConsumer(ch));
+</pre>
+
+<h2>The Consumer interface</h2>
+<p>
+The <code>Consumer</code> interface (like the SAX2 <code>ContentHandler</code>
+is very useful and efficient for any kind
+of processing of XML data that can be done in a single pass.</p>
+<p>
+A <code>Consumer</code> is a passive output "sink".  It doesn't
+do anything its own.  Instead, it is used as the output
+of a <dfn>producer</dfn>, which is the application that does the actual work,
+and sends the results to the <code>Consumer</code>.
+The separation between a producer (when generates reuslts)
+and a <code>Consumer</code>, which (uses the results allows)
+allows for geat flexibility in plugging together modules.
+Note that a <code>Consumer</code> can pass 
+<p>
+Here is a Java program that counts the number of different kinds of
+elements produced by evaluating XQuery expressions.
+It is a class that extends the basic <code>gnu.lists.FilterConsumer</code>,
+which provides dummy implementations of the <code>Consumer</code> methods.</p>
+<pre>
+import gnu.xquery.lang.XQuery;
+import java.util.*;
+import gnu.lists.*;
+import java.io.PrintStream;
+
+public class CountElements extends FilterConsumer
+{
+  CountElements()
+  {
+    super(VoidConsumer.getInstance());
+  }
+
+  List list = new ArrayList();
+  int numAttributes = 0;
+  int numInts = 0;
+  int numObjects = 0;
+
+  public void beginGroup(String typeName, Object type)
+  {
+    list.add(typeName);
+    super.beginGroup(typeName, type);
+  }
+
+  public void beginAttribute(String attrName, Object attrType)
+  {
+    numAttributes++;
+    super.beginAttribute(attrName, attrType);
+  }
+
+  public void writeInt(int v)
+  {
+    numInts++;
+    super.writeInt(v);
+  }
+
+  public void writeObject(Object v)
+  {
+    numObjects++;
+    super.writeObject(v);
+  }
+
+  void dump (PrintStream out)
+  {
+    Collections.sort(list);
+    int total = 0;
+    ListIterator it = list.listIterator();
+    String previous = null;
+    int count = 0;
+    for (;;)
+      {
+	boolean done = ! it.hasNext();
+	String cur = done ? "" : (String) it.next();
+	if (previous != null && ! previous.equals(cur))
+	  {
+	    out.println("&lt;" + previous + "&gt; - " + count + " times");
+	    count = 0;
+	  }
+	if (done)
+	  break;
+	previous = cur;
+	count++;
+	total++;
+      }
+    out.println("TOTAL: " + total);
+    if (numAttributes &gt; 0)
+      out.println("Attributes: " + numAttributes);
+    if (numInts &gt; 0)
+      out.println("ints: " + numInts);
+    if (numObjects &gt; 0)
+      out.println("Objects: " + numObjects);
+  }
+
+  public static void main(String[] args) throws Throwable
+  {
+    XQuery xq = new XQuery();
+    CountElements counter = new CountElements();
+    for (int i = 0;  i &lt; args.length;  i++)
+      {
+	String exp = args[i];
+	xq.eval(exp, counter);
+      }
+    counter.dump(System.out);
+  }
+}
+</pre>
+<p>
+The produced calls the <code>beginGroup</code> method 
+
+<h2>The TreeList DOM class</h2>
+
+<!--<img src="qexo-interactive.jpg" img>-->
+
+    <hr>
+    <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
+<!-- Created: Sun Dec  8 10:58:11 PST 2002 -->
+<!-- hhmts start -->
+Last modified: Sun Dec 15 13:33:23 PST 2002
+<!-- hhmts end -->
+  </body>
+</html>
