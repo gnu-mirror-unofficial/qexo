@@ -2,10 +2,44 @@
 <html>
   <head>
     <title>Qexo Extensions to XQuery</title>
+<link rel="stylesheet" title="Kawa (navbar: fixed, left)"
+  href="../kawa/style/kawa-l.css" media="screen, print, projection, tv">
+<link rel="alternate stylesheet" title="Kawa (navbar: fixed, right)"
+  href="../kawa/style/kawa-r.css" media="screen, print, projection, tv">
   </head>
 
-  <body>
+  <body id="body">
+<div class="navcol">
+<b class="logo"><a href="index.html">Qexo</a></b>
+<div class="navbar">
+<div>
+<ul>
+<li><a rel="bookmark" href="index.html#Documentation">Documentation and articles</a></li>
+<li><a rel="bookmark" href="index.html#Download">Getting and installing</a></li>
+<li><a rel="bookmark" href="index.html#Usage">Using Qexo</a></li>
+<li><a rel="bookmark" href="#body">Extensions</a>
+<ul>
+<li><a rel="bookmark" href="#Calling-Java-Methods">Invoking methods</a></li>
+<li><a rel="bookmark" href="servlet.html">Servlets / web-apps</a></li>
+<li><a rel="bookmark" href="#Implementation-specific-functions">Functions</a></li>
+</ul>
+</li>
+<li><a rel="bookmark" href="index.html#License">License: Qexo is Free Software</a></li>
+<li><a rel="bookmark" href="../kawa/index.html">Qexo is based on Kawa</a></li>
+</ul>
+</div>
+</div>
+</div>
+
     <h1>Qexo Extensions to XQuery</h1>
+Qexo has various beyond the XQuery standard:
+<ul>
+<li>
+A convenient namespace-based syntax for <a href="#Calling-Java-Methods">invoking Java methods</a>.
+<li>You can compile a Qexo program to a <a href="servlet.html">servlet</a>.
+<li>Various extra <a href="#Implementation-specific-functions">pre-defined functions</a>: <code>index-of</code>, <code>last-index-of</code>,
+<code>write-to</code>.
+</ul>
 
 <h2><a name= id="Calling-Java-Methods" />Calling Java Methods</h2>
 <p>
@@ -139,7 +173,7 @@ You can compile a Qexo program to a <a href="servlet.html">servlet</a>.
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Wed Nov 20 17:37:28 PST 2002 -->
 <!-- hhmts start -->
-Last modified: Sat May 15 23:07:02 PDT 2004
+Last modified: Thu Feb  3 18:37:40 PST 2005
 <!-- hhmts end -->
   </body>
 </html>
