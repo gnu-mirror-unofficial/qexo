@@ -240,103 +240,10 @@ which is the GNU General Public License with some extra options.
 
 <h2>Status</h2>
 
-<p>Some things work; many things don't.
-For example many of standard XQuery functions have not been implemented yet.
-Those that are implemented may only work on simple values of the expected type.
-Implemented features include some simple expressions;
-element content (element "literals" like <code>&lt;a&gt;...&lt;/a&gt;</code>);
-FLWR expressions (<code>let</code> and <code>for</code> forms).
-Many complex 'for'- and other expressions now generate inlined code.
-<p>
-Path expressins are evaluated without removing duplicates and
-sorting in document order.  That is also
-why we don't handle <code>//</code> according to spec.
-For most path expressions it shouldn't
-matter, but in some cases we get the wrong result.  
-This will be fixed in a future release.
-<p>
-In this table <i>(which needs to be updated)</i> "Ok" means that the feature works in both the
-released (source and jar) versions listed above, and also in CVS;
-"Ok, in CVS" means the feature/fix is so recent it is only
-available in the CVS version.
-<p>
-<table border>
-<thead><tr><th><strong>Feature</strong></th>
-  <th><strong>Implementation status</strong></th></tr>
-  </thead>
-<tr><td>numeric literal</td><td>Ok</td></tr>
-<tr><td>string literal</td><td>Ok</td></tr>
-<tr><td><code>{--</code> comment <code>--}</code></td><td>Ok</td></tr>
-<tr><td><code>and</code></td><td>Ok</td></tr>
-<tr><td><code>or</code></td><td>Ok</td></tr>
-<tr><td><code>+</code></td><td>Ok</td></tr>
-<tr><td>binary <code>-</code></td><td>Ok</td></tr>
-<tr><td>unary <code>-</code></td><td>Missing</td></tr>
-<tr><td><code>*</code></td><td>Ok</td></tr>
-<tr><td><code>div</code></td><td><code>6 div 4</code> yields <code>3/2</code></td></tr>
-<tr><td><code>mod</code></td><td>Ok</td></tr>
-<tr><td><code>=</code></td><td>Ok</td></tr>
-<tr><td><code>!=</code></td><td>Ok</td></tr>
-<tr><td><code>&lt;</code></td><td>Ok</td></tr>
-<tr><td><code>&gt;</code></td><td>Ok</td></tr>
-<tr><td><code>&lt;=</code></td><td>Ok</td></tr>
-<tr><td><code>&gt;=</code></td><td>Ok</td></tr>
-<tr><td><code>==</code></td><td>Missing</td></tr>
-<tr><td><code>!==</code></td><td>Missing</td></tr>
-<tr><td>nodes<code>/</code>element-name</td><td>Ok</td></tr>
-<tr><td>nodes<code>//</code>element-name</td><td>Ok</td></tr>
-<tr><td>nodes<code>//</code>element-name<code>[</code>predicate<code>]</code></td><td>Ok</td></tr>
-<tr><td>nodes<code>/*</code></td><td>Ok</td></tr>
-<tr><td>nodes<code>/@</code>attribute-name</td><td>Ok</td></tr>
-<tr><td>nodes<code>/@*</code></td><td>Ok</td></tr>
-<tr><td>nodes<code>/</code>expression</td><td>Ok</td></tr>
-<tr><td><code>node()</code></td><td>Ok</td></tr>
-<tr><td><code>text()</code></td><td>Ok</td></tr>
-<tr><td>values<code>[</code>index<code>]</code></td><td>Ok</td></tr>
-<tr><td>values<code>[</code>low-index <code>to</code> high-index<code>]</code></td><td>Ok</td></tr>
-<tr><td>values<code>[</code>boolean<code>]</code></td><td>Ok</td></tr>
-<tr><td>element-name <i>(not following a '/')</i></td><td>Ok</td></tr>
-<tr><td><code>@</code>attribute-name <i>(not following a '/')</i></td><td>Ok</td></tr>
-<tr><td><code>descendant::</code> axis</td><td>Ok</td></tr>
-<tr><td><code>descendant-or-self::</code> axis</td><td>Ok</td></tr>
-<tr><td><code>instanceof</code></td><td>Ok, but DataType limited</td></tr>
-<tr><td><code>instanceof only</code></td><td>Missing</td></tr>
-<tr><td><code>cast as</code></td><td>Missing</td></tr>
-<tr><td><code>treat as</code></td><td>Missing</td></tr>
-<tr><td><code>for</code></td><td>Ok</td></tr>
-<tr><td><code>let</code></td><td>Ok</td></tr>
-<tr><td><code>if</code></td><td>Ok</td></tr>
-<tr><td><code>to</code></td><td>Ok</td></tr>
-<tr><td><code>sortby</code></td><td>Missing</td></tr>
-<tr><td><code>typeswitch</code></td><td>OK</td></tr>
-<tr><td><code>element</code> type</td><td>OK</td></tr>
-<tr><td><code>node</code> type</td><td>OK</td></tr>
-<tr><td><code>text</code> type</td><td>OK</td></tr>
-<tr><td><code>,</code>(sequence concatenate)</td><td>Ok</td></tr>
-<tr><td><code>document</code> function</td><td>Ok</td></tr>
-<tr><td><code>children</code> function</td><td>Ok</td></tr>
-<tr><td><code>attributes</code> function</td><td>Ok</td></tr>
-<tr><td><code>empty</code> function</td><td>Ok</td></tr>
-<tr><td><code>false</code> function</td><td>Ok</td></tr>
-<tr><td><code>true</code> function</td><td>Ok</td></tr>
-<tr><td><code>number</code> function</td><td>Ok</td></tr>
-<tr><td><code>string</code> function</td><td>Ok</td></tr>
-<tr><td><code>string-value</code> function</td><td>Ok</td></tr>
-<tr><td><code>item-at</code> function</td><td>Ok</td></tr>
-<tr><td><code>sublist</code> function</td><td>Ok</td></tr>
-<tr><td><code>sublist</code> function</td><td>Ok</td></tr>
-<tr><td><code>count</code> function</td><td>Ok</td></tr>
-<tr><td><code>min</code> function</td><td>Ok</td></tr>
-<tr><td><code>max</code> function</td><td>Ok</td></tr>
-<tr><td><code>sum</code> function</td><td>Ok</td></tr>
-<tr><td><code>avg</code> function</td><td>Ok</td></tr>
-<tr><td><code>position</code> function</td><td>Ok</td></tr>
-<tr><td>element constructors</td><td>Ok</td></tr>
-<tr><td>function call</td><td>Ok</td></tr>
-<tr><td>function definition</td><td>Ok</td></tr>
-<tr><td><code>namespace</code> definition</td><td>Ok</td></tr>
-<tr><td><code>default namespace</code> definition</td><td>Ok</td></tr>
-</table>
+This <a href="status.html">page summaries what works</a>,
+relative to the most recent XQuery specification documents.
+It describes the latest working sources in CVS; release 1.7.95 (which
+will hopefully be out soon) will be based on this.
 
 <h2 id="Extensions">Extensions</h2>
 Qexo has various <a href="Extensions.html"> extensions</a>
@@ -352,7 +259,7 @@ A convenient namespace-based syntax for <a href="Extensions.html#Calling-Java-Me
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sat Aug 18 14:08:13 PDT 2001 -->
 <!-- hhmts start -->
-Last modified: Tue Nov  9 12:50:51 PST 2004
+Last modified: Wed Dec 22 22:14:52 PST 2004
 <!-- hhmts end -->
   </body>
 </html>
