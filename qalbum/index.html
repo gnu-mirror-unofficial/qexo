@@ -1,0 +1,281 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Scripts for Managing Photographs </title>
+  </head>
+
+  <body>
+    <h1>Scripts for Managing Photographs </h1>
+
+<p>
+The idea of these scripts is that you write a "picture-group file",
+which is an XML file which describes a group of images (such as jpegs
+from a digital camera).
+You then run the script <code><a href="group.sh">group.sh</a></code>
+which reads the picture-group file, and the script generates a series
+of html files:  An overview page containing small images, plus one page
+for each picture.  The advantage is that you just edit the
+picture-group file, tweak the scripts to your preference, and
+automatically get nice linked web pages.
+<p>
+There are also some helper scripts for generating scaled images
+(thumbnails) and that help with some of the tedious parts
+of editing the picture-group file.</p>
+<p>
+Here is an <a href="http://pics.bothner.com/2000/Japan/">example</a>
+page generated with these scripts, and here is the
+<a href="http://pics.bothner.com/2000/Japan/index.xml">picture group
+file</a> describing it.
+
+<h2>Naming convention</h2>
+<p>A suggested naming convention:  Each <code>.jpg</code>
+file should follow this naming convention:  <code>prefixNnX.jpg</code>,
+where <code>prefix</code> is name common to a group of files,
+and <code>Nn</code> is a serial number.  The <code>X</code> is an
+optional code letter, where <code>r</code> means the picture is
+right-side-up but rotated relative to the camera original;
+<code>p</code> is a page-size image (scaled and perhaps cropped and rotated
+so it is suitable for viewing in a web page by itself); and
+<code>t</code> means a thumbnail image (scaled to show multiple images
+per page).</p>
+
+<h2>Suggested procedure</h2>
+<p>
+If you have a group of pictures you want to web-ify,
+this section gives suggested instructions for what to do.
+
+<h3>Generate initial overview files</h3>
+<p>Put the scripts directory in your path:
+<pre>
+PATH=/home/pics/public_html/scripts:$PATH
+</pre>
+<p>
+Start by putting the <code>.jpg</code> files in the desired directory.
+Then <code>cd</code> to that directory.</p>
+<p>Run the <code>make-xml.sh</code> script.
+If you follow the naming convention given below, you can do:
+<pre>
+make-xml.sh "Title" prefix[0-9][0-9].jpg
+</pre>
+<p>Here <code>"Title"</code> is the name you want on the title page
+of your overview page, and <code>prefix</code> is the common prefix.
+<p>
+This creates <code>index.xml</code>.  To generate the initial
+overview do:
+<pre>
+group.sh index
+</pre>
+<p>
+You now have a rough overview page in <code>index.html</code>,
+which you can view using a browser.  Some of the pictures are rotated.
+Next we fix this.
+<h3>Unrotating rotated picture</h3>
+<p>
+Suppose when viewing <code>index.html</code>, a picture is rotated 90 degrees
+counter-clockwise (to the left).  In that case, edit <code>index.xml</code>
+to add in the corresponding <code>&lt;picture&gt;</code> section:
+<pre>
+&lt;original rotated="left"/&gt;
+</pre>
+<p>If the picture is rotated 90 degrees clockwise (to the right),
+instead add the following:
+<pre>
+&lt;original rotated="right"/&gt;
+</pre>
+<p>
+Then run:
+<pre>
+rotations.sh index
+</pre>
+<p>
+This creates rotated copies of the files you specified
+as <code>&lt;orginal rotated="xxx"&gt;</code>, and
+also edits <code>index.xml</code> for you.
+If the original file was named <code>xxxNN.jpg</code>,
+the rotated file will be named <code>xxxNNr.jpg</code>.
+<p>Next re-run:
+<pre>
+group.sh index
+</pre>
+<p>Check <code>index.html</code> with a browser to see if you got it right.
+If you didn't, re-edit <code>index.xml</code>.
+For any picture that was rotated the wrong way,
+delete the rotated file:
+<pre>
+rm xxxNNr.jpg
+</pre>
+<p>Re-run <code>rotations.sh index</code> and <code>group.sh index</code>.
+Check again;  continue until all the pictures are upright.
+
+<h3>Generate scaled images</h3>
+<p>
+At this point the overview page <code>index.html</code>
+shows you thumbnails of each image.  However, the reducation in
+scale is handled in the browser, which means a browsers still
+has to download the full-size image.  To generate
+images that take less space, do:
+<pre>
+gen-images
+</pre>
+<p>
+This also updates <code>index.xml</code>, and re-runs <code>group.sh</code>
+for you.
+
+<h3>Cropping/editing</h3>
+<p>
+You may want to edit some of the images.
+Perhaps you want to crop out boring bits.
+I suggest you use gimp.  Don't edit the original
+(<samp><var>picNn</var>.jpg</samp> or <samp><var>picNn</var>t.jpg</samp>).
+Instead, edit the page-sized version: <samp>picNnp.jpg</samp>.
+Once you are satisfied, delete the thumbnail version (assuming you
+want that to be re-generated from the cropped version).
+Next edit <samp>index.xml</samp> to remove the <samp>width</code>
+and <samp>height</code> attributes from those to images, so
+what you have is:
+<pre>
+&lt;image&gt;<var>picNn</var>p.jpg&lt;/image&gt;
+&lt;small-image&gt;<var>picNn</var>t.jpg&lt;/small-image&gt;
+</pre>
+<p>Finally, re-run <code>gen-images</code>.
+
+<h2>Format of the picture-group file</h2>
+<p>A picture-group file is an xml file, which looks rather like an
+html file, but with different tags (element names).  Also the syntax
+is more strict:  For example, for every start tag
+(such as <samp>&lt;text&gt;</samp>) you have to include the end tag
+(e.g. <samp>&lt;/text&gt;</samp>), and they have to be properly nested.
+Also, attribute values (such as in <samp>width="1280"</samp>) have to be
+quoted (with single or double quotes).
+<p>
+Each picture-group file contains a single <samp>&lt;group&gt;</samp>
+element.  Each <samp>&lt;group&gt;</samp> should have
+a <samp>&lt;title&gt;</samp>, which is a short decription of the
+pictures in the group; it is used as the title of the overview page.
+Each <samp>&lt;group&gt;</samp> has one or more 
+<samp>&lt;row&gt;</samp> elements, where each <samp>&lt;row&gt;</samp>
+contains one or more <samp>&lt;picture&gt;</samp> elements.
+The <samp>&lt;row&gt;</samp> element has no semantic meaning,
+but it is used to group together those <samp>&lt;picture&gt;</samp>
+elements that should be shown next to each other (on the same row)
+of the overview page.
+<p>
+A <samp>&lt;group&gt;</samp> can also contain any number of
+<samp>&lt;text&gt;</samp>, which provide extended description
+about the pictures in the group; they are is also included in
+the overview page.
+You can mix <samp>&lt;row&gt;</samp> and <samp>&lt;text&gt;</samp> elements;
+the resulting overview page shows the text and pictures in the same order.
+Each <samp>&lt;text&gt;</samp> results in a single HTML paragraph
+(<samp>&lt;p&gt;</samp> element), the <samp>&lt;text&gt;</samp> can contain
+arbitrary HTML markup (as long as it is also valid XML), which is
+copied as is to the overview page.
+<p>
+Each  <samp>&lt;picture&gt;</samp> element describes one image.
+It must have an <code>id</code> attribute, which is used
+to name the web page generated for that picture.
+The <samp>&lt;picture&gt;</samp> element names one, two or three
+<em>image files</em> showing the same
+image but at possibly different resolutions.
+<p>
+If there is a <samp>&lt;full-image&gt;</samp> element, it should contain
+the name of the original full-size, uncropped, image file.  This is typically
+what you download from the camera, but it may be at too high a resolution
+(and slow to download) for convenient browsing.
+<p>
+If there is an <samp>&lt;image&gt;</samp> element, it should contain
+the name of an image file suitable for showing in a web browser
+on a page by itself (with some descriptive text).  Ideally, this
+will by 500-800 pixels in the largest dimension.  (If the original
+fullsize uncropped image is this size, you should just use
+<samp>&lt;image&gt;</samp> and leave out the <samp>&lt;full-image&gt;</samp>
+element)
+(If there is no <samp>&lt;image&gt;</samp> element, the scripts
+will use the file named in <samp>&lt;full-image&gt;</samp>, but
+scaled by 60%.  If there is no <samp>&lt;full-image&gt;</samp> either,
+then the <samp>&lt;small-image&gt;</samp> will be chosen.)
+<p>
+If there is a <samp>&lt;small-image&gt;</samp> element, its should
+contain the name of a small ("thumbnail") image file, suitable for showing
+with a number of other small images on the same web page.
+Typically, a <samp>&lt;small-image&gt;</samp> should be 100-300 pixels
+in the largest dimensions.  This is the image that will be chosen
+for the group overview page.
+(If there is no <samp>&lt;small-image&gt;</samp> element,
+the script will use the file named by <samp>&lt;image&gt;</samp>,
+but scaled by 50%; if there is no <samp>&lt;image&gt;</samp> element
+either, the script will use the <samp>&lt;full-image&gt;</samp>
+scaled by 20%.  This of course means that download will require
+downloading the larger images so the browser can scale them;
+thus downloads will be slower.)
+<p>
+Each of <samp>&lt;full-image&gt;</samp>, <samp>&lt;image&gt;</samp>,
+and <samp>&lt;small-image&gt;</samp> must have <code>width</code>
+and <code>height</code> attributes.
+You can use the <code><a href="sizes.sh">sizes.sh</a></code>
+to set the width and height attribute from the jpg files
+in the current directory, as long as you have the <code>rdjpgcom</code>
+program installed.
+<p>
+Each <samp>&lt;picture&gt;</samp> may in addition have a
+short <samp>&lt;caption&gt;</samp>.  This is used as a short
+description of the picture in the overview page, and it is used
+as the page title in the picture page.</p>
+<p>
+Each <samp>&lt;picture&gt;</samp> may also have a <samp>&lt;date&gt;</samp>
+element specifying when the picture was taken; it should have the format
+<code>YYYY-MM-DD</code>.  If there is no <samp>&lt;date&gt;</samp>
+element for the <samp>&lt;picture&gt;</samp>, but there is one
+for the <samp>&lt;group&gt;</samp>, that is used instead.
+<p>Each <samp>&lt;picture&gt;</samp> may also have
+a <samp>&lt;text&gt;</samp> element which describes the picture in detail.
+
+<h2>Running <code>group.sh</code></h2>
+<p>
+If the picture-group file is named <code><var>mypics</var>.xml</code>,
+you do:
+<pre>
+scripts/group.sh <var>mypics</var>
+</pre>
+This creates <code><var>mypics</var>.html</code>.
+It also creates a <code><var>picn</var>.html</code> for each
+<samp>&lt;picture&gt;</samp> element in <code><var>mypics</var>.xml</code>,
+where <code><var>picn</var></code> is the <code>id</code> attribute of the
+<samp>&lt;picture&gt;</samp>.  (A suggested naming convention:
+The pictures in <code>mypics.xml</code> should be
+named <code>mypics1</code>, <code>mypics2</code>, and so on.)
+(Note the names of the image files need not be related to the <code>id</code>,
+but it makes sense for them to be consistent.)
+
+<h2>Files</h2>
+<p>These scripts have been run using the
+<a href="http://www.gnu.org/software/kawa/xquery/">Kawa XQuery</a>
+XML processor
+(An older version of these scripts used XSLT.)
+<p>
+If you're on a Unix-like system, I suggest using the
+ <code><a href="group.sh">group.sh</a></code> script.
+It passed the correct parameters to the script
+<code><a href="pictures.xql">pictures.xql</a></code>.
+
+<h2>Author and license stuff</h2>
+<p>
+These scripts were written by
+<a href="http://www.bothner.com/~per">Per Bothner</a>
+<code>&lt;<a href="mailto:per@bothner.com">Per Bothner</a>&gt;</code>.
+<p>
+You are free to use these for your own images (personal or business).
+I of course make NO WARRANTY; if they should happen to destroy
+your critical files, I'm sorry, but you should have been more careful.
+Please do not redistribute the scripts in a product or as
+part of some other software distribution without permission.
+I expect you to customise the scripts for your own use; if you
+make significant enhancements, I would appreciate hearing about it.
+    <hr>
+    <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
+<!-- Created: Mon Feb 14 15:42:29 PST 2000 -->
+<!-- hhmts start -->
+Last modified: Fri Sep 27 22:25:44 PDT 2002
+<!-- hhmts end -->
+  </body>
+</html>
