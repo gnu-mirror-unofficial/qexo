@@ -11,9 +11,10 @@
 In this article we will show to to write and install
 a very simple "web application" written in the
 <a href="http://www.w3.org/XML/Query">XQuery language</a>.
+We will also show you how errors are handled, and how you can debug them.
 Our application uses the servlet extension of
 <a href="http://www.gnu.org/software/qexo/">Qexo</a>
-(version 1.7 or later), a Free implementation of XQuery.</p>
+(version 1.7beta2 or later), a Free implementation of XQuery.</p>
 <p>
 Our application presents to the user a form like the following:</p>
 <img src="webapp-adder-1.png" title="Figure 1"
@@ -54,12 +55,17 @@ define function num-parameter($name, $default) {
           &lt;td&gt;
             &lt;input
               name="sum1"
-              value="{num-parameter("sum1", 0)+num-parameter("sum2", 0)}" /&gt;
+              value="{num-parameter("sum1", 0)
+                     +num-parameter("sum2", 0)}" /&gt;
           &lt;/td&gt;
         &lt;/tr&gt;
         &lt;tr&gt;
           &lt;td&gt;Add to it:&lt;/td&gt;
-          &lt;td&gt;&lt;input name="sum2" value="{num-parameter("sum2", 1)}" /&gt;&lt;/td&gt;
+          &lt;td&gt;
+            &lt;input
+              name="sum2"
+              value="{num-parameter("sum2", 1)}" /&gt;
+          &lt;/td&gt;
         &lt;/tr&gt;
       &lt;/table&gt;
       &lt;input type="submit" value="Submit" /&gt;
@@ -284,7 +290,8 @@ stack trace.  Look for the <code>root cause</code>,
 which looks like:
 <pre>
 java.io.FileNotFoundException: http://localhost:8080/data.txt
-    at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:707)
+    at sun.net.www.protocol.http.HttpURLConnection
+       .getInputStream(HttpURLConnection.java:707)
     at gnu.kawa.xml.XMLParser.(XMLParser.java:57)
     at gnu.kawa.xml.XMLParser.(XMLParser.java:49)
     at gnu.kawa.xml.XMLParser.(XMLParser.java:42)
@@ -302,9 +309,11 @@ java.io.FileNotFoundException: http://localhost:8080/data.txt
     at gnu.kawa.servlet.KawaServlet.doGet(KawaServlet.java:57)
     at javax.servlet.http.HttpServlet.service(HttpServlet.java:740)
     at javax.servlet.http.HttpServlet.service(HttpServlet.java:853)
-    at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:247)
+    at org.apache.catalina.core.ApplicationFilterChain
+       .internalDoFilter(ApplicationFilterChain.java:247)
     ... <i>lots of Tomcat internals</i> ...
-    at org.apache.tomcat.util.threads.ThreadPool$ControlRunnable.run(ThreadPool.java:619)
+    at org.apache.tomcat.util.threads.ThreadPool$ControlRunnable
+       .run(ThreadPool.java:619)
     at java.lang.Thread.run(Thread.java:554)
 </pre>
 <p>
@@ -334,7 +343,7 @@ the last expression in the function.
 <h3>Adding trace output</h3>
 <p>
 Sometimes it is difficult to understand what an application is
-doing, in which case it is useful to add print stamenets for debugging
+doing, in which case it is useful to add print statements for debugging
 purposes.  XQuery is a side-effect-free language, so it doesn't
 really have print statements.
 However, the May 2003 draft specification added a <code>trace</code>
@@ -355,7 +364,7 @@ define function num-parameter($name, $default) {
 <p>
 That writes the following output to Qexo's standard error output
 (<code>System.err</code>).  Tomcat re-directs the error output
-to the file <code>$CATALINA_HOME/logs/cata;ine.out</code>,
+to the file <code>$CATALINA_HOME/logs/catalina.out</code>,
 where you can read it.
 <pre>
 XQuery-trace: num-parameter of 'sum1' is: 0
@@ -367,7 +376,7 @@ XQuery-trace: num-parameter of 'sum2' is: 1
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Mon May  5 20:28:35 PDT 2003 -->
 <!-- hhmts start -->
-Last modified: Thu May  8 12:13:36 PDT 2003
+Last modified: Wed May 21 13:57:22 PDT 2003
 <!-- hhmts end -->
   </body>
 </html>
