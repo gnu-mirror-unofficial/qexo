@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Qexo Extensions to XQuery</title>
+  </head>
+
+  <body>
+    <h1>Qexo Extensions to XQuery</h1>
+
+<h2><a name= id="Calling-Java-Methods" />Calling Java Methods</h2>
+<p><i>(This is only in CVS so far.)</i></p>
+<p>
+Qexo (following many XSLT implemenations) uses special namespaces
+to name Java classes.  For example:</p>
+<pre>
+declare namespace Integer = "class:java.lang.Integer"
+</pre>
+<p>
+You can use this namespace to invoke methods in the
+Java class <code>java.lang.Integer</code> class:</p>
+<pre>
+Integer:toHexString(255)
+</pre>
+<p>This invokes the static <code>toHexString(int)</code> method,
+evaluating to the string <code>"ff"</code>.</p>
+<p>
+More generally, if you call a function whose name is a QName
+for which there is no in-scope function, but the QName's
+namepace-URI starts with the string <code>class:</code>
+then the rest of the namespace-URI will be interpreted as a Java class name,
+and the QName's local-part will be interpreted as a Java method name
+defined in that Java class.
+The compiler will look for the "best" matching public method (using the
+available type information), and try to pick a specific method
+at compile-time.  (If it cannot, it will print a warning message,
+and instead emit code that try to pick the best method at run-time.)
+Both static and non-static methods are eligible; for non-static
+methods the first parameter is used as the <code>this</code> argument.</p>
+<p>
+Specifically how the compiler picks the "best" method is as follows.
+It finds all the public methods in the named
+class and its superclasses that match the name and argument count.
+It first looks for any methods whose parameter types match the actual
+argument types (to the extent known at compile-time)
+without requiring any run-time type casts (narrowing).  If there is one or
+more such method, the most specific such method is selected.
+If there is no most specific method, a warning is printed.
+Otherwise, if there is a single method that matches, but requiring
+a run-time cast, that method is selected.  Otherwise, a warning
+is printed, and the most spectic method is selected using the
+actual run-time argument values.
+</p>
+<p>
+If the local-name is "<code>new</code>" then a constructor will be picked.
+For example:</p>
+<pre>
+Integer:new("1234")
+</pre>
+<p>
+This is equivalent to the Java expression <code>new Integer("1234")</code>,
+which creates a new <code>java.lang.Integer</code> instance whose
+<code>intValue</code> is 1234.</p>
+<p>
+As a convenience, if the QName in a function call has
+a namespace-prefix for which there is no in-scope namespace
+definition, but the namespace-prefix is the fully-qualified name of
+a Java class (existing at compile-time), then that is equivalent to using
+a <code>class:</code> namespace-uri.  For example:</p>
+<pre>
+java.lang.Object:toString(3+4)
+</pre>
+evaluates to the string <code>7<code>.  The expression is equivalent to:
+<pre>
+declare namespace obj = "class:java.lang.Object"
+obj:toString(3+4)
+</pre>
+<p>assuming <code>obj</code> is some otherwise-unused namespace-prefix.</p>
+
+<h2><a name="Implementation-specific-functions" />Implementation-specific functions</h2>
+These will probably be moved into some Qexo-specific namespace.
+<dl>
+<dt>
+<code>index-of(</code><var>str</var><code>, </code><var>pat</var><code>)</code>
+</dt>
+<dd>
+Returns the (one-based) index of the first substring string 
+of <var>str</var> that matches the string <var>pat</var>.
+</dd>
+<dt>
+<code>last-index-of(</code><var>str</var><code>, </code><var>pat</var><code>)</code>
+</dt>
+<dd>
+Returns the (one-based) index of the last substring string 
+of <var>str</var> that matches the string <var>pat</var>.
+</dd>
+<dt>
+<code>write-to(</code><var>value</var><code>, </code><var>filename</var></code>)</code>
+<dd>
+Writes the value(s) given by <var>value</var> in XML syntax to
+the file named by <var>filename</var>
+</dd>
+</dl>
+
+<h2>Servlets</h2>
+You can compile a Qexo program to a <a href="servlet.html">servlet</a>.
+
+
+    <hr>
+    <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
+<!-- Created: Wed Nov 20 17:37:28 PST 2002 -->
+<!-- hhmts start -->
+Last modified: Wed Nov 20 23:40:25 PST 2002
+<!-- hhmts end -->
+  </body>
+</html>
