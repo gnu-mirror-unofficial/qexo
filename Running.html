@@ -451,9 +451,88 @@ you can use an <code>eval</code> method that takes a <code>Reader</code>.
 <p>
 You can also call Qexo functions that have been compiled
 to <code>.class</code> files, directly using Java method invocation.
-How to do so is a bit complicated and likely to change,
-so check <a href="http://www.gnu.org/software/qexo/Running.html">the online version of this chapter</a>
-for future updates,</p>
+How to do so is a bit complicated and likely to change;
+it will be documented later.</p>
+
+<h2>Setting the context item from Java</h2>
+<p>
+<em>(This feature is only available in the CVS version of Qexo
+so far.  It will be in the next release.)</em>
+<p>
+When you evaluate an XQuery expression from Java,
+you may want to set the context item, position, and size
+(collectively known as the focus) of the expression.
+The preceding <code>eval</code> methods evaluate the expression
+without the focus defined, and if you evaluate an expression that
+assumes a focus (such as a top-level path expression) then
+Qexo will report a syntax error.
+<p>
+If you want to specify the focus for an expression, you can use
+the <code>evalWithFocus</code> methods of <code>gnu.xquery.lang.XQuery</code>.
+For example:
+<pre>
+import gnu.xquery.lang.XQuery;
+public class EvalWithFocus1
+{
+  public static void main (String[] args) throws Throwable
+  {
+    XQuery xq = new XQuery();
+    Object a = xq.eval("&lt;a&gt;&lt;b id='1'/&gt;&lt;b id='2'/&gt;&lt;/a&gt;");
+    <b>Object b = xq.evalWithFocus("&lt;r size='{last()}'&gt;{b}&lt;/r&gt;", a, 1, 9);</b>
+    System.out.println(b);
+    }
+  }
+}
+</pre>
+<p>
+The <code>&lt;r&gt;</code> element constructor has an enclosed path
+expression <code>b</code>.  This is evaluated relative to the context item,
+which is the second argument to <code>evalWithFocus</code>, in this
+case the result of the previous <code>eval</code> in variable <code>a</code>.
+So the <code>b</code> returns the two <code>&lt;b&gt;</code> children of the
+<code>&lt;a&gt;</code> element.  The remaining two parameters
+to <code>evalWithFocus</code> are the context position and context size.
+(In this case the 8 other items of the context sequence don't exist.)
+So the above program prints out:</p>
+<pre>
+&lt;r size="9"&gt;&lt;b id="1" /&gt;&lt;b id="2" /&gt;&lt;/r&gt;
+</pre>
+
+<p>
+If there is more than one item in the context sequence, you will
+usually want to evaluate the expression for each item in the sequence.
+Instead of writing a loop in Java, use the two-operand
+form of <code>EvalWithFocus</code> and pass it the whole sequence:
+<pre>
+import gnu.xquery.lang.XQuery;
+public class EvalWithFocus2
+{
+  public static void main (String[] args) throws Throwable
+  {
+    XQuery xq = new XQuery();
+    Object a = xq.eval("&lt;a&gt;&lt;b id='1'/&gt;&lt;/a&gt;, &lt;a&gt;&lt;b id='2'/&gt;&lt;/a&gt;");
+    <b>Object b = xq.evalWithFocus("&lt;r pos='{position()}'&gt;{b}&lt;/r&gt;", a);</b>
+    System.out.println(b);
+  }
+}
+</pre>
+<p>
+This results in a 2-item sequence, one for each item in <code>a</code>.
+(Note that <code>a</code> in this example is different than before.)
+<pre>
+&lt;r pos="1"&gt;&lt;b id="1" /&gt;&lt;/r&gt;, &lt;r pos="2"&gt;&lt;b id="2" /&gt;&lt;/r&gt;
+</pre>
+<p>
+Note that if <code>v1</code> is the result of evaluating <code>e1</code>,
+then the result of <code>evalWithFocus("e2", v1)</code> is
+equivalent to evaluating <code>e1/e2</code>.
+<p>
+There are variants of these methods where the output to written to a
+<code>Consumer</code>, and the expression is read from a <code>Reader</code>.
+There are also methods so you can pre-compile the expression
+(using <code>evalToFocusProc</code>) and then repeatedly apply that to
+different values (using <code>applyWithFocus</code>).
+</p>
 
 <h2>Using Qexo with SAX2</h2>
 <p>
@@ -672,7 +751,7 @@ in this case is a <code>CountElements</code> object.</p>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Sun Dec  8 10:58:11 PST 2002 -->
 <!-- hhmts start -->
-Last modified: Mon Jun  9 12:25:01 PDT 2003
+Last modified: Sun Nov  9 19:02:37 PST 2003
 <!-- hhmts end -->
   </body>
 </html>
