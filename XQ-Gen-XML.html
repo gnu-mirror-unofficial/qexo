@@ -4,8 +4,7 @@ under the terms of the GNU Free Documentation License, version 1.1.
 A copy of the latter is in the file fdl.txt in this directory;
 you may not distribute this document without it.-->
 <html><body>
-<p>If you find a mistake, or something is unclear, please email <a href="mailto:per@bothner.com">per@bothner.com</a> so I can fix the text.</p>
-<h1>Generating XML and HTML using XQuery</h1>
+<p>If you find a mistake, or something is unclear, please email <a href="mailto:per@bothner.com">per@bothner.com</a> so I can fix the text.</p><h1>Generating XML and HTML using XQuery</h1>
 <h2>by Per Bothner</h2>
 <p>Most people think of XQuery as a query language for processing XML "databases". But it is also a very nice language for <em>generating</em> XML and HTML, including web pages. In this
 article we will look at XQuery from this angle.</p>
@@ -13,20 +12,20 @@ article we will look at XQuery from this angle.</p>
 <p>There are many tools for generating web pages. Many of these are based on <dfn>templates</dfn>: You write an HTML page, but you can embed within it expressions that get calculated by
 the web server. Here are some popular examples:</p>
 <ul>
-<li><p>  JSP or JavaServer Pages (<a href="http://java.sun.com/products/jsp/">http://java.sun.com/products/jsp/</a>) is a format where Java expressions and commands are embedded in HTML pages. A JSP page is
+<li><p>   JSP or JavaServer Pages (<a href="http://java.sun.com/products/jsp/">http://java.sun.com/products/jsp/</a>) is a format where Java expressions and commands are embedded in HTML pages. A JSP page is
 automatically translated into a special kind of Java class, a <dfn>servlet</dfn>. A web server can be configured to execute the servlet when receiving Web requests. This is a simple example:</p><pre>&lt;p&gt;3*4 is: &lt;%= 3*4%&gt;.&lt;/p&gt;
 </pre>
 <p>   Evaluating it yields this HTML fragment:</p><pre>&lt;p&gt;3*4 is: 12.&lt;/p&gt;
 </pre>
 </li>
-<li><p>  PHP (<a href="http://www.php.net/">http://www.php.net/</a>) is a relatively new scripting language that is especially popular for server applications.  Here is the same example:</p><pre>&lt;p&gt;3*4 is: &lt;?php echo 3*4 ?&gt;.&lt;/p&gt;
+<li><p>   PHP (<a href="http://www.php.net/">http://www.php.net/</a>) is a relatively new scripting language that is especially popular for server applications.  Here is the same example:</p><pre>&lt;p&gt;3*4 is: &lt;?php echo 3*4 ?&gt;.&lt;/p&gt;
 </pre>
 </li>
-<li><p>  ASP or Active Server Pages from Microsoft supports embedded interpreted VBScript and JScript code; ASP.NET (<a href="http://www.asp.net">http://www.asp.net</a>) supports other compiled
+<li><p>   ASP or Active Server Pages from Microsoft supports embedded interpreted VBScript and JScript code; ASP.NET (<a href="http://www.asp.net">http://www.asp.net</a>) supports other compiled
 <code>.NET</code> languages. Here is the same example:</p><pre>&lt;p&gt;3*4 is: &lt;%= 3*4&gt;.&lt;/p&gt;
 </pre>
 </li>
-<li><p>  BRL or the Beautiful Report Language(<a href="http://brl.sourceforge.net/">http://brl.sourceforge.net/</a>) allows expressions in the Scheme language to be embedded inside templates. BRL is similar to
+<li><p>   BRL or the Beautiful Report Language(<a href="http://brl.sourceforge.net/">http://brl.sourceforge.net/</a>) allows expressions in the Scheme language to be embedded inside templates. BRL is similar to
 JSP in that it generates Java servlets. Again, the same example:</p><pre>&lt;p&gt;3*4 is: [(* 3 4)].&lt;/p&gt;
 </pre>
 </li>
@@ -45,10 +44,10 @@ features, they all have the same basic idea: You throw a bunch of digital images
 images; if you click on one, you get a bigger version of that image.</p>
 <p>There are two basic approaches to doing this:</p>
 <ul>
-<li><p>A program that generates all the web pages in advance. This is nice, because you can use a browser to view the pages on your local disk using a <code>file:</code> URL, even if you aren't
+<li><p> A program that generates all the web pages in advance. This is nice, because you can use a browser to view the pages on your local disk using a <code>file:</code> URL, even if you aren't
 running a server. You can even burn the web pages onto a CD-ROM and browse the pages from there. Also, you may have an ISP that allows you to put up web pages, but running server scripts may be an
 extra-cost option.</p></li>
-<li><p>A module or script added to a web server that generates the web pages when requested by a browser. This saves disk space for the HTML files, though that is trivial compared to the
+<li><p> A module or script added to a web server that generates the web pages when requested by a browser. This saves disk space for the HTML files, though that is trivial compared to the
 disk space for the JPEG images. More valuable is that the server can present the viewer with multiple styles and preferences. This is most valuable if the server re-sizes the JPEG images as suitable
 for the viewer. This approach also makes it easier to just upload a collection of new pictures without extra steps.</p></li>
 </ul>
@@ -60,9 +59,9 @@ of learning and using XQuery.</p>
 <p>The following sample <code>index.xml</code> file describes six digital pictures from a car trip to the West Coast of Norway in the summer of 2001. Each photograph is described by a
 <code>&lt;picture&gt;</code> element. Each picture may be available in three resolutions:</p>
 <ul>
-<li><p>  The <code>&lt;full-image&gt;</code> element gives the name (and size in pixels) of the original full-size image.</p></li>
-<li><p>  The <code>&lt;image&gt;</code> element gives the name and size of the image scaled suitably for viewing in a web page by itself when browsing.</p></li>
-<li><p>  The <code>&lt;small-image&gt;</code> element gives the name and size of a thumbnail image.</p></li>
+<li><p>   The <code>&lt;full-image&gt;</code> element gives the name (and size in pixels) of the original full-size image.</p></li>
+<li><p>   The <code>&lt;image&gt;</code> element gives the name and size of the image scaled suitably for viewing in a web page by itself when browsing.</p></li>
+<li><p>   The <code>&lt;small-image&gt;</code> element gives the name and size of a thumbnail image.</p></li>
 </ul>
 <p>Listing 1 shows a sample <code>index.xml</code> file (abbreviated).</p>
 <p><i>Listing 1: An <code>index.xml</code> file describing some pictures</i></p>
@@ -80,17 +79,6 @@ of learning and using XQuery.</p>
     &lt;full-image width="1280" height="960"&gt;Lillehammer22.jpg&lt;/full-image&gt;
     &lt;image width="740" height="555"&gt;Lillehammer22p.jpg&lt;/image&gt;
     &lt;small-image width="240" height="180"&gt;Lillehammer22t.jpg&lt;/small-image&gt;
-  &lt;/picture&gt;
-
-  &lt;picture id="WedingCabinHike1"&gt;
-    &lt;caption&gt;Hike with family&lt;/caption&gt;
-    &lt;date&gt;2001-07-28&lt;/date&gt;
-    &lt;text&gt;We stayed at the cabin of Agnes (Per's cousin "Mimmi") and Kjell
-      Weding at G&amp;#229;l&amp;#229; near Ringebu, and
-      we went for an evening hike with them.&lt;/text&gt;
-    &lt;full-image width="1280" height="960"&gt;WedingCabinHike1.jpg&lt;/full-image&gt;
-    &lt;image width="740" height="555"&gt;WedingCabinHike1p.jpg&lt;/image&gt;
-    &lt;small-image width="240" height="180"&gt;WedingCabinHike1t.jpg&lt;/small-image&gt;
   &lt;/picture&gt;
 
   &lt;!-- <i>more picture elements as desired</i> --&gt;
@@ -257,18 +245,18 @@ that moves the <code>$next</code> element over to the <code>$pictures</code> seq
 <p><i>Figure 2: A web page for viewing a single picture.</i></p><p>The first tricky part is dealing with the links for the previous and next picture. The other tricky part is that we want to support multiple <dfn>styles</dfn>. The existing code
 supports three styles that each image can be displayed in:</p>
 <ul>
-<li><p><code>"Medium image"</code> is the default style. It displays the image at around 640 pixels wide, which is fine for most screens and browsers.</p></li>
-<li><p>  <code>"Large image"</code> gives you a higher resolution, about 1024 or 1280 pixels wide. (For most of the pictures I take, 1280 pixels wide is the original camera
+<li><p> <code>"Medium image"</code> is the default style. It displays the image at around 640 pixels wide, which is fine for most screens and browsers.</p></li>
+<li><p>   <code>"Large image"</code> gives you a higher resolution, about 1024 or 1280 pixels wide. (For most of the pictures I take, 1280 pixels wide is the original camera
 resolution. From which you can infer that my camera is a few years old.)</p></li>
-<li><p>  The <code>"Info"</code> style shows the thumbnail image, EXIF camera information from the JPEG, and links to the original JPEG files.</p></li>
+<li><p>   The <code>"Info"</code> style shows the thumbnail image, EXIF camera information from the JPEG, and links to the original JPEG files.</p></li>
 </ul>
 <p>Thus we need to generate 3 HTML pages times the number of <code>&lt;picture&gt;</code> elements. Exactly how to write all these files is somewhat implementation dependent. There are (at
 least) three ways to do it:</p>
 <ul>
-<li><p>  Write a script or driver program (perhaps a batch script) that loops through the pictures, calling the XQuery implementation once for each desired output file. You need
+<li><p>   Write a script or driver program (perhaps a batch script) that loops through the pictures, calling the XQuery implementation once for each desired output file. You need
 to pass the desired file as some kind of parameter that XQuery can access. The standard function <code>inputs</code> is one way to tell the XQuery program which file to generate. The output from XQuery is
 re-directed to the intended HTML file.</p></li>
-<li><p>  Generate all the HTML output files in a single XQuery run, by putting them in a single large XML object, like this:</p><pre>&lt;outputs&gt;
+<li><p>   Generate all the HTML output files in a single XQuery run, by putting them in a single large XML object, like this:</p><pre>&lt;outputs&gt;
   &lt;output-file filename="picture1.html"&gt;
     &lt;html&gt;<i>contents of picture1.html</i>&lt;/html&gt;
   &lt;/output-file&gt;
@@ -279,10 +267,10 @@ re-directed to the intended HTML file.</p></li>
 &lt;/outputs&gt;
 </pre>
 <p>      It is then easy to write a post-processor to split this into separate XML files.</p></li>
-<li><p>  Generate all the HTML output files in a single XQuery run, but use an implementation-specific function to write each HTML separately. While non-standard, it is the
+<li><p>   Generate all the HTML output files in a single XQuery run, but use an implementation-specific function to write each HTML separately. While non-standard, it is the
 simplest and most efficient, so we will use that approach here.</p></li>
 </ul>
-<p>The Qexo (<a href="http://www.gnu.org/software/qexo/&lt;/u&gt;) implementation of XQuery includes a &lt;u&gt;write-to">http://www.gnu.org/software/qexo/</a>) implementation of XQuery includes a <code>write-to</code> built-in function. It takes two parameters&#8212;a value (normally an element node)
+<p>The Qexo (<a href="http://www.gnu.org/software/qexo/">http://www.gnu.org/software/qexo/</a>) implementation of XQuery includes a <code>write-to</code> built-in function. It takes two parameters&#8212;a value (normally an element node)
 and a file name&#8212;and writes the former to the latter, using HTML-compatible XML (XHTML) syntax. It returns an empty sequence. Other XQuery implementations may have similar functions.</p>
 <p>The outermost expression of the new XQuery program writes both the <code>index.html</code> overview file and each of the individual picture pages, the latter in each of the 3 styles. Writing
 the picture pages is done by two nested loops, the outer one looping over <code>&lt;picture&gt;</code> elements, and the inner one looping over the 3 styles. Each then calls the <code>picture</code> function to
@@ -362,16 +350,18 @@ define function picture($picture, $group, $name, $prev, $next, $date, $style) {
     &lt;/script&gt;
   &lt;/head&gt;
   &lt;body bgcolor="#00AAAA"&gt;
-{   nav-bar($picture, $name, $prev, $next, $style)}
-{   make-header($picture, $group)}
-{   picture-text($picture)}
-{   if (empty($date)) then () else &lt;p&gt;Date taken: {$date}.&lt;/p&gt;}
-{let $full-image := $picture/full-image,
-     $image := $picture/image
+{ nav-bar($picture, $name, $prev, $next, $style)}
+{ make-header($picture, $group)}
+{ picture-text($picture)}
+{ if (empty($date)) then () else &lt;p&gt;Date taken: {$date}.&lt;/p&gt;}
+{ let $full-image := $picture/full-image,
+      $image := $picture/image
   return
   if ($style = "info") then (
-    make-thumbnail($picture),
-    document(concat($name,"-info.txt")),
+    &lt;table&gt;&lt;tr&gt;
+      &lt;td style="padding: 20 20 20 10"&gt;{make-thumbnail($picture)} &lt;/td&gt;
+      &lt;td&gt;{document(concat($name,"-info.txt"))}&lt;/td&gt;
+    &lt;/tr&gt;&lt;/table&gt;,
     &lt;table&gt;&lt;tr&gt;&lt;td&gt;Plain JPEG images:&lt;/td&gt;
     {raw-jpg-link($picture/full-image, "Original")}
     {raw-jpg-link($picture/image,
@@ -389,7 +379,7 @@ define function picture($picture, $group, $name, $prev, $next, $date, $style) {
     make-img($full-image, 0.5)
   else
     make-img($image, 1)
-}
+  }
   &lt;/body&gt;
 &lt;/html&gt;
 }</pre>
@@ -507,11 +497,11 @@ pass the read <code>$group</code> to <code>make-group-page</code> as before, and
 <p>We need to find the correct <code>&lt;picture&gt;</code> element in the read document, by searching for one that matches the incoming request. There are various ways of doing this, but we
 need to keep a few concerns in mind:</p>
 <ul>
-<li><p>We need to find not just the current <code>&lt;picture&gt;</code>, but also the previous and next pictures, so we create links to them. Thus we need not just the requested
+<li><p> We need to find not just the current <code>&lt;picture&gt;</code>, but also the previous and next pictures, so we create links to them. Thus we need not just the requested
 <code>&lt;picture&gt;</code> element, but also its index in the sequence <code>$pictures</code>. We do that using the <code>for</code>-loop that sets the value of <code>$i</code>.</p></li>
-<li><p>We want to emit some suitable error response if the request is for a <code>&lt;picture&gt;</code> that doesn't exist. We do that by testing <code>empty($i)</code>, and calling the Qexo
+<li><p> We want to emit some suitable error response if the request is for a <code>&lt;picture&gt;</code> that doesn't exist. We do that by testing <code>empty($i)</code>, and calling the Qexo
 <code>error-response</code> function. This function takes a HTTP error code and a message, and creates an appropriate error value that gets sent back to the browser.</p></li>
-<li><p>It is more efficient if the HTML page generated by the <code>picture</code> function can be written directly to the servlet output buffer, as opposed to creating a temporary document
+<li><p> It is more efficient if the HTML page generated by the <code>picture</code> function can be written directly to the servlet output buffer, as opposed to creating a temporary document
 value, and later writing that out. To make it easier for an XQuery compiler to avoid unnecessary copying, we call the <code>picture</code> function so its output directly becomes the output of the
 top-level expression, without first storing it in a temporary variable.</p></li>
 </ul>
@@ -575,7 +565,7 @@ CATALINA_HOME=$(CATALINA_HOME)
 export JAVA_HOME CATALINA_HOME
 $(CATALINA_HOME)/bin/startup.sh start</pre>
 <p>After you have started up Tomcat, it by default listens to port 8080. To view the <code>NorwayHighlights</code> album, point your browser at
-<a href="http://localhost:8080/pics/NorwayHighlights/index.html&lt;/u&gt;. When Tomcat receives this request, it will invoke the &lt;u&gt;pictures&lt;/u&gt; servlet, and the call &lt;u&gt;request-servlet-path()">http://localhost:8080/pics/NorwayHighlights/index.html</a>. When Tomcat receives this request, it will invoke the <code>pictures</code> servlet, and the call <code>request-servlet-path()</code> will return
+<a href="http://localhost:8080/pics/NorwayHighlights/index.html">http://localhost:8080/pics/NorwayHighlights/index.html</a>. When Tomcat receives this request, it will invoke the <code>pictures</code> servlet, and the call <code>request-servlet-path()</code> will return
 <code>/NorwayHighlights/index.html</code>. The <code>$file</code> variable will get set to <code>index.html</code>, so <code>make-group-page</code> is called. If you click a link, the browser sends back a new request, which
 the servlet handles. Any <code>.jpg</code> image files that might be requested via an <code>&lt;img&gt;</code> or <code>&lt;a&gt;</code> tag, such as <a href="http://localhost:8080/pics/NorwayHighlights/Skjolden1.jpg">http://localhost:8080/pics/NorwayHighlights/Skjolden1.jpg</a>,
 will not be handled by the servlet. Instead, Tomcat handles those using its default rules, and looks for correspondingly-named files relative to the web application directory, such as
@@ -583,12 +573,12 @@ will not be handled by the servlet. Instead, Tomcat handles those using its defa
 <h3>Comparison with JavaServer Pages</h3>
 <p>We can summarize the advantages of XQuery versus JSP and similar template systems as follows:</p>
 <ul>
-<li><p>  Better integration than JSP's HTML+Java. You can use the same programming language for both the presentation and the logic.</p></li>
-<li><p>  XQuery is a higher-level language compared to Java, with powerful features for manipulating XML.</p></li>
-<li><p>  XQuery is a true expression language; values can be structured XML that you can pass to functions. You don't need to clutter your program with print invocations.</p></li>
-<li><p>  Qexo can run XQuery programs in different modes, even expressions typed at a command prompt. This helps development and testing.</p></li>
-<li><p>  Errors (such as stack traces) refer to the line numbers in the XQuery source, as opposed to line numbers in generated Java code.</p></li>
-<li><p>  XQuery is statically typed, which helps in catching errors early.</p></li>
+<li><p>   Better integration than JSP's HTML+Java. You can use the same programming language for both the presentation and the logic.</p></li>
+<li><p>   XQuery is a higher-level language compared to Java, with powerful features for manipulating XML.</p></li>
+<li><p>   XQuery is a true expression language; values can be structured XML that you can pass to functions. You don't need to clutter your program with print invocations.</p></li>
+<li><p>   Qexo can run XQuery programs in different modes, even expressions typed at a command prompt. This helps development and testing.</p></li>
+<li><p>   Errors (such as stack traces) refer to the line numbers in the XQuery source, as opposed to line numbers in generated Java code.</p></li>
+<li><p>   XQuery is statically typed, which helps in catching errors early.</p></li>
 </ul>
 <h2>Running XQuery programs from CGI scripts</h2>
 <p>CGI (Common Gateway Interface) scripts are programs or scripts that are executed by a Web server in response to a request. The request parameters are passed to the script as environment
