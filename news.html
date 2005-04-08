@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Qexo News and Change Summary</title>
+<!--
+<link rel="stylesheet" title="Kawa (navbar: fixed, left)"
+  href="../kawa/style/kawa-l.css" media="screen, print, projection, tv">
+<link rel="alternate stylesheet" title="Kawa (navbar: fixed, right)"
+  href="../kawa/style/kawa-r.css" media="screen, print, projection, tv">-->
+  </head>
+
+  <body>
+<h1><center>Qexo News and Change Summary</center></h1>
+<p>
+These changes are in more-or-less reverse chronological order,
+with the most recent changes first.</p>
+<p>
+See also the list of <a href="../kawa/news.html">general Kawa changes</a>.
+<p>
+
+<h2>Changes in the CVS repository since 1.7.90</h2>
+<p> Warn about old syntax.
+<p>
+Handle <code>declare default collation</code>.  This is mainly a place-holder
+so we can correctly implement functions that use collations.
+<p>
+Added <code>.xq</code> and <code>.xquery</code> as XQuery file extensions,
+to match latest draft.
+<p>
+Added QName functions <code>local-name-from-QName</code>,
+<code>namespace-uri-from-QName</code>, <code>namespace-uri-for-prefix</code>.
+
+<p>
+Implement namespace declaration attributes such as
+<code>&lt;a xmlns:a="URL"&gt;</code>.
+
+<h2>Changes from Kawa 1.7 to 1.7.90</h2>
+<p>
+'M to N' is now empty if M &gt; N, following the November '03 draft.
+<p>
+ New Java api for evaluating Java expression with a given context sequence
+  (item, position, size).  See <a href="Running.html"><code>Running.html</code></a>.
+<p>
+ Much improved namespace support.  Namespace attributes in a source
+  xml document are remembered, and correctly serialized (printed).
+  There is support for namespace undeclarations (as in the XML Namespaces
+  1.1 Candicate Recommendation).  Copying element nodes (as needed when
+  creating new element nodes with element constructors) should correctly
+  copy the namespace declarations.
+  Still missing is support for namespace attributes in element constructors.
+<p>
+ Support compiled library modules:  'module' and 'import module'
+  statements.  Efficient cross-module calling.  (Needs documentation.)
+<p>
+ Proper QName handling of variable and function names.
+<p>
+ Support absolute path expressions (starting with / or //). 
+<p>
+ Working general implementation of position() and last().
+<p>
+ Handle the remaining XPath axes, such as parent and also
+  all the optional axes (ancestor, following-sibling etc).
+  (Because of the above changes, you may see a performance
+  regression, as I concentrated on correctness and generality.
+  I'll be gradually adding optimizations when I can.)
+<p>
+ Implement 'at' (position) clause of FLWOR statement.
+<p>
+ Implement 'some ... satisfies; and 'every ... satisfies'.
+<p>
+ Various syntax changes for the August '03 draft:
+<ul>
+   <li> Pre-define namespace prefix 'local:'.
+   <li> Update 'define function' to 'declare function'
+   <li> Update 'define variable' to 'declare variable'
+   <li> Update xmlspace syntax.
+   <li> Handle semi-colons required after declarations.
+</ul>
+  For now, old syntax is handled quietly as well as new syntax.
+  Later, a warning will become the default.
+  Later still, the old syntax will go away!
+<p>
+<code>distinct-nodes</code> and various string functions are implemented.
+<p>
+ The '|' or 'union' and 'intersect' and 'except' operators are implemented.
+<p>
+The 'declare xmlspace' declaration is implemented, which should now
+  correctly handle "Boundary whitespace" in element constructors.
+<p>
+Optional function returns are now handled.  Some type specifiers would
+  generate bad bytecode; these should now be fixed.
+
+<h2>Changes from Kawa 1.6.99 to 1.7.</h2>
+<p>
+Various XQuery changes, based on the May '03 specification:
+<p>
+Implemented <code>define variable'</code> except the <code>external</code> support.
+<p>
+Implemented the <code>trace</code> function.
+<p>
+Implemented the new comment syntax.
+<p>
+Supports the new <code>element(<var>name</var>, *)</code> type-specifier syntax.
+<p>
+Expanded string literal syntax, with references and doubled quotes.
+<p>
+Allow <code>doc</code> as synonym for <code>document</code> function.
+<p>
+Implemented the full 2-operand <code>document</code> function (now-deprecated, sigh).
+<p>
+Implemented <code>base-uri</code> support.
+</body>
+</html>
