@@ -6,8 +6,8 @@ declare namespace ImageInfo = "class:com.drew.imaging.exif.ImageInfo"
 declare variable $nl { "&#10;" };
 
 declare function make-img($picture, $scale) {
-  <img border="1" src="{$picture}" width="{number($picture/@width) * $scale}"
-    height="{number($picture/@height) * $scale}" />
+  <img src="{$picture}" width="{number($picture/@width) * $scale}"
+    height="{number($picture/@height) * $scale}"/>
 };
 
 declare function make-thumbnail($pic) {
@@ -21,8 +21,12 @@ declare function make-thumbnail($pic) {
   ( "(missing small-image)", string($pic), ")" )
 };
 
+declare function style-link($style) {
+  if ($style="full") then "large" else $style
+}
+
 declare function make-link($picture-name, $style, $text) {
-  <a href="{$picture-name}{$style}.html">{$text}</a>
+  <a href="{$picture-name}{style-link($style)}.html">{$text}</a>
 };
 
 declare function format-row($row) {
@@ -115,7 +119,7 @@ declare function nav-bar($picture, $name, $prev, $next, $style) {
     <td><span class="button"><a href="index.html">Index</a></span></td>{
     if ($style="info") then () else ("
     ",<td><span class="button">{make-link($name, "info", "Info")}</span></td>),
-    if ($style="large") then () else ("
+    if ($style="large" or $style="full") then () else ("
     ",<td width="200" align="left"><span class="button">{
       make-link($name, "large", "Large image")}</span></td>),
     if ($style="") then () else ("
@@ -161,11 +165,12 @@ declare function raw-jpg-link($image, $description) {
  : $prev:  The previous <picture> or the empty sequence if there is none.
  : $next:  The next <picture> or the empty sequence if there is none.
  : $date:  The date the picture was taken, as a string, or the empty sequence.
- : $style:  The style and size,  Currently only "large" or "" (medium)
- :   or "info".  The "info" style show a thumbnail, plus EXIF information,
- :   plus links to the raw JPGs.
+ : $style:  The style and size.
+ :   Currently only "full", "large" or "" (medium) or "info".
+ :   The "info" style show a thumbnail, plus EXIF information, plus links to
+ :   the raw JPGs.  The "full" style is like "large" but auto-resizing.
  :)
-declare function picture($picture, $group, $name, $preamble, $prev, $next, $date, $style) {
+declare function picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count) {
 (: FIXME add documentheader and DO NOT EDIT comment :)
 <html>
   <head>
@@ -174,22 +179,31 @@ declare function picture($picture, $group, $name, $preamble, $prev, $next, $date
     (: Note how we pre-pend whitespace to properly indent the <link>s. :)
     if (empty($prev)) then ()
     else ("
-    ",<link rel="prev" href="{$prev/@id}{$style}.html" />),
+    ",<link rel="prev" href="{$prev/@id}{style-link($style)}.html" />),
     if (empty($next)) then ()
     else ("
-    ",<link rel="next" href="{$next/@id}{$style}.html" />)}
+    ",<link rel="next" href="{$next/@id}{style-link($style)}.html" />)}
     <title>{make-title($picture,$group)}</title>
     <style type="text/css">
       a {{ padding: 1 4; text-decoration: none; }}
       td {{ padding-left: 0; border-style: none }}
-      span.button {{ border-width: thin; background-color: #FFFF99;
-      border-style: solid }}
-    </style>{( (: (Note what we have to do to add an XQuery comment here!)
+      span.button {{ border: thin solid; background-color: #FFFF99; }} {
+    if ($style!="full") then '
+      img { border: thin solid black }'
+    else '
+      img { position: absolute; bottom: 0px; right: 0px; }
+      img { visibility: hidden }
+      body { overflow: hidden }
+      div#preamble { position: absolute; top: 0px; left: 0px; width: 600px }
+      div.preamble-text { background-color: #FFFF99; border: 1px solid black; padding: 0.5em} '}
+   </style>
+{(  (: (Note what we have to do to add an XQuery comment here!)
      : Next we generate a JavaScript handler, to handle pressing the keys
      : 'n' (or space) and 'p' for navigation.  The indentation of the code
      : isn't "logical", but it makes the JavaScript code look nice. :) )}
     <script language="JavaScript">
       document.onkeypress = handler;
+      var hidePreamble = false;
       function handler(e) {{
         var key = navigator.appName == 'Netscape' ? e.which
           : window.event.keyCode;{
@@ -197,26 +211,50 @@ declare function picture($picture, $group, $name, $preamble, $prev, $next, $date
         else (: if 'n' was pressed, goto $next :)
           concat('
         if (key == 110 || key == 32) { location="',
-          string($next/@id), $style, '.html"; return true; }'),
+          string($next/@id), style-link($style), '.html"; return true; }'),
         if (empty($prev)) then ()
         else (: if 'p' was pressed, goto $prev :)
           concat('
         if (key == 112) { location="',
-          string($prev/@id), $style, '.html"; return true; }')}
+          string($prev/@id), style-link($style), '.html"; return true; }')}
         if (key == 117) {{ location="index.html"; return true; }}
-        if (key == 105) {{ location="{string($next/@id)}info.html"; return true; }}
-        if (key == 108) {{ location="{string($next/@id)}large.html"; return true; }}
-        if (key == 109) {{ location="{string($next/@id)}.html"; return true; }}
-        return routeEvent(e); }}
+        if (key == 105) {{ location="{$name}info.html"; return true; }}
+        if (key == 108) {{ location="{$name}large.html"; return true; }}
+        if (key == 109) {{ location="{$name}.html"; return true; }}
+	if (key == 104) {{
+	  var preamble = document.getElementById("preamble");
+	  hidePreamble = !hidePreamble;
+	  preamble.style.visibility = hidePreamble ? "hidden" : "visible";
+	  return true;
+        }}
+        return routeEvent(e);
+      }}{ if ($style!="full") then () else '
+      function LoadSize() {
+        image = document.getElementsByTagName("img")[0];
+        image.origwidth = image.width;
+        image.origheight = image.height;
+        ScaleSize();
+        image.style.visibility = "visible";
+      }
+      function ScaleSize() {
+        var image = document.getElementsByTagName("img")[0];
+        var wscale = 1.0 * document.body.clientWidth /  image.origwidth;
+        var hscale = 1.0 * document.body.clientHeight / image.origheight;
+        var scale = Math.min(wscale, hscale);
+        image.style.width = scale * image.origwidth;
+        image.style.height = scale * image.origheight;
+      }'}
     </script>
   </head>
-  <body bgcolor="#00DDDD">
-{ nav-bar($picture, $name, $prev, $next, $style)}
-{ $preamble }
-{ make-header($picture, $group)}
-{ picture-text($picture)}
-{ if (empty($date)) then () else <p>Date taken: {$date}.</p>}
-{ let $full-image := $picture/full-image,
+{
+  element body {
+    attribute bgcolor {"#00DDDD"},
+    if ($style="full") then
+      (attribute onload {"javascript:LoadSize();"},
+      attribute onresize {"javascript:ScaleSize();"})
+    else
+    above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count),
+  let $full-image := $picture/full-image,
       $image := $picture/image
   return
   if ($style = "info") then (
@@ -240,8 +278,10 @@ declare function picture($picture, $group, $name, $preamble, $prev, $next, $date
             <td><span class="button"><a href="{string($outtake/@img)}">{if (empty($outtext)) then "picture" else $outtext}</a></span></td>}
         </tr></table>
   )
-  else if ($style="large" and $full-image) then
+  else if (($style="large" or $style="full") and $full-image) then
     make-img($full-image, 1)
+  else if ($style="full" and $image) then
+    make-img($image, 1)
   else if ($style="large" and $image
            and number($image/@width) <= 640
            and number($image/@height) <= 640) then
@@ -250,9 +290,26 @@ declare function picture($picture, $group, $name, $preamble, $prev, $next, $date
     make-img($full-image, 0.5)
   else
     make-img($image, 1)
-  }
-  </body>
-</html>
+ },
+ (: In "full" style, we need to draw the header etc *after* the image. :)
+ if ($style!="full") then () else
+    above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count)
+ }
+</html>,$nl
+};
+
+declare function above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count) {
+<div id="preamble">
+{ (:if ($style="full") then () else:)
+  nav-bar($picture, $name, $prev, $next, $style)}
+<div class="preamble-text">
+<p>{if ($i=$count) then "Last" else concat("Number ", $i)} of {$count}.  {
+  if (empty($date)) then () else concat("Date taken: ",string($date),".")}</p>
+{ $preamble }
+{ make-header($picture, $group)}
+{ picture-text($picture)}
+</div>
+</div>
 };
 
 declare function make-group-page($group) {
@@ -312,8 +369,8 @@ declare function loop-pictures($group, $pictures, $i, $count, $style, $texts, $u
 	    $name := string($cur/@id)
         return
         (write-to(picture($cur,  $group, $name,
-		    $texts, $prev, $next, $date, $style),
-                  concat($name, $style, ".html")),
+		    $texts, $prev, $next, $date, $style, $i, $count),
+                  concat($name, style-link($style), ".html")),
          loop-pictures($group, $pictures, $i+1, $count, $style, (),  $rest))
       default return
          loop-pictures($group, $pictures, $i, $count, $style, $texts,  $rest)
@@ -325,6 +382,6 @@ let $group := doc("index.xml")/group,
     $count := count($pictures)
   return (
     write-to(make-group-page($group), "index.html"),
-    for $style in ("", "info", "large")
+    for $style in ("", "info", "full")
     return
     loop-pictures($group, $pictures, 1, $count, $style, (), $group/*))
