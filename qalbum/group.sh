@@ -23,4 +23,4 @@ $JAVA -cp $scriptdir:${KAWAJAR} pictures
 #$JAVA kawa.repl -xquery --main -C $scriptdir/pictures.xql
 #$JAVA pictures
 
-rm *-info.txt
+rm -f *-info.txt

@@ -11,4 +11,4 @@ index_file=${1-index}.xml
 done)>sizes.sed
 sed -f sizes.sed <index.xml >/tmp/$$.index
 #rm sizes.sed
-cp /tmp/$$.index index.xml
+mv /tmp/$$.index index.xml
