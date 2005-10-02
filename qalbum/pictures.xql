@@ -205,8 +205,7 @@ declare function picture($picture, $group, $name, $preamble, $prev, $next, $date
       document.onkeypress = handler;
       var hidePreamble = false;
       function handler(e) {{
-        var key = navigator.appName == 'Netscape' ? e.which
-          : window.event.keyCode;{
+        var key = e ? e.which : event.keyCode;{
         if (empty($next)) then ()
         else (: if 'n' was pressed, goto $next :)
           concat('
@@ -231,15 +230,30 @@ declare function picture($picture, $group, $name, $preamble, $prev, $next, $date
       }}{ if ($style!="full") then () else '
       function LoadSize() {
         image = document.getElementsByTagName("img")[0];
-        image.origwidth = image.width;
-        image.origheight = image.height;
+	image.origwidth = image.getAttribute("width");
+        image.origheight = image.getAttribute("height");
         ScaleSize();
         image.style.visibility = "visible";
       }
       function ScaleSize() {
+        /* Window size calculation from S5 slides.css. by Eric Meyer. */
+	var hSize, vSize;
+ 	if (window.innerHeight) {
+		vSize = window.innerHeight;
+		hSize = window.innerWidth;
+	} else if (document.documentElement.clientHeight) {
+		vSize = document.documentElement.clientHeight;
+		hSize = document.documentElement.clientWidth;
+	} else if (document.body.clientHeight) {
+		vSize = document.body.clientHeight;
+		hSize = document.body.clientWidth;
+	} else {
+		vSize = 700;  // assuming 1024x768, minus chrome and such
+		hSize = 1024; // these do not account for kiosk mode or Opera Show
+	}
         var image = document.getElementsByTagName("img")[0];
-        var wscale = 1.0 * document.body.clientWidth /  image.origwidth;
-        var hscale = 1.0 * document.body.clientHeight / image.origheight;
+        var wscale = hSize /  image.origwidth;
+        var hscale = vSize / image.origheight;
         var scale = Math.min(wscale, hscale);
         image.style.width = scale * image.origwidth;
         image.style.height = scale * image.origheight;
@@ -304,7 +318,8 @@ declare function above-picture($picture, $group, $name, $preamble, $prev, $next,
   nav-bar($picture, $name, $prev, $next, $style)}
 <div class="preamble-text">
 <p>{if ($i=$count) then "Last" else concat("Number ", $i)} of {$count}.  {
-  if (empty($date)) then () else concat("Date taken: ",string($date),".")}</p>
+  if (empty($date)) then () else concat("Date taken: ",string($date),"."),
+  if ($style="full") then <i> [Type <code>h</code> to hide.]</i> else () }</p>
 { $preamble }
 { make-header($picture, $group)}
 { picture-text($picture)}
