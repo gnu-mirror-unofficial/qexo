@@ -7,18 +7,25 @@ declare namespace ImageInfo = "class:com.drew.imaging.exif.ImageInfo"
 :)
 declare variable $nl := "&#10;";
 
-declare function local:make-img($picture, $scale) {
-  <img src="{$picture}" width="{number($picture/@width) * $scale}"
+declare function local:make-img($picture, $scale, $class) {
+  <img class="{$class}" src="{$picture}"
+    width="{number($picture/@width) * $scale}"
+    height="{number($picture/@height) * $scale}"/>
+};
+
+declare function local:make-main-img($picture, $scale) {
+  <img class="main" id="main-image" src="{$picture}"
+    width="{number($picture/@width) * $scale}"
     height="{number($picture/@height) * $scale}"/>
 };
 
 declare function local:make-thumbnail($pic) {
   if ($pic/small-image) then
-    local:make-img($pic/small-image, 1.0)
+    local:make-img($pic/small-image, 1.0, "thumb")
   else if ($pic/image) then
-    local:make-img($pic/image, 0.5)
+    local:make-img($pic/image, 0.5, "thumb")
   else if ($pic/full-image) then
-    local:make-img($pic/full-image, 0.2)
+    local:make-img($pic/full-image, 0.2, "thumb")
   else
   ( "(missing small-image)", string($pic), ")" )
 };
@@ -193,10 +200,7 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
     if ($style!="full") then '
       img { border: thin solid black }'
     else '
-      img { position: absolute; bottom: 0px; right: 0px; }
-      img { visibility: hidden }
-      body { overflow: hidden }
-      div#preamble { position: absolute; top: 0px; left: 0px; width: 600px }
+      div#preamble { z-index: 1; top: 0px; left: 0px; width: 600px }
       div.preamble-text { background-color: #FFFF99; border: 1px solid black; padding: 0.5em} '}
    </style>
 {(  (: (Note what we have to do to add an XQuery comment here!)
@@ -204,53 +208,24 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
      : 'n' (or space) and 'p' for navigation.  The indentation of the code
      : isn't "logical", but it makes the JavaScript code look nice. :) )}
     <script language="JavaScript">
-      document.onkeypress = handler;
-      var next = "{ if (empty($next)) then "" else string($next/@id) }";
-      var prev = "{ if (empty($prev)) then "" else string($prev/@id) }";
-      var hash = {if ($style="info") then '"#info"' else if ($style="full") then 'location.hash ? location.hash : "#large-scaled"' else 'location.hash'};
-      function handler(e) {{
-        var key = e ? e.which : event.keyCode;{
-        if (empty($next)) then ()
-        else (: if 'n' was pressed, goto $next :)
-          concat('
-        if (key == 110 || key == 32) { location="',
-          string($next/@id), local:style-link($style), '.html"+hash; return true; }'),
-        if (empty($prev)) then ()
-        else (: if 'p' was pressed, goto $prev :)
-          concat('
-        if (key == 112) { location="',
-          string($prev/@id), local:style-link($style), '.html"+hash; return true; }')}
-        if (key == 117) {{ location="index.html{
-           if ($style="info") then '#info"'
-           else if ($style="full") then '"+(hash==""?"#large-scaled":hash)'
-	   else '"'}; return true; }}
-        if (key == 105) {{ location="{$name}info.html"; return true; }}
-        if (key == 108) {{ location="{$name}large.html"; return true; }}
-        if (key == 109) {{ location="{$name}.html"; return true; }}
-	if (key == 104) {{
-	  var preamble = document.getElementById("preamble");
-	  hidePreamble = !hidePreamble;
-	  preamble.style.visibility = hidePreamble ? "hidden" : "visible";
-          hash = hidePreamble ? "#large-scaled-only" : "#large-scaled";
-	  location.hash = hidePreamble ? hash : "";
-          if (up_button_link)
-            up_button_link.href = "index.html"+hash;
-	  return true;
-        }}
-        return routeEvent(e);
-      }}
+      var thisId = "{string($next/@id)}";
+      var nextId = "{ if (empty($next)) then "" else string($next/@id) }";
+      var prevId = "{ if (empty($prev)) then "" else string($prev/@id) }";
+      var hash = location.hash;
+      var style_link = "{local:style-link($style)}";
+      var uphash = {if ($style="info") then '"#info"' else if ($style="full") then 'location.hash ? location.hash : "#large-scaled"' else '""'};
     </script>
-    <script language="JavaScript" type="text/javascript" src="{$libdir}/picture.js"></script>
+    <script language="JavaScript" type="text/javascript" src="{$libdir}/picture.js">{((:Following space needed to force output of closing tag:))} </script>
   </head>
 {
   element body {
     attribute bgcolor {"#00DDDD"},
     if ($style="full") then
-      (attribute onload {"javascript:LoadSize();"},
-      attribute onresize {"javascript:ScaleSize();"})
+      (attribute onload {"javascript:ScaledLoad();"},
+      attribute onresize {"javascript:ScaledResize();"})
     else
-    (attribute onload {"javascript:OnLoad();"},
-    local:above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count)),
+      attribute onload {"javascript:OnLoad();"},
+    local:above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count),
   let $full-image := $picture/full-image,
       $image := $picture/image
   return
@@ -276,21 +251,18 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
         </tr></table>
   )
   else if (($style="large" or $style="full") and $full-image) then
-    local:make-img($full-image, 1)
+    local:make-main-img($full-image, 1)
   else if ($style="full" and $image) then
-    local:make-img($image, 1)
+    local:make-main-img($image, 1)
   else if ($style="large" and $image
            and number($image/@width) <= 640
            and number($image/@height) <= 640) then
-    local:make-img($image, 2)
+    local:make-main-img($image, 2)
   else if ($full-image) then
-    local:make-img($full-image, 0.5)
+    local:make-main-img($full-image, 0.5)
   else
-    local:make-img($image, 1)
- },
- (: In "full" style, we need to draw the header etc *after* the image. :)
- if ($style!="full") then () else
-    local:above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count)
+    local:make-main-img($image, 1)
+ }
  }
 </html>,$nl
 };
@@ -302,7 +274,7 @@ declare function local:above-picture($picture, $group, $name, $preamble, $prev, 
 <div class="preamble-text">
 <p>{if ($i=$count) then "Last" else concat("Number ", $i)} of {$count}.  {
   if (empty($date)) then () else concat("Date taken: ",string($date),"."),
-  if ($style="full") then <i> [Type <code>h</code> to hide.]</i> else () }</p>
+  if ($style="full") then <script language="JavaScript">document.write(" <i>[Type <code>h</code> to hide.]</i>")</script> else () }</p>
 { $preamble }
 { local:make-header($picture, $group)}
 { local:picture-text($picture)}
