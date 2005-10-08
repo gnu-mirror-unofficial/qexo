@@ -15,18 +15,81 @@ public class create
 
   public static void main (String[] args)
   {
-    if (args.length <= 1)
+    int iarg = 0;
+    String title = null;
+    String libdir = null;
+    String scriptdir = null;
+    boolean force = false;
+    for (; ; iarg++)
       {
-	System.err.println("Usage: \"album title\" file1.jpg file2.jpg ...");
-	System.exit(-1);
+        if (iarg == args.length)
+          {
+            error("Usage: \"album title\" file1.jpg file2.jpg ...");
+          }
+        String arg = args[iarg];
+        if (! arg.startsWith("-"))
+          break;
+        if (arg.startsWith("--libdir="))
+          {
+            libdir = arg.substring(9);
+          }
+        else if (arg.startsWith("--scriptdir="))
+          {
+            scriptdir = arg.substring(12);
+          }
+        else if (arg.startsWith("--title="))
+          {
+            title = arg.substring(8);
+          }
+        else if (arg.equals("--force"))
+          {
+            force = true;
+          }
+        else
+          {
+            error("unrecognized option: "+arg);
+          }
       }
-    String title = args[0];
     File indexFile = new File("index.xml");
-    if (indexFile.exists())
+    if (indexFile.exists() && ! force)
       {
 	System.err.println("The file index.xml already exists.");
 	System.err.println("Delete it first if you're sure you don't want it.");
 	System.exit(-1);
+      }
+    if (title == null)
+      {
+        if (iarg+1==args.length
+            || args[iarg].endsWith(".jpg")
+            || args[iarg].endsWith(".jpeg"))
+          error("missing title");
+        title = args[iarg];
+        iarg++;
+      }
+    if (libdir == null)
+      {
+        File dir = new File(System.getProperty("user.dir"));
+        File parent = dir.getParentFile();
+        libdir = "";
+        for (;;)
+          {
+            if (parent == null)
+              error("cannot find an existing ..../lib for libdir");
+            String dpath = dir.getPath();
+            File ldir = new File(dir, "lib");
+            if (ldir.isDirectory())
+              {
+                libdir = libdir+"lib";
+                break;
+              }
+            dir = parent;
+            parent = dir.getParentFile();
+            libdir = "../"+libdir;
+          }
+      }
+    else if (! new File(libdir).isDirectory())
+      {
+        error("libdir "+libdir+" is not a directory");
       }
     // We build the output in an initial StringWriter, so we don't
     // create a partial index.xml if there is an exception.
@@ -35,11 +98,11 @@ public class create
     try
       {
         out.println("<?xml version=\"1.0\"?>");
-        out.println("<group>");
+        out.println("<group libdir=\""+libdir+"\">");
         out.println("<title>" + title + "</title>");
 
         int iend = args.length;
-        for (int i = 1;  i < iend;  i++)
+        for (int i = iarg;  i < iend;  i++)
           {
             String filename = args[i];
             File file =  new File(filename);

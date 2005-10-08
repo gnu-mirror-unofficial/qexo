@@ -1,3 +1,5 @@
+declare xmlspace preserve;
+declare variable $libdir external;
 (:
 declare namespace exif-extractor = "class:com.drew.imaging.exif.ExifExtractor"
 declare namespace exif-loader = "class:com.drew.imaging.exif.ExifLoader"
@@ -116,7 +118,7 @@ declare function local:make-header($picture, $group) {
 declare function local:nav-bar($picture, $name, $prev, $next, $style) {
 <table>
   <tr>
-    <td><span class="button"><a href="index.html">Index</a></span></td>{
+    <td><span class="button"><a id="up-button" href="index.html">Index</a></span></td>{
     if ($style="info") then () else ("
     ",<td><span class="button">{local:make-link($name, "info", "Info")}</span></td>),
     if ($style="large" or $style="full") then () else ("
@@ -203,20 +205,25 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
      : isn't "logical", but it makes the JavaScript code look nice. :) )}
     <script language="JavaScript">
       document.onkeypress = handler;
-      var hidePreamble = false;
+      var next = "{ if (empty($next)) then "" else string($next/@id) }";
+      var prev = "{ if (empty($prev)) then "" else string($prev/@id) }";
+      var hash = {if ($style="info") then '"#info"' else if ($style="full") then 'location.hash ? location.hash : "#large-scaled"' else 'location.hash'};
       function handler(e) {{
         var key = e ? e.which : event.keyCode;{
         if (empty($next)) then ()
         else (: if 'n' was pressed, goto $next :)
           concat('
         if (key == 110 || key == 32) { location="',
-          string($next/@id), local:style-link($style), '.html"; return true; }'),
+          string($next/@id), local:style-link($style), '.html"+hash; return true; }'),
         if (empty($prev)) then ()
         else (: if 'p' was pressed, goto $prev :)
           concat('
         if (key == 112) { location="',
-          string($prev/@id), local:style-link($style), '.html"; return true; }')}
-        if (key == 117) {{ location="index.html"; return true; }}
+          string($prev/@id), local:style-link($style), '.html"+hash; return true; }')}
+        if (key == 117) {{ location="index.html{
+           if ($style="info") then '#info"'
+           else if ($style="full") then '"+(hash==""?"#large-scaled":hash)'
+	   else '"'}; return true; }}
         if (key == 105) {{ location="{$name}info.html"; return true; }}
         if (key == 108) {{ location="{$name}large.html"; return true; }}
         if (key == 109) {{ location="{$name}.html"; return true; }}
@@ -224,41 +231,16 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
 	  var preamble = document.getElementById("preamble");
 	  hidePreamble = !hidePreamble;
 	  preamble.style.visibility = hidePreamble ? "hidden" : "visible";
+          hash = hidePreamble ? "#large-scaled-only" : "#large-scaled";
+	  location.hash = hidePreamble ? hash : "";
+          if (up_button_link)
+            up_button_link.href = "index.html"+hash;
 	  return true;
         }}
         return routeEvent(e);
-      }}{ if ($style!="full") then () else '
-      function LoadSize() {
-        image = document.getElementsByTagName("img")[0];
-	image.origwidth = image.getAttribute("width");
-        image.origheight = image.getAttribute("height");
-        ScaleSize();
-        image.style.visibility = "visible";
-      }
-      function ScaleSize() {
-        /* Window size calculation from S5 slides.css. by Eric Meyer. */
-	var hSize, vSize;
- 	if (window.innerHeight) {
-		vSize = window.innerHeight;
-		hSize = window.innerWidth;
-	} else if (document.documentElement.clientHeight) {
-		vSize = document.documentElement.clientHeight;
-		hSize = document.documentElement.clientWidth;
-	} else if (document.body.clientHeight) {
-		vSize = document.body.clientHeight;
-		hSize = document.body.clientWidth;
-	} else {
-		vSize = 700;  // assuming 1024x768, minus chrome and such
-		hSize = 1024; // these do not account for kiosk mode or Opera Show
-	}
-        var image = document.getElementsByTagName("img")[0];
-        var wscale = hSize /  image.origwidth;
-        var hscale = vSize / image.origheight;
-        var scale = Math.min(wscale, hscale);
-        image.style.width = scale * image.origwidth;
-        image.style.height = scale * image.origheight;
-      }'}
+      }}
     </script>
+    <script language="JavaScript" type="text/javascript" src="{$libdir}/picture.js"></script>
   </head>
 {
   element body {
@@ -267,7 +249,8 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
       (attribute onload {"javascript:LoadSize();"},
       attribute onresize {"javascript:ScaleSize();"})
     else
-    local:above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count),
+    (attribute onload {"javascript:OnLoad();"},
+    local:above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count)),
   let $full-image := $picture/full-image,
       $image := $picture/image
   return
@@ -338,16 +321,9 @@ declare function local:make-group-page($group) {
       img {{ border: 0 }}
       table.row {{ padding: 10px }}
     </style>
-    <script language="JavaScript">
-      document.onkeypress = handler;
-      function handler(e) {{
-        var key = navigator.appName == 'Netscape' ? e.which
-          : window.event.keyCode;
-        if (key == 117) {{ location="../index.html"; return true; }}
-        return routeEvent(e); }}
-    </script>
+    <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"></script>
   </head>
-  <body bgcolor="#00AAAA">
+  <body bgcolor="#00AAAA" onload="javascript:fixLinks();">
     <h2>{$group/title/node()}</h2>
 {   local:find-rows((), $group/*)}
   </body>
