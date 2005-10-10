@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Help for viewing QAlbum photo albums</title>
+</head>
+
+<body>
+<h1>Help for viewing QAlbum photo albums</h1>
+
+<p>The photo album code is intended to work on all browsers,
+but it works best with modern browsers with CSS and JavaScript enabled.</p>
+
+<h2>Picture styles</h2>
+
+<p>You can choose between different picture sizes and display styles
+using the Style selector.  (Some of the styles require JavaScript to
+be enabled.  If JavaScript is not available, you get get button to choose
+between the Medium, Large, and Info styles.)
+
+<dl>
+  <dt>Medium</dt>
+  <dd>The default style show a picture scaled to at most
+    740 pixels in either direction.
+    This is suitable for low-to-moderate bandwidth connections,
+    and should work for any display wider than 800 pixels.</dd>
+  <dt>Large</dt>
+  <dd>This currently uses the original unscaled image,
+      so it is best for high-bandwidth connections and larger displays.
+    What with increasing camera resulations, in the future we might
+    need to add an extra <q>hude</q> size for originals.)</dd>
+   <dt>Information</dt>
+   <dd>This shows a small (thumbnail) image, but also shows
+     various <q>EXIF</q> information about the camera and the image.
+     It also has direct links to the image (<code>.jpg</code>) files,
+     and any outtake/alternative images.</dd>
+   <dt>Large, scaled</dt>
+   <dd>Uses the large image, and automatically scaled it to fit
+     the current window.
+     This means you don't have to scroll the picture if it doesn't fit.
+     It is very nice for fullscreen mode.
+     The initial navigation links and text may overlap the image,
+     depending on the relative image and window sizes.
+     Type <q><code>h</code></q> to hide the links and text;
+     another <q><code>h</code></q> bring them back.</dd>
+   <dt>Large, scaled, no text</dt>
+   <dd>Same as the previous style followed by typing <q><code>h</code></q>
+     to hide the links and text.
+     Type <q><code>h</code></q> bring them back.</dd>
+   <dt>Medium, scaled</dt>
+   <dd>Same as <q>Large, scaled</q>, but uses the medium image.
+     This downloads and displays much faster, but the pictures aren't
+     quite as nice-looking.
+   <dt>Medium, scaled, no text</dt>
+   <dd>Same as <q>Large, scaled, no text</q>, but uses the medium image.</dd>
+   <dt>Slider</dt>
+   <dd>On the left shows a scrollable frame with all the images,
+     while the rest of the window matches the medium image.
+     This makes it easy to navigate to the picture you want.</dd>
+</dd>
+</dl>
+
+<h2>Keyboard shortcuts</h2>
+
+<p>These keyboard shortcuts might be easier than clicking.
+(They only work if JavaScript is enabled.)
+
+<dl>
+ <dt>p</dt><dd>Go to the Previous image.</dd>
+ <dt>n</dt><dd>Go to the Next image.</dd>
+ <dt>u</dt><dd>Go Up to the index page.</dd>
+ <dt>l</dt><dd>Show the Large image.</dd>
+ <dt>i</dt><dd>Show the Information page.</dd>
+ <dt>m</dt><dd>Show the Medium (default) page.</dd>
+</dl>
+</body>
+</html>
