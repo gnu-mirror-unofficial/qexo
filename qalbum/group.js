@@ -1,8 +1,8 @@
 var hash = location.hash;
 function handler(e) {
   var key = e ? e.which : event.keyCode;
-  if (key == 117) { location="../index.html"; return true; }
-  return false;
+  if (key == 117) { location="../index.html"; return false; }
+  return true;
 }
 document.onkeypress = handler;
 function fixLinks() {
@@ -70,4 +70,5 @@ function sliderHandler (e) {
       return false;
     }
   }
+  return true;
 }

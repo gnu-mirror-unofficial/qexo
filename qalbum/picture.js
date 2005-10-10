@@ -79,14 +79,31 @@ function ScaledResize() {
 }
 
 function handler(e) {
-  var key = e ? e.which : event.keyCode;
+  var event = e ? e : window.event;
+  var key = event.keyCode ? event.keyCode : event.which;
+  if (event.ctrlKey || event.altKey || event.metaKey) return;
+  //if (event.shiftKey) key += 100;
   if (key >= 65 && key <= 90) key += 32; // Needed for Konqueor
-  if (nextId && (key == 110 || key == 32)) {
+  if (key == 32 || key == 34) { // space or page-down
+    var body = document.body;
+    if (nextId && body.scrollTop+body.clientHeight>=body.scrollHeight)
+      key = 110;
+    else
+      return true;
+  }
+  if (nextId && key == 110) { // 'n' key
       if (top.slider) {
         top.slider.sliderSelectId(nextId);
         return false;
       }
       location=nextId+style_link+".html"+hash; return true;
+  }
+  if (key == 33) { // page-up
+    var body = document.body;
+    if (prevId && body.scrollTop==0)
+      key = 112;
+    else
+      return true;
   }
   if (prevId && key == 112) {
       if (top.slider) {
