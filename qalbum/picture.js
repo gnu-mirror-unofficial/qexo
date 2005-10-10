@@ -27,7 +27,7 @@ function OnLoad() {
     {
       var td_node = td_nodes[i];
       var parent = td_node.parentNode;
-      if (td_node.getAttribute("class")=="style-choice")
+      if (td_node.getAttribute("style-button"))
         td_node.parentNode.removeChild(td_node);
     }
   preamble = document.getElementById("preamble");

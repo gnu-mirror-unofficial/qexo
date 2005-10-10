@@ -134,12 +134,12 @@ declare function local:nav-bar($picture, $name, $prev, $next, $style) {
       else ()
     }</td>{
     if ($style="info") then () else ("
-    ",<td class="style-choice">{local:make-link($name, "info", "Info")}</td>),
+    ",<td style-button="info">{local:make-link($name, "info", "Info")}</td>),
     if ($style="large" or $style="full") then () else ("
-    ",<td width="200" align="left" class="style-choice">{
+    ",<td width="200" align="left" style-button="large">{
       local:make-link($name, "large", "Large image")}</td>),
     if ($style="") then () else ("
-    ",<td width="200" align="left" class="style-choice">{
+    ",<td width="200" align="left" style-button="medium">{
       local:make-link($name, "", "Medium image")}</td>)}
   <script language="JavaScript">WriteStyleMenu();</script>
   </tr>
