@@ -46,7 +46,7 @@ declare function local:format-row($row) {
    <table bgcolor="black" cellpadding="0" frame="border"
       border="0" rules="none">
       <tr>
-        <td align="center"><a href="{$pic/@id}.html">{
+        <td align="center"><a fixup="style" href="{$pic/@id}.html">{
           local:make-thumbnail($pic)}</a></td>
       </tr>
       { if ($pic/caption) then

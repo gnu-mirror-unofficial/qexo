@@ -9,22 +9,23 @@ function fixLinks() {
   if (hash=="")
     return;
   var links = document.getElementsByTagName("a");
-  // FIXME assume all links are to thumbnails.
   for (var i = links.length; --i >= 0; ) {
-    var href = links[i].href;
-    if (hash=="#info")
-      href = href.replace(/[.]html/, "info.html");
-    else if (hash=="#large-scaled")
-      href = href.replace(/[.]html/, "large.html#large-scaled");
-    else if (hash=="#large-scaled-only")
-      href = href.replace(/[.]html/, "large.html#large-scaled-only");
-    else if (hash=="#large")
-      href = href.replace(/[.]html/, "large.html");
-    else if (hash=="#medium-scaled")
-      href = href.replace(/[.]html/, ".html#medium-scaled");
-    else if (hash=="#medium-scaled-only")
-      href = href.replace(/[.]html/, ".html#medium-scaled-only");
-    links[i].href = href;
+    if (links[i].getAttribute("fixup")) {
+      var href = links[i].href;
+      if (hash=="#info")
+        href = href.replace(/[.]html/, "info.html");
+      else if (hash=="#large-scaled")
+        href = href.replace(/[.]html/, "large.html#large-scaled");
+      else if (hash=="#large-scaled-only")
+        href = href.replace(/[.]html/, "large.html#large-scaled-only");
+      else if (hash=="#large")
+        href = href.replace(/[.]html/, "large.html");
+      else if (hash=="#medium-scaled")
+        href = href.replace(/[.]html/, ".html#medium-scaled");
+      else if (hash=="#medium-scaled-only")
+        href = href.replace(/[.]html/, ".html#medium-scaled-only");
+      links[i].href = href;
+    }
   }
 }
 
