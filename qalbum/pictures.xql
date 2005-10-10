@@ -35,7 +35,7 @@ declare function local:style-link($style) {
 };
 
 declare function local:make-link($picture-name, $style, $text) {
-  <a href="{$picture-name}{local:style-link($style)}.html">{$text}</a>
+  <a class="button" href="{$picture-name}{local:style-link($style)}.html" onclick='OnClick("{$picture-name}")'>{$text}</a>
 };
 
 declare function local:format-row($row) {
@@ -125,24 +125,23 @@ declare function local:make-header($picture, $group) {
 declare function local:nav-bar($picture, $name, $prev, $next, $style) {
 <table>
   <tr>
-    <td><span class="button"><a id="up-button" href="index.html">Index</a></span></td>{
-    if ($style="info") then () else ("
-    ",<td><span class="button">{local:make-link($name, "info", "Info")}</span></td>),
-    if ($style="large" or $style="full") then () else ("
-    ",<td width="200" align="left"><span class="button">{
-      local:make-link($name, "large", "Large image")}</span></td>),
-    if ($style="") then () else ("
-    ",<td width="200" align="left"><span class="button">{
-      local:make-link($name, "", "Medium image")}</span></td>)}
+    <td><a class="button" id="up-button" href="index.html" onclick="top.location='index.html'">Index</a></td>
     <td width="100" align="right">{
-      if ($prev) then
-        <span class="button">{local:make-link($prev/@id, $style, " < Previous ")
-      }</span> else ()}</td>
+      if ($prev) then local:make-link($prev/@id, $style, " < Previous ")
+      else ()}</td>
     <td width="100" align="left">{
-      if ($next) then
-        <span class="button">{local:make-link($next/@id, $style, " Next > ")}</span>
+      if ($next) then local:make-link($next/@id, $style, " Next > ")
       else ()
-    }</td>
+    }</td>{
+    if ($style="info") then () else ("
+    ",<td class="style-choice">{local:make-link($name, "info", "Info")}</td>),
+    if ($style="large" or $style="full") then () else ("
+    ",<td width="200" align="left" class="style-choice">{
+      local:make-link($name, "large", "Large image")}</td>),
+    if ($style="") then () else ("
+    ",<td width="200" align="left" class="style-choice">{
+      local:make-link($name, "", "Medium image")}</td>)}
+  <script language="JavaScript">WriteStyleMenu();</script>
   </tr>
 </table>
 };
@@ -196,35 +195,35 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
     <style type="text/css">
       a {{ padding: 1 4; text-decoration: none; }}
       td {{ padding-left: 0; border-style: none }}
-      span.button {{ border: thin solid; background-color: #FFFF99; }} {
-    if ($style!="full") then '
-      img { border: thin solid black }'
-    else '
-      div#preamble { z-index: 1; top: 0px; left: 0px; width: 600px }
-      div.preamble-text { background-color: #FFFF99; border: 1px solid black; padding: 0.5em} '}
+      a.button {{ border: thin solid; background-color: #FFFF99; }}
+      a.button:hover {{ background-color: orange; }}
+      span.button {{ border: thin solid; background-color: #FFFF99; }}
+      img {{ border: thin solid black }}
+      div#preamble {{ z-index: 1; top: 0px; left: 0px; width: 600px }}
+      div.preamble-text {{ background-color: #FFFF99; border: 1px solid black; padding: 0.5em}}
    </style>
 {(  (: (Note what we have to do to add an XQuery comment here!)
      : Next we generate a JavaScript handler, to handle pressing the keys
      : 'n' (or space) and 'p' for navigation.  The indentation of the code
      : isn't "logical", but it makes the JavaScript code look nice. :) )}
     <script language="JavaScript">
-      var thisId = "{string($next/@id)}";
+      var thisId = "{$name}";
       var nextId = "{ if (empty($next)) then "" else string($next/@id) }";
       var prevId = "{ if (empty($prev)) then "" else string($prev/@id) }";
+      var libdir = "{$libdir}";
       var hash = location.hash;
       var style_link = "{local:style-link($style)}";
-      var uphash = {if ($style="info") then '"#info"' else if ($style="full") then 'location.hash ? location.hash : "#large-scaled"' else '""'};
+      var uphash = {if ($style="info") then '"#info"'
+                    else if ($style="full") then 'location.hash ? location.hash : "#large"'
+                    else 'location.hash?location.hash:top.slider?"#slider":""'};
     </script>
     <script language="JavaScript" type="text/javascript" src="{$libdir}/picture.js">{((:Following space needed to force output of closing tag:))} </script>
   </head>
 {
   element body {
     attribute bgcolor {"#00DDDD"},
-    if ($style="full") then
-      (attribute onload {"javascript:ScaledLoad();"},
-      attribute onresize {"javascript:ScaledResize();"})
-    else
-      attribute onload {"javascript:OnLoad();"},
+    attribute onload {"javascript:OnLoad();"},
+    attribute onresize {"javascript:ScaledResize();"},
     local:above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count),
   let $full-image := $picture/full-image,
       $image := $picture/image
@@ -258,31 +257,32 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
            and number($image/@width) <= 640
            and number($image/@height) <= 640) then
     local:make-main-img($image, 2)
-  else if ($full-image) then
-    local:make-main-img($full-image, 0.5)
-  else
+  else if ($image) then
     local:make-main-img($image, 1)
+  else
+    local:make-main-img($full-image, 0.5)
  }
  }
 </html>,$nl
 };
 
 declare function local:above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count) {
-<div id="preamble">
+<div id="preamble"><form>
 { (:if ($style="full") then () else:)
   local:nav-bar($picture, $name, $prev, $next, $style)}
 <div class="preamble-text">
 <p>{if ($i=$count) then "Last" else concat("Number ", $i)} of {$count}.  {
   if (empty($date)) then () else concat("Date taken: ",string($date),"."),
-  if ($style="full") then <script language="JavaScript">document.write(" <i>[Type <code>h</code> to hide.]</i>")</script> else () }</p>
+  if ($style="full") then <script language="JavaScript">if (scaled) document.write(" <i>[Type <code>h</code> to hide.]</i>")</script> else () }</p>
 { $preamble }
 { local:make-header($picture, $group)}
 { local:picture-text($picture)}
-</div>
+</div></form>
 </div>
 };
 
-declare function local:make-group-page($group) {
+declare function local:make-slider-page($group) {
+let $first := string($group/picture[1]/@id) return
 <html>
   <head>
     {$group/title}
@@ -293,10 +293,96 @@ declare function local:make-group-page($group) {
       img {{ border: 0 }}
       table.row {{ padding: 10px }}
     </style>
-    <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"></script>
+    <script type="text/javascript">
+      function loadFrames() {{
+        var hash=top.location.hash;
+        var main=top.main;
+        var id = hash ? hash.substring(1) : "{$first}";
+        top.slider.sliderSelectId(id);
+        top.slider.focus();
+      }}
+    </script>
+  </head>
+  <frameset cols="280,*" onload="top.loadFrames()">
+    <frame name="slider" src="sindex.html" />
+    <frame name="main" src="{$first}.html" />
+  </frameset>
+</html>
+};
+
+declare function local:make-slider-index-page($group) {
+<html>
+  <head>
+    {$group/title}
+    <link rel="up" href="../index.html" />
+    <link rel="top" href="../../index.html" />
+    <style type="text/css">
+      a.textual {{ text-decoration: none }}
+      img {{ border: 0 }}
+      table.row {{ padding: 10px }}
+    </style>
+    <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"> </script>
+  <script language="JavaScript">document.onkeypress = sliderHandler;</script>
   </head>
   <body bgcolor="#00AAAA" onload="javascript:fixLinks();">
+  <table cellpadding="0" frame="border"
+      border="0" rules="none" >{
+  for $pic in $group/* return
+  typeswitch ($pic)
+  case element(text,*) return <tr><td><p>{$pic/node()}</p></td></tr>
+  case element(picture,*) return ("
+    ",
+<tr><td><table id="{$pic/@id}" bgcolor="black" onclick="javascript:onClickSlider(this)">
+      <tr>
+        <td align="center"><a href="{$pic/@id}.html" target="main">{
+          local:make-thumbnail($pic)}</a></td>
+      </tr> {
+      if ($pic/caption) then
+      <tr>
+        <td  bgcolor="#FFFF99" align="center"><a class="textual" target="main"
+          href="{$pic/@id}.html" target="main">{$pic/caption/node()}</a></td>
+      </tr>
+      else ()}
+    </table></td></tr>)
+  default return ()
+}
+  </table>
+  </body>
+</html>
+};
+
+declare function local:make-group-page($group) {
+<html>
+  <head>
+    {$group/title}
+    <link rel="up" href="../index.html" />
+    <link rel="help" href="{$libdir}/help.html" />
+    <link rel="top" href="../../index.html" />
+    <style type="text/css">
+      a.textual {{ text-decoration: none }}
+      img {{ border: 0 }}
+      table.row {{ padding: 10px }}
+      div#header {{ padding: 1px }}
+      span.button {{ border: thin solid; background-color: #FFFF99; }}
+      p#group-buttons {{ display: block; margin: 0; text-align: center;
+        position: absolute;  top: 0.5em;  left: 0.5em;  width: 6em;
+        right: auto;  background: #FFFF99; }}
+      p#group-buttons a {{ text-decoration: none; display: block; border: thin solid black }}
+      p#group-buttons a:link {{ text-decoration: none}}
+      p#group-buttons a:hover {{ background: orange }}
+      div#header h2 {{ position: relative;  left: 7em;  top: 0em;}}
+    </style>
+    <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"> </script>
+  </head>
+  <body bgcolor="#00AAAA" onload="javascript:fixLinks();">
+  <div id="header">
+  <p id="group-buttons">
+    <a href="{$libdir}/help.html">Help</a>
+    <a href="../index.html">Up</a>
+    <a href="slider.html">Slider</a>
+    </p>
     <h2>{$group/title/node()}</h2>
+  </div>
 {   local:find-rows((), $group/*)}
   </body>
 </html>
@@ -311,7 +397,7 @@ declare function local:make-group-page($group) {
  : $texts: <text> nodes seen so far that are not in a <picture>.
  : $unseen: the modes (<picture>, <row>, <text>) to process for this call.
  :)
-declare function local:loop-pictures($group, $pictures, $i, $count, $style, $texts, $unseen) {
+declare function local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts, $unseen) {
   if (empty($unseen)) then ()
   else
     let $cur := item-at($unseen, 1),
@@ -319,24 +405,27 @@ declare function local:loop-pictures($group, $pictures, $i, $count, $style, $tex
     return
       typeswitch ($cur)
       case element(row,*) return (
-	 local:loop-pictures($group, $pictures, $i, $count, $style, $texts, $cur/*),
-         local:loop-pictures($group, $pictures, $i+count($cur//picture),
+	 local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts, $cur/*),
+         local:loop-pictures($group, $date, $pictures, $i+count($cur//picture),
            $count, $style, (), $rest))
       case element(text,*) return
-        local:loop-pictures($group, $pictures, $i, $count, $style,
+        local:loop-pictures($group, $date, $pictures, $i, $count, $style,
                       ($texts,<p>{$cur/node()}</p>), $rest)
+      case element(date,*) return
+        local:loop-pictures($group, $cur, $pictures, $i, $count, $style,
+                      $texts, $rest)
       case element(picture,*) return
         let $prev := if ($i > 1) then item-at($pictures, $i - 1) else (),
             $next := if ($i < $count) then item-at($pictures, $i + 1) else (),
-            $date := if ($cur/date) then $cur/date else $group/date,
+            $pdate := if ($cur/date) then $cur/date else $date,
 	    $name := string($cur/@id)
         return
         (write-to(local:picture($cur,  $group, $name,
-		    $texts, $prev, $next, $date, $style, $i, $count),
+		    $texts, $prev, $next, $pdate, $style, $i, $count),
                   concat($name, local:style-link($style), ".html")),
-         local:loop-pictures($group, $pictures, $i+1, $count, $style, (),  $rest))
+         local:loop-pictures($group, $date, $pictures, $i+1, $count, $style, (),  $rest))
       default return
-         local:loop-pictures($group, $pictures, $i, $count, $style, $texts,  $rest)
+         local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts,  $rest)
 };
 
 let $group := doc("index.xml")/group,
@@ -344,7 +433,9 @@ let $group := doc("index.xml")/group,
     $pictures := $group//picture,
     $count := count($pictures)
   return (
+    write-to(local:make-slider-page($group), "slider.html"),
+    write-to(local:make-slider-index-page($group), "sindex.html"),
     write-to(local:make-group-page($group), "index.html"),
     for $style in ("", "info", "full")
     return
-    local:loop-pictures($group, $pictures, 1, $count, $style, (), $group/*))
+    local:loop-pictures($group, $group/date[1], $pictures, 1, $count, $style, (), $group/*))
