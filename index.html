@@ -196,21 +196,15 @@ by using the XQuery sandbox hosted at
 
 <h2 id="Download">How to get and install Qexo</h2>
 <p>Qexo is part of Kawa.  The easiest way to try it out it to
-download a <a href="http://ftp.gnu.org/pub/gnu/kawa/kawa-1.7.90.jar">runnable jar</a>.
+download a <a href="http://ftp.gnu.org/pub/gnu/kawa/kawa-1.8.jar">runnable jar</a>.
 Alternatively, you can get the
-<a href="http://ftp.gnu.org/pub/gnu/kawa/kawa-1.7.90.tar.gz">source code</a>.
+<a href="http://ftp.gnu.org/pub/gnu/kawa/kawa-1.8.tar.gz">source code</a>.
 Both are available from the Kawa ftp site
-<a href="http://ftp.gnu.org/pub/gnu/kawa/">http://ftp.gnu.org/pub/gnu/kawa/"</a>
+<a href="http://ftp.gnu.org/pub/gnu/kawa/">http://ftp.gnu.org/pub/gnu/kawa/</a>
 or a <a href="http://www.gnu.org/order/ftp.html">mirror</a>
 However, XQuery is new and constantly changing, so you might
 prefer to get Kawa from the CVS repository, as described
 <a href="http://www.gnu.org/software/kawa/Getting-Kawa.html">in the Kawa manual</a>.
-</p>
-
-<p style="border: solid; border-color: red; border-width: 2px">
-A beta of Kawa/Qexo 1.8 is (temporarily) available at<br>
-<a href="ftp://bothner.com/pub/kawa-1.8beta.tar.gz"><code>ftp://bothner.com/pub/kawa-1.8beta.tar.gz</code> (source code)</a> or<br />
-<a href="ftp://bothner.com/pub/kawa-1.8beta.jar"><code>ftp://bothner.com/pub/kawa-1.8beta.jar</code> (runnable jar file)</a>.
 </p>
 
 <h2 id="Usage">Usage</h2>
@@ -223,7 +217,7 @@ valid XQuery expression, then that expression will be treated as
 a complete expression.  (However, when parsing a file the entire
 file is parsed.)
 <pre>
-$ java -jar kawa-1.7.90.jar --xquery
+$ java -jar kawa-1.8.jar --xquery
 xquery[1]: for $x in (3,4,5) return &lt;a&gt;{$x}&lt;/a&gt;
 &lt;a&gt;3&lt;/a&gt;&lt;a&gt;4&lt;/a&gt;&lt;a&gt;5&lt;/a&gt;
 xquery[2]: string-value(&lt;a&gt;3+5 is {3+5}&lt;/a&gt;)
@@ -233,8 +227,8 @@ xquery[3]:
 <p>
 You can also compile an XQuery program to a Java application:
 <pre>
-$ java -jar kawa-1.7.90.jar --xquery --main -C prog.xql
-$ java -cp .:kawa-1.7.90.jar prog
+$ java -jar kawa-1.8.jar --xquery --main -C prog.xql
+$ java -cp .:kawa-1.8.jar prog
 </pre>
 <p>
 You can read <a href="Running.html">here for more on running Qexo</a>.
@@ -255,8 +249,6 @@ which is the GNU General Public License with some extra options.
 
 This <a href="status.html">page summaries what works</a>,
 relative to the most recent XQuery specification documents.
-It describes the latest working sources in CVS; release 1.7.95 (which
-will hopefully be out soon) will be based on this.
 
     <hr>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
