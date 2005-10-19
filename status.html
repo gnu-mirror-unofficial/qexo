@@ -7,8 +7,7 @@
   <body>
     <h1>Qexo Implementation Status</h1>
 
-<p><em>Note:</em> This (incompletely) describes the status
-of the latest CVS source tree, which should become 1.7.95.</p>
+<p><em>Note:</em> This (incompletely) describes the status of the Kawa/Qexo 1.8 release.</p>
 
 <h2>Type specifiers</h2>
 
@@ -43,7 +42,7 @@ All axes (including optional ones, except the namespace axis) are implemented.
 
 <h3>Other expressions</h3>
 
-<p>FLWOR expressions should work, except for <code>order by</code> clauses.</p>
+<p>FLWOR expressions should work correctly.</p>
 
 <p>No support for validation, and incomplete support for type testing.
 <code>typeswitch</code> works to the extent that Qexo understands the types.</p>
@@ -56,8 +55,8 @@ are not implemented.</p>
 <h2>Prologue declarations</h2>
 
 <ul>
-<li><code>VarDecl</code> (<code>declare variable</code>): Ok, though no
-support for <code>external</code> variables yet.</li>
+<li><code>VarDecl</code> (<code>declare variable</code>): Ok, including
+support for <code>external</code> variables.</li>
 <li><code>FunctionDecl</code> (<code>declare function</code>): Ok, though no
 support for <code>external</code> functions yet.
 No support yet for multiple functions with the same name but
@@ -68,7 +67,7 @@ Type conversion and casting behavior are uneven.
 <li><code>DefaultNamespaceDecl</code> (<code>declare default (element/function) namespace</code>): Ok.</li>
 <li><code>DefaultCollationDecl</code> (<code>declare default collection</code>): Ok.  The default collection is set in the static context, but so far
 nothing uses it.  Also, only the default (code-point) collation works.</li>
-<li><code>BaseURIDecl</code> (<code>declare base-uri</code>): Not implemented.
+<li><code>BaseURIDecl</code> (<code>declare base-uri</code>): Ok.
 <li><code>ConstructionDecl</code> (<code>declare construction</code>): Not implemented.
 </li>
 <li><code>SchemeImport</code> (<code>import scheme</code>): Not imeplemented.</li>
@@ -206,6 +205,7 @@ nothing uses it.  Also, only the default (code-point) collation works.</li>
     <li>Operators and Functions Related to QNames<br/>
 	<ol>
 	  <li><code>op:QName-equal</code>: Ok.</li>
+	  <li><code>fn:prefix-from-QName</code>: Ok.</li>
 	  <li><code>fn:local-name-from-QName</code>: Ok.</li>
 	  <li><code>fn:namespace-uri-from-QName</code>: Ok.</li>
 	  <li><code>fn:namespace-uri-for-prefix</code>: Ok.</li>
@@ -220,18 +220,16 @@ nothing uses it.  Also, only the default (code-point) collation works.</li>
 <ol>
       <li><code>fn:name</code>: Not implemented.<br/>
 (Workaround: <code>fn:string(fn:node-name(<var>node</var>))</code>.)</li>
-      <li><code>fn:local-name</code>: Not implemented.<br/>
-(Workaround: <code>fn:local-name-from-QName(fn:node-name(<var>node</var>))</code>.)</li>
+      <li><code>fn:local-name</code>: Ok.</li>
 </li>
-      <li><code>fn:namespace-uri</code>: Not implemented.<br/>
-(Workaround: <code>fn:namespace-uri-from-QName(fn:node-name(<var>node</var>))</code>.)</li>
+      <li><code>fn:namespace-uri</code>: Ok.</li>
 </li>
       <li><code>fn:number</code>: Only 1-argument version is implemented.</li>
       <li><code>fn:lang</code>: Not implemented.</li>
       <li><code>op:is-same-node</code> (<code>is</code> operator on nodes): Ok.</li>
       <li><code>op:node-before</code> (<code>&lt;&lt;</code> operator on nodes): Ok.</li>
       <li><code>op:node-after</code>(<code>&gt;&gt;</code> operator on nodes): Ok.</li>
-      <li><code>fn:root</code>: Only 1-argument version is implemented.</li>
+      <li><code>fn:root</code>: Ok.</li>
     </ol>
 <h3>15 Functions and Operators on Sequences</h3>
     <ol>
@@ -241,10 +239,10 @@ nothing uses it.  Also, only the default (code-point) collation works.</li>
 	  <li><code>fn:index-of</code>: Ok.</li>
 	  <li><code>fn:empty</code>: Ok.</li>
 	  <li><code>fn:exists</code>: Ok.</li>
-	  <li><code>fn:distinct-values</code>: Not implemented.</li>
+	  <li><code>fn:distinct-values</code>: Ok.</li>
 	  <li><code>fn:insert-before</code>: Not implemented.</li>
 	  <li><code>fn:remove</code>: Not implemented.</li>
-	  <li><code>fn:reverse</code>: Not implemented.</li>
+	  <li><code>fn:reverse</code>: Ok.</li>
 	  <li><code>fn:subsequence</code>: Not implemented.</li>
 	  <li><code>fn:unordered</code>: Not implemented.</li>
 	</ol></li>
@@ -275,6 +273,7 @@ nothing uses it.  Also, only the default (code-point) collation works.</li>
 	  <li><code>fn:id</code>: Not implemented.</li>
 	  <li><code>fn:idref</code>: Not implemented.</li>
 	  <li><code>fn:doc</code>: Ok.</li>
+	  <li><code>fn:doc-available</code>: Ok.</li>
 	  <li><code>fn:collection</code>: Not implemented.</li>
 	</ol></li>
       </ol>
