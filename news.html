@@ -18,21 +18,53 @@ with the most recent changes first.</p>
 See also the list of <a href="../kawa/news.html">general Kawa changes</a>.
 <p>
 
-<h2>Changes in the CVS repository since 1.7.90</h2>
-<p> Warn about old syntax.
-<p>
+<h2>Changes in the CVS repository since 1.8</h2>
+<p>None so far!</p>
+
+<h2>Changes from Kawa 1.7.90 to 1.8</h2>
+<ul>
+<li><p>The <code>order by</code> clause of FLWOR-expressions now works.</p></li>
+<li>
+A <code>qexo</code> command-line command is now installed
+(if using <code>make</code> to build and install).
+<li><p>
+The <code>doc</code> function now properly remembers previously-read
+documents, so reading the same document twice yields identical nodes,
+as required by the specification.
+The <code>doc-available</code> function is newly implemented.
+<li><p>
+The <code>declare base-uri</code> statement now works.
+<li><p>
+The standard functions <code>distinct-values</code>, <code>reverse</code>,
+<code>compare</code>, <code>local-name</code>, and <code>namespace-uri</code>
+are now implemented.
+The <code>min</code> and <code>max</code> now atomize nodes if needed.
+Hence some more standard use cases now work.
+<li><p>
+External variables are implemented.
+For example given a file <code>script.xql</code> containing:<br/>
+<code>declare variable $input external;</code><br/>
+<code>doc($fname)</code><br/>
+you can run it thus:<br/>
+<code>qexo fname=my-file.xml -f script.xql</code>
+<li><p>
+You can specify the serialization parameters
+<code>doctype-system</code> and <code>doctype-public</code>.</p>
+<li><p>Warns about old syntax.
+<li><p>
 Handle <code>declare default collation</code>.  This is mainly a place-holder
 so we can correctly implement functions that use collations.
-<p>
+<li><p>
 Added <code>.xq</code> and <code>.xquery</code> as XQuery file extensions,
 to match latest draft.
-<p>
+<li><p>
 Added QName functions <code>local-name-from-QName</code>,
-<code>namespace-uri-from-QName</code>, <code>namespace-uri-for-prefix</code>.
-
-<p>
+<code>namespace-uri-from-QName</code>, <code>prefix-from-QName</code>,
+and <code>namespace-uri-for-prefix</code>.
+<li><p>
 Implement namespace declaration attributes such as
 <code>&lt;a xmlns:a="URL"&gt;</code>.
+</ul>
 
 <h2>Changes from Kawa 1.7 to 1.7.90</h2>
 <p>
@@ -54,9 +86,9 @@ Implement namespace declaration attributes such as
 <p>
  Proper QName handling of variable and function names.
 <p>
- Support absolute path expressions (starting with / or //). 
+ Support absolute path expressions (starting with <code>/</code> or <code>//</code>). 
 <p>
- Working general implementation of position() and last().
+ Working general implementation of <code>position()</code> and<code> last()</code>.
 <p>
  Handle the remaining XPath axes, such as parent and also
   all the optional axes (ancestor, following-sibling etc).
