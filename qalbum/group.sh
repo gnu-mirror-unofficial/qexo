@@ -8,6 +8,9 @@ elif test -f ../../lib/picture.js; then libdir=../../lib
 elif test -f ../../../lib/picture.js; then libdir=../../../lib
 else echo missing libdir; exit -1
 fi
+for file in picture.js group.js help.html; do
+  test $scriptdir/$file -nt $libdir/$file && cp $scriptdir/$file $libdir/$file
+done
   
 for id in `sed -n -e 's/<picture id="\(.*\)">/\1/p' <index.xml`
 do
