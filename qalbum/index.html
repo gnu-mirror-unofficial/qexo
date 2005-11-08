@@ -59,6 +59,22 @@ per page).</p>
 If you have a group of pictures you want to web-ify,
 this section gives suggested instructions for what to do.
 
+<h3>If needed, create a <code>lib</code> directory</h3>
+<p>
+The <code>lib</code> directory contains files that are
+shared between albums - currently two JavaScript files and
+<a href="help.html"><code>help.html</code></a>.
+The directory can be anywhere, if you explicitly specify
+the <code>--libdir=<var>directory</var></code> when running
+<code>make-xml.sh</code>.
+However, if you use <code>../lib</code>, <code>../../lib</code>, or
+<code>../../lib</code> (relative to the album you're working on)
+then the scripts will find it automatically.
+So create a directory named <code>lib</code> next to your
+top-level album.
+When you run <code>group.sh</code> later, it will copy the necessary
+files over.
+
 <h3>Generate initial overview files</h3>
 <p>Put the scripts directory in your path:
 <pre>
