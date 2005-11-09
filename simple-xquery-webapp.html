@@ -94,39 +94,15 @@ I'll explain the control flow of our "application"
 after we look at how to install and get it running.
 
 <h2>Installing Qexo under Tomcat</h2>
-
 <p>Installing this application is very easy, assuming you have
 a web server that can run servlets.
-I tested this application using version 4.1.24 of
-<a href="http://jakarta.apache.org/tomcat/">Tomcat</a>,
-which is a Free web server
-written in Java and released by the Apache Foundation's Jakarta project.
-I assume you or someone else has already installed Tomcat,
-and that the environment variable <code>$CATALINA_HOME</code> is
-where Tomcat is installed.</p>
-<p>
 Qexo is part of the
-<a href="http://www.gnu.org/software/kawa/">Kawa framework</a>.
-You will need to install a <code>jar</code> file of Kawa
-(version 1.7 or later).
-You can get <code>kawa-1.7.jar</code> from
-<a href="ftp://ftp.gnu.org/pub/gnu/kawa/">the Kawa ftp site</a>
-or from a <a href="http://www.gnu.org/order/ftp.html">mirror site</a>.
-Install this as <code>$CATALINA_HOME/shared/lib/kawa-1.7.jar</code>.
-(If you're using Tomcat 4.0.x, <code>shared/lib</code> doesn't
-exist.  Install as <code>$CATALINA_HOME/lib/kawa-1.7.jar</code> instead.)</p>
-<p>
-If Tomcat isn't already running, start it.
-For example, under Unix-like systems you can
-run the script <code>$CATALINA_HOME/bin/startup.sh</code>.
-You may need to set the environment variable <code>JAVA_HOME</code>
-to point to where Java is installed on your machine.
-(On Mac OS X 10.2 this
-is <code>/Library/Java/Home</code>.)
-If you haven't changed any of the defaults,
-you should now be able to point your browser at
-<a href="http://localhost:8080/"><code>http://localhost:8080/</code></a>,
-and get the default Tomcat home page.
+<a href="http://www.gnu.org/software/kawa/">Kawa framework</a>,
+so you will need to install a <code>.jar</code> file of Kawa
+(version 1.7 or later)
+into the server so it can execute Kawa code.
+See these
+<a href="../kawa/server/Tomcat-setup.html">instructions for setting up Tomcat for Kawa</a>.
 
 <h2>Installing our web application</h2>
 <p>A <dfn>web application</dfn> is a group of data,
@@ -242,7 +218,7 @@ been <a href="servlet.html"#debugging">moved<a>.
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Mon May  5 20:28:35 PDT 2003 -->
 <!-- hhmts start -->
-Last modified: Mon Aug  9 23:09:50 PDT 2004
+Last modified: Tue Nov  8 18:45:58 PST 2005
 <!-- hhmts end -->
   </body>
 </html>
