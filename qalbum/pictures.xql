@@ -1,11 +1,7 @@
 declare xmlspace preserve;
 declare variable $libdir external;
-(:
-declare namespace exif-extractor = "class:com.drew.imaging.exif.ExifExtractor"
-declare namespace exif-loader = "class:com.drew.imaging.exif.ExifLoader"
-declare namespace ImageInfo = "class:com.drew.imaging.exif.ImageInfo"
-:)
 declare variable $nl := "&#10;";
+declare namespace ImageInfo = "class:qalbum.ImageInfo";
 
 declare function local:make-img($picture, $scale, $class) {
   <img class="{$class}" src="{$picture}"
@@ -40,9 +36,9 @@ declare function local:make-link($picture-name, $style, $text) {
 
 declare function local:format-row($row) {
   "&#10;  ", (: emit a newline for readabilty :)
-  <table width="90%" class="row"><tr>{
+  <table class="row"><tr>{
   for $pic in $row return
-  <td>
+  <td align="center">
    <table bgcolor="black" cellpadding="0" frame="border"
       border="0" rules="none">
       <tr>
@@ -148,15 +144,9 @@ declare function local:nav-bar($picture, $name, $prev, $next, $style) {
 
 declare function local:get-image-info ($name)
 {
-(:
-<pre>{
-  let $info := exif-loader:getImageInfo(java.io.File:new(concat($name,".jpg")))
-  for $i in iterator-items(ImageInfo:getTagIterator($info)) return
- ( "
-", ImageInfo:getTagName($i),": ", ImageInfo:getDescription($info, $i))
+<pre>
+{ImageInfo:readCommonValues(concat($name,".jpg"))
 }</pre>
-:)
-  doc(concat($name,"-info.txt"))
 };
 
 declare function local:raw-jpg-link($image, $description) {
@@ -317,6 +307,7 @@ declare function local:make-slider-index-page($group) {
     <link rel="up" href="../index.html" />
     <link rel="top" href="../../index.html" />
     <style type="text/css">
+      p {{ font-size: small }}
       a.textual {{ text-decoration: none }}
       img {{ border: 0 }}
       table.row {{ padding: 10px }}
@@ -361,8 +352,8 @@ declare function local:make-group-page($group) {
     <style type="text/css">
       a.textual {{ text-decoration: none }}
       img {{ border: 0 }}
-      table.row {{ padding: 10px }}
-      div#header {{ padding: 1px }}
+      table.row {{ padding: 10px; width: 100% }}
+      div#header {{ padding: 1px; width: 720 }}
       span.button {{ border: thin solid; background-color: #FFFF99; }}
       p#group-buttons {{ display: block; margin: 0; text-align: center;
         position: absolute;  top: 0.5em;  left: 0.5em;  width: 6em;
@@ -428,7 +419,7 @@ declare function local:loop-pictures($group, $date, $pictures, $i, $count, $styl
          local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts,  $rest)
 };
 
-let $group := doc("index.xml")/group,
+let $group := doc("file:./index.xml")/group,
     $group-name := $group/title,
     $pictures := $group//picture,
     $count := count($pictures)
