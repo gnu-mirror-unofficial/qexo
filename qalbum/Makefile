@@ -1,20 +1,25 @@
-KAWALIB = /home/bothner/kawa-bin
+#KAWALIB = /home/bothner/kawa-bin
+KAWALIB = /home/bothner/Kawa/work2
 JAVA = java
 JAVAC = javac
 KAWA = CLASSPATH=$${KAWAJAR-$(KAWALIB)}:. $(JAVA) kawa.repl
 QEXO = $(KAWA) --xquery
 QALBUM_PACKAGE_DIR = ../qalbum
 QALBUM_PACKAGE_ROOT = ..
+ExifExtractor_JAR = metadata-extractor-2.3.0.jar
 
-all: sizes.class pictures.class
+all: $(QALBUM_PACKAGE_DIR)/ImageInfo.class $(QALBUM_PACKAGE_DIR)/pictures.class
 
 sizes.class: sizes.xql
-	$(QEXO) --main -C sizes.xql
+	scriptdir=`pwd`; ./setup.sh; \
+	$(KAWA) --xquery --main -C sizes.xql
 
 $(QALBUM_PACKAGE_DIR)/create.class: $(QALBUM_PACKAGE_DIR)/create.java
 	$(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/create.java
 
-pictures.class: pictures.xql
-	scriptdir=`pwd`; \
-	. ./setup.sh; \
-	$(KAWA) --xquery --main -C pictures.xql
+$(QALBUM_PACKAGE_DIR)/ImageInfo.class: $(QALBUM_PACKAGE_DIR)/ImageInfo.java
+	CLASSPATH=".:$(ExifExtractor_JAR)" $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/ImageInfo.java
+
+$(QALBUM_PACKAGE_DIR)/pictures.class: pictures.xql
+	scriptdir=`pwd`; ./setup.sh; \
+	$(KAWA) --xquery --main -d .. -P qalbum. -C pictures.xql
