@@ -181,6 +181,11 @@ public class ImageInfo
     return sbuf.toString();
   }
 
+  public String toString ()
+  {
+    return "ImageInfo["+filename+"]";
+  }
+
   public static void main (String[] args)
     throws Throwable
   {
