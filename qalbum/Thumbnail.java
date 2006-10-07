@@ -1,4 +1,6 @@
-// http://developer.java.sun.com/developer/TechTips/1999/tt1021.html
+// Based on http://developer.java.sun.com/developer/TechTips/1999/tt1021.html
+
+package qalbum;
 
 import java.awt.Image;
 import java.awt.Graphics2D;
