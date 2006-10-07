@@ -1,27 +1,29 @@
-declare xmlspace preserve;
+declare boundary-space preserve;
 declare variable $libdir external;
 declare variable $nl := "&#10;";
-declare namespace ImageInfo = "class:qalbum.ImageInfo";
+declare namespace PictureInfo = "class:qalbum.PictureInfo";
 
-declare function local:make-img($picture, $scale, $class) {
-  <img class="{$class}" src="{$picture}"
-    width="{number($picture/@width) * $scale}"
-    height="{number($picture/@height) * $scale}"/>
+declare function local:make-img($image, $scale as xs:double, $class, $picinfo) {
+  let $image-name := string($image) return
+  <img class="{$class}" src="{$image-name}"
+    width="{PictureInfo:getWidthFor($picinfo, $image-name) * $scale}"
+    height="{PictureInfo:getHeightFor($picinfo, $image-name) * $scale}"/>
 };
 
-declare function local:make-main-img($picture, $scale) {
-  <img class="main" id="main-image" src="{$picture}"
-    width="{number($picture/@width) * $scale}"
-    height="{number($picture/@height) * $scale}"/>
+declare function local:make-main-img($image, $scale as xs:double, $picinfo) {
+  let $image-name := string($image) return
+  <img class="main" id="main-image" src="{$image-name}"
+    width="{PictureInfo:getWidthFor($picinfo, $image-name) * $scale}"
+    height="{PictureInfo:getHeightFor($picinfo, $image-name) * $scale}"/>
 };
 
-declare function local:make-thumbnail($pic) {
+declare function local:make-thumbnail($pic, $picinfo) {
   if ($pic/small-image) then
-    local:make-img($pic/small-image, 1.0, "thumb")
+    local:make-img($pic/small-image, 1.0e0, "thumb", $picinfo)
   else if ($pic/image) then
-    local:make-img($pic/image, 0.5, "thumb")
+    local:make-img($pic/image, 0.5e0, "thumb", $picinfo)
   else if ($pic/full-image) then
-    local:make-img($pic/full-image, 0.2, "thumb")
+    local:make-img($pic/full-image, 0.2e0, "thumb", $picinfo)
   else
   ( "(missing small-image)", string($pic), ")" )
 };
@@ -34,16 +36,17 @@ declare function local:make-link($picture-name, $style, $text) {
   <a class="button" href="{$picture-name}{local:style-link($style)}.html" onclick='OnClick("{$picture-name}")'>{$text}</a>
 };
 
-declare function local:format-row($row) {
+declare function local:format-row($first, $last, $pictures, $picinfos) {
   "&#10;  ", (: emit a newline for readabilty :)
   <table class="row"><tr>{
-  for $pic in $row return
+  for $i in $first to $last
+  let $pic := item-at($pictures, $i) return
   <td align="center">
    <table bgcolor="black" cellpadding="0" frame="border"
       border="0" rules="none">
       <tr>
         <td align="center"><a fixup="style" href="{$pic/@id}.html">{
-          local:make-thumbnail($pic)}</a></td>
+          local:make-thumbnail($pic, item-at($picinfos, $i))}</a></td>
       </tr>
       { if ($pic/caption) then
       <tr>
@@ -60,45 +63,51 @@ declare function local:format-row($row) {
  : rows of at most 3, for the thumbnail page.
  : $prev:  An integer giving the number of <picture>s in
  :   this current sequence that precede those in $pictures.
+ : $count: Total number of pictures.
  : $pictures:  Remaining <picture> elements to process.
  : Returns formatted HTML for the input $pictures.
  :)
-declare function local:make-rows($prev, $pictures) {
-  let $count := count($pictures) return
+declare function local:make-rows($first, $last, $pictures, $picinfos) {
+  let $count := $last - $first + 1 return
   if ($count = 0) then ()
-  else if ($count <= 3) then
-    local:format-row($pictures)
-  else if ($count = 4 and $prev = 0) then
-    (: A special case:  If there are 4 pictures in a row,
-     : then group them as 2 rows of 2 rather than 3 + 1. :)
-    (local:format-row(sublist($pictures, 1, 2)),
-     local:format-row(sublist($pictures, 3, 2)))
+  else if ($count=4) then (: special case to display 2+2 rather than 3+1 :)
+    (local:format-row($first, $first+1, $pictures, $picinfos),
+     local:format-row($first+2, $last, $pictures, $picinfos))
   else
-     (local:format-row(sublist($pictures, 1, 3)),
-      local:make-rows($prev+3,sublist($pictures, 4)))
+  let $lastrow := (($count + 2) mod 3) + 1 return
+    (local:make-rows($first, $last - $lastrow, $pictures, $picinfos),
+     local:format-row($last - $lastrow + 1, $last, $pictures, $picinfos))
 };
 
 (: Process the children of a <group>, grouping thumbnails into rows.
- : $pictures:  Sequence of <picture>s that need to be split into rows.
+ : $first: Index (in $pictures) of next picture to emit thumbnail for.
+ : $ntext: Index (in $pictures) of first <picture> element in unseen.
+ : $pictures:  Sequence of all the <picture> elements.
+ : $picinfos:  Sequence of corresponding PictureInfo object.
  : $unseen: sequence of remaining children we have not processed yet.
  :)
-declare function local:find-rows($pictures, $unseen) {
-  if (empty($unseen)) then local:make-rows(0, $pictures)
+declare function local:find-rows($first, $next, $unseen,
+                                 $pictures, $picinfos) {
+  if (empty($unseen)) then
+    local:make-rows($first, $next - 1, $pictures, $picinfos)
   else
-    let $next := item-at($unseen, 1),
-        $rest := sublist($unseen, 2)
+    let $item := item-at($unseen, 1),
+        $rest := subsequence($unseen, 2)
     return
-      typeswitch ($next)
-      case element(row,*) return
-        (local:make-rows(0, $pictures),local:format-row($next/*),local:find-rows((), $rest))
-      case element(date,*) return (: ignore <date> children here. :)
-        (local:make-rows(0, $pictures),local:find-rows((), $rest))
-      case element(title,*) return (: ignore <title> children here. :)
-        (local:make-rows(0, $pictures),local:find-rows((), $rest))
-      case element(text,*) return (: format <text> as a paragraph. :)
-        (local:make-rows(0, $pictures),<p>{$next/node()}</p>,local:find-rows((), $rest))
-      default return
-        local:find-rows(($pictures,$next), $rest)
+      if ($item instance of element(picture)) then
+        (: Add the picture picture to the pending <picture> sequence :)
+        local:find-rows($first, $next+1, $rest, $pictures, $picinfos)
+      else
+        (local:make-rows($first, $next - 1, $pictures, $picinfos),
+         if ($item instance of element(row)) then
+           let $rcount := count($item/picture) return
+             (local:format-row($next, $next +$rcount -1, $pictures, $picinfos),
+              local:find-rows($next+$rcount, $next+$rcount, $rest, $pictures, $picinfos))
+         else
+           ((if ($item instance of element(text)) then
+             <p>{$item/node()}</p>
+             else () (: ignore <date>, <title> here :)),
+            local:find-rows($next, $next, $rest, $pictures, $picinfos)))
 };
 
 declare function local:picture-text($picture) {
@@ -142,17 +151,9 @@ declare function local:nav-bar($picture, $name, $prev, $next, $style) {
 </table>
 };
 
-declare function local:get-image-info ($name)
-{
-<pre>
-{ImageInfo:readCommonValues(concat($name,".jpg"))
-}</pre>
-};
-
-declare function local:raw-jpg-link($image, $description) {
+declare function local:raw-jpg-link($image, $description, $picinfo) {
   if (empty($image)) then () else
-  <td><span class="button"><a href="{$image}">{$description} ({
-    string($image/@width)}x{string($image/@height)})</a></span></td>
+  <td><span class="button"><a href="{$image}">{$description} {PictureInfo:getSizeDescription($picinfo, string($image))}</a></span></td>
 };
 
 (: Generate a page picture image with links etc.
@@ -168,7 +169,7 @@ declare function local:raw-jpg-link($image, $description) {
  :   The "info" style show a thumbnail, plus EXIF information, plus links to
  :   the raw JPGs.  The "full" style is like "large" but auto-resizing.
  :)
-declare function local:picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count) {
+declare function local:picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count, $picinfo) {
 (: FIXME add documentheader and DO NOT EDIT comment :)
 <html>
   <head>
@@ -220,15 +221,17 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
   return
   if ($style = "info") then (
     <table><tr>
-      <td style="padding: 20 20 20 10">{local:make-thumbnail($picture)} </td>
-      <td>{local:get-image-info($name)}</td>
+      <td style="padding: 20 20 20 10">{local:make-thumbnail($picture, $picinfo)} </td>
+      <td><pre>
+{PictureInfo:getImageDescription($picinfo)}
+</pre></td>
     </tr></table>,"
 ", (: FIXME use $nl :)
     <table><tr><td>Plain JPEG images:</td>
-    {local:raw-jpg-link($picture/full-image, "Original")}
+    {local:raw-jpg-link($picture/full-image, "Original", $picinfo)}
     {local:raw-jpg-link($picture/image,
-    if ($full-image) then "Scaled" else "Original")}
-    {local:raw-jpg-link($picture/small-image, "Thumbnail")}
+    if ($full-image) then "Scaled" else "Original", $picinfo)}
+    {local:raw-jpg-link($picture/small-image, "Thumbnail", $picinfo)}
     </tr></table>,"
 ", (: FIXME use $nl :)
     let $outtakes := $picture/outtake return
@@ -240,17 +243,18 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
         </tr></table>
   )
   else if (($style="large" or $style="full") and $full-image) then
-    local:make-main-img($full-image, 1)
+    local:make-main-img($full-image, 1e0, $picinfo)
   else if ($style="full" and $image) then
-    local:make-main-img($image, 1)
+    local:make-main-img($image, 1e0, $picinfo)
   else if ($style="large" and $image
-           and number($image/@width) <= 640
-           and number($image/@height) <= 640) then
-    local:make-main-img($image, 2)
+           and (let $image-name := string($image) return
+                 PictureInfo:getWidthFor($picinfo, $image-name) <= 640 and
+                 PictureInfo:getHeightFor($picinfo, $image-name) <= 640)) then
+    local:make-main-img($image, 2e0, $picinfo)
   else if ($image) then
-    local:make-main-img($image, 1)
+    local:make-main-img($image, 1e0, $picinfo)
   else
-    local:make-main-img($full-image, 0.5)
+    local:make-main-img($full-image, 0.5e0, $picinfo)
  }
  }
 </html>,$nl
@@ -300,7 +304,7 @@ let $first := string($group/picture[1]/@id) return
 </html>
 };
 
-declare function local:make-slider-index-page($group) {
+declare function local:make-slider-index-page($group, $picinfos) {
 <html>
   <head>
     {$group/title}
@@ -318,31 +322,58 @@ declare function local:make-slider-index-page($group) {
   <body bgcolor="#00AAAA" onload="javascript:fixLinks();">
   <table cellpadding="0" frame="border"
       border="0" rules="none" >{
-  for $pic in $group/* return
-  typeswitch ($pic)
-  case element(text,*) return <tr><td><p>{$pic/node()}</p></td></tr>
-  case element(picture,*) return ("
-    ",
-<tr><td><table id="{$pic/@id}" bgcolor="black" onclick="javascript:onClickSlider(this)">
-      <tr>
-        <td align="center"><a href="{$pic/@id}.html" target="main">{
-          local:make-thumbnail($pic)}</a></td>
-      </tr> {
-      if ($pic/caption) then
-      <tr>
-        <td  bgcolor="#FFFF99" align="center"><a class="textual" target="main"
-          href="{$pic/@id}.html" target="main">{$pic/caption/node()}</a></td>
-      </tr>
-      else ()}
-    </table></td></tr>)
-  default return ()
+  let $nodes := $group/* return
+    local:slider-index-page-helper($nodes, 1 , count($nodes), $picinfos, 1)
 }
   </table>
   </body>
 </html>
 };
 
-declare function local:make-group-page($group) {
+(: Recurse over nodes to produce a slider.
+ : $nodes: the nodes to process.
+ : $i: next node (as an index in $nodes) to process.
+ : $n: count($nodes).
+ : $picinfos: The PictureInfo objects
+ : $p: next picture (as an index in $picinfos) to process.
+ :)
+declare function local:slider-index-page-helper($nodes, $i, $n,
+                                                $picinfos, $p) {
+  if ($i > $n) then ()
+  else
+  let $item := item-at($nodes, $i) return
+    typeswitch ($item)
+      case element(text) return
+        (<tr><td><p>{$item/node()}</p></td></tr>,
+          local:slider-index-page-helper($nodes, $i+1, $n, $picinfos, $p))
+      case element(row) return
+        let $pictures := $item/picture
+        let $npictures := count($pictures) return
+          (local:slider-index-page-helper($pictures, 1, $npictures,
+                                          $picinfos, $p),
+           local:slider-index-page-helper($nodes, $i+1, $n,
+                                          $picinfos, $p+$npictures))
+      case element(picture) return ("
+    ",
+      <tr><td><table id="{$item/@id}" bgcolor="black" onclick="javascript:onClickSlider(this)">
+      <tr>
+        <td align="center"><a href="{$item/@id}.html" target="main">{
+          local:make-thumbnail($item, item-at($picinfos, $p))}</a></td>
+      </tr> {
+      if ($item/caption) then
+      <tr>
+        <td  bgcolor="#FFFF99" align="center"><a class="textual" target="main"
+          href="{$item/@id}.html" target="main">{$item/caption/node()}</a></td>
+      </tr>
+      else ()}
+    </table></td></tr>,
+    local:slider-index-page-helper($nodes, $i+1, $n, $picinfos, $p+1))
+  default return
+    local:slider-index-page-helper($nodes, $i+1, $n, $picinfos, $p)
+};
+
+
+declare function local:make-group-page($group, $pictures, $picinfos) {
 <html>
   <head>
     {$group/title}
@@ -374,7 +405,7 @@ declare function local:make-group-page($group) {
     </p>
     <h2>{$group/title/node()}</h2>
   </div>
-{   local:find-rows((), $group/*)}
+{   local:find-rows(1, 1, $group/*, $pictures, $picinfos)}
   </body>
 </html>
 };
@@ -388,45 +419,51 @@ declare function local:make-group-page($group) {
  : $texts: <text> nodes seen so far that are not in a <picture>.
  : $unseen: the modes (<picture>, <row>, <text>) to process for this call.
  :)
-declare function local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts, $unseen) {
+declare function local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts, $unseen, $picinfos) {
   if (empty($unseen)) then ()
   else
     let $cur := item-at($unseen, 1),
-        $rest := sublist($unseen, 2)
+        $rest := subsequence($unseen, 2)
     return
       typeswitch ($cur)
       case element(row,*) return (
-	 local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts, $cur/*),
+	 local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts, $cur/*, $picinfos),
          local:loop-pictures($group, $date, $pictures, $i+count($cur//picture),
-           $count, $style, (), $rest))
+           $count, $style, (), $rest, $picinfos))
       case element(text,*) return
         local:loop-pictures($group, $date, $pictures, $i, $count, $style,
-                      ($texts,<p>{$cur/node()}</p>), $rest)
+                      ($texts,<p>{$cur/node()}</p>), $rest, $picinfos)
       case element(date,*) return
         local:loop-pictures($group, $cur, $pictures, $i, $count, $style,
-                      $texts, $rest)
+                      $texts, $rest, $picinfos)
       case element(picture,*) return
         let $prev := if ($i > 1) then item-at($pictures, $i - 1) else (),
             $next := if ($i < $count) then item-at($pictures, $i + 1) else (),
             $pdate := if ($cur/date) then $cur/date else $date,
 	    $name := string($cur/@id)
         return
-        (write-to(local:picture($cur,  $group, $name,
-		    $texts, $prev, $next, $pdate, $style, $i, $count),
+        (write-to-if-changed(local:picture($cur,  $group, $name,
+		    $texts, $prev, $next, $pdate, $style, $i, $count, item-at($picinfos, $i)),
                   concat($name, local:style-link($style), ".html")),
-         local:loop-pictures($group, $date, $pictures, $i+1, $count, $style, (),  $rest))
+         local:loop-pictures($group, $date, $pictures, $i+1, $count, $style, (),  $rest, $picinfos))
       default return
-         local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts,  $rest)
+         local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts,  $rest, $picinfos)
 };
 
 let $group := doc("file:./index.xml")/group,
     $group-name := $group/title,
     $pictures := $group//picture,
+    $picinfos :=
+      for $p in $pictures
+        return PictureInfo:make(string($p/@id),
+                                string($p/small-image),
+                                string($p/image),
+                                string($p/full-image)),
     $count := count($pictures)
   return (
-    write-to(local:make-slider-page($group), "slider.html"),
-    write-to(local:make-slider-index-page($group), "sindex.html"),
-    write-to(local:make-group-page($group), "index.html"),
+    write-to-if-changed(local:make-slider-page($group), "slider.html"),
+    write-to-if-changed(local:make-slider-index-page($group, $picinfos), "sindex.html"),
+    write-to-if-changed(local:make-group-page($group, $pictures, $picinfos), "index.html"),
     for $style in ("", "info", "full")
     return
-    local:loop-pictures($group, $group/date[1], $pictures, 1, $count, $style, (), $group/*))
+    local:loop-pictures($group, $group/date[1], $pictures, 1, $count, $style, (), $group/*, $picinfos))
