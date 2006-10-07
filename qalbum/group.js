@@ -1,3 +1,5 @@
+// Copyright 2006 Per Bothner
+
 var hash = location.hash;
 function handler(e) {
   var key = e ? e.which : event.keyCode;
