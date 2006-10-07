@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import javax.imageio.*;
 import javax.imageio.stream.*;
+import com.drew.metadata.exif.ExifDirectory;
 
 public class create
 {
@@ -124,6 +125,18 @@ public class create
                 iis.close();
                 out.print("<picture id=\"");  out.print(base);
                 out.println("\">");
+
+                ImageInfo info = ImageInfo.readMetadata(file, filename);
+                String orientation = info.getExifString(ExifDirectory.TAG_ORIENTATION);
+                if (orientation != null && ! orientation.equals("1"))
+                  {
+                    out.print("<original rotated=\"");
+                    out.print(orientation.equals("6") ? "left"
+                              : orientation.equals("8") ? "right"
+                              : orientation);
+                    out.println("\"/>");
+                  }
+
                 String tag = width <= 700 || height <= 700 ? "image" : "full-image";
                 //System.err.println("file: "+filename+" width: "+width+" height: "+height+" tag:"+tag);
                 out.print('<');  out.print(tag);
