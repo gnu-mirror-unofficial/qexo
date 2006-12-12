@@ -7,308 +7,164 @@
   <body>
     <h1>Qexo Implementation Status</h1>
 
-<p><em>Note:</em> This (incompletely) describes the status of the Kawa/Qexo 1.8 release.</p>
+<p><em>This describes the status of the Qexo version 1.8.91.</em></p>
 
-<h2>Type specifiers</h2>
+<h2>Feature Summary</h2>
+<p>Qexo 1.8.91 implements most of the core XQuery specification,
+and <a href="http://www.w3.org/XML/Query/test-suite/XQTSReportSimple.html">passes over 98%</a>
+of the <a href="http://www.w3.org/XML/Query/test-suite/">XQuery Test Suite</a>.
+<p>Qexo implements the Full Axis Feature.</p>
+<p>Qexo implements the Module Feature.</p>
+<p>Qexo implements the Serialization Feature.
+However, only some serialization parameters are settable.</p>
+<p>Qexo does not implement the Schema Import Feature.</p>
+<p>Qexo does not implement the Schema Validation Feature.</p>
+<p>Qexo implements some ad-hoc static typing,
+but does not implement Static Typing Feature.</p>
 
-<p>Qexo only implements part of the XQuery types system.
-There is no support validation or Schema handling, and only
-some of the predefined types are recognized.</p>
+<h2>Atomic types</h2>
+<p>These subtypes of <code>xs:string</code>
+are not yet implemented:
+<code>xs:normalizedString</code>, <code>xs:token</code>,
+<code>xs:language</code>, <code>xs:NMTOKEN</code>, <code>xs:Name</code>,
+<code>xs:NCName</code>, <code>xs:ID</code>, <code>xs:IDREF</code>,
+and <code>xs:ENTITY</code>.</p>
 
-<h3>Atomic types</h2>
 <ul>
-<li><code>xs:QName</code>: Implemented using <code>gnu.xml.SName</code>.
-If Kawa is configured for JAXP 1.3 (or Java 5) then this class
-extends <code>javax.xml.namespace.QName</code>.</li>
-<li><code>xs:boolean</code>: Impleented using <code>java.lang.Boolean</code>.</li>
-<li><code>xs:string</code>: Implemented using <code>java.lang.String</code>.</li>
-<li><code>xs:integer</code>: Implemented using <code>gnu.math.IntNum</code>.</li>
-<li><code>positiveInteger</code>: Implemented using <code>gnu.math.IntNum</code>.</li>
-<li><code>nonPositiveInteger</code>: Implemented using <code>gnu.math.IntNum</code>.</li>
-<li><code>negativeInteger</code>: Implemented using <code>gnu.math.IntNum</code>.</li>
-<li><code>nonNegativeInteger</code>: Implemented using <code>gnu.math.IntNum</code>.</li>
-<li<code>xs:decimal</code>: Translates to <code>gnu.math.RealNum</code>.</li>
+<li><code>xs:untypedAtomic</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/UntypedAtomic.html"><code>gnu.kawa.xml.UntypedAtomic</code></a>.</li>
+<li><code>xs:dateTime</code>, <code>xs:date</code>, <code>xs:time</code>,
+<code>xs:gYearMonth</code>, <code>xs:gYear</code>, <code>xs:gMonthDay</code>, <code>xs:gDay</code>, and <code>xs:gMonth</code>
+are implemented using <a href="../kawa/api/gnu/math/DateTime.html"><code>gnu.math.DateTime</code></a>.
+<li><code>xs:duration</code>, <code>xs:yearMonthDuration</code>,
+<code>xs:dayTimeDuration</code> are implemented using <a href="../kawa/api/gnu/math/Duration.html"><code>gnu.math.Duration</code></a>.
+<li><code>xs:QName</code> is implemented using <a href="../kawa/api/gnu/mapping/Symbol.html"><code>gnu.mapping.Symbol</code></a>.
+<li><code>xs:boolean</code> is implemented using <code>java.lang.Boolean</code>.</li>
+<li><code>xs:string</code> is implemented using <code>java.lang.String</code>.</li>
+<li><code>xs:integer</code>, <code>xs:positiveInteger</code>,
+<code>xs:nonPositiveInteger</code>, <code>xs:negativeInteger</code>,
+and <code>xs:nonNegativeInteger</code> are implemented using <a href="../kawa/api/gnu/math/IntNum.html"><code>gnu.math.IntNum</code></a>.</li>
+<li><code>xs:long</code>, <code>xs:int</code>, <code>xs:short</code>, <code>xs:byte</code>, <code>xs:unsignedLong</code>, <code>xs:unsignedInt</code>, <code>xs:unsignedShort</code>, <code>xs:unsignedbyte</code> are currently also implemented
+using <code>gnu.math.IntNum</code>, but in the future may be implemented using primitive Java types.
+<li<code>xs:decimal</code> is implemented using <code>java.math.BigDecimal</code>.</li>
+<li><code>xs:base64Binary</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/Base64Binary.html"><code>gnu.kawa.xml.Base64Binary</code></a>.
+<li><code>xs:hexBinary</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/HexBinary.html"><code>gnu.kawa.xml.HexBinary</code></a>.
+<li><code>xs:anyURI</code> is currently implemented using <code>java.net.URI</code> (or <code>java.lang.String</code> if Qexo is compiled for pre-JDK-1.4).
+This is likely to change to using a new type <code>gnu.kawa.util.Path</code>.
+<li><code>xs:NOTATION</code> is implemented using
+<a href="../kawa/api/gnu/kawa/xml/Notation.html"><code>gnu.kawa.xml.Notation</code></a>.
 </ul>
 
 <h2>Expressions</h2>
-
-<h3>Path expression</h3>
-<p>All path expressions are believed to work correctly.
-All axes (including optional ones, except the namespace axis) are implemented.
-
-<h3>Node construction</h3>
-
-<p>All direct and computed node constructors are believed to work correctly.</p>
-
-<h3>Other expressions</h3>
-
-<p>FLWOR expressions should work correctly.</p>
-
-<p>No support for validation, and incomplete support for type testing.
-<code>typeswitch</code> works to the extent that Qexo understands the types.</p>
-
-<p>The <code>ordered</code> and <code>unordered</code> expressions
-are not implemented.</p>
-
-<p>Except as noted, other expressions should work.</p>
+<p>Except as noted below, all XQuery expression forms are handled.</p>
+<p><code>ordered</code>, <code>unordered</code> expressions are
+recognized but ignored.</p>
+<p><code>validate</code> expressions are not supported.</p>
+<p>Extension expressions are impemented, but no extensions
+are currently recognized.</p>
 
 <h2>Prologue declarations</h2>
 
 <ul>
+<li><code>VersionDecl</code> (<code>xquery version</code>) is handled
+but any encoding specification is ignored.
 <li><code>VarDecl</code> (<code>declare variable</code>): Ok, including
 support for <code>external</code> variables.</li>
 <li><code>FunctionDecl</code> (<code>declare function</code>): Ok, though no
 support for <code>external</code> functions yet.
-No support yet for multiple functions with the same name but
-different number of parameters.
-Type conversion and casting behavior are uneven.
+Type conversion and casting behavior are uneven:
+the special function conversions (such as atomization) are
+not done for non-builtin functions.
 </li>
 <li><code>NamespaceDecl</code> (<code>declare namespace</code>): Ok.
 <li><code>DefaultNamespaceDecl</code> (<code>declare default (element/function) namespace</code>): Ok.</li>
+<li><code>BoundarySpaceDecl</code> (<code>declare boundary-space</code>): Ok.
 <li><code>DefaultCollationDecl</code> (<code>declare default collection</code>): Ok.  The default collection is set in the static context, but so far
 nothing uses it.  Also, only the default (code-point) collation works.</li>
 <li><code>BaseURIDecl</code> (<code>declare base-uri</code>): Ok.
 <li><code>ConstructionDecl</code> (<code>declare construction</code>): Not implemented.
 </li>
-<li><code>SchemeImport</code> (<code>import scheme</code>): Not imeplemented.</li>
-<li><code>ModuleImport</code> (<code>module import</code>): Partial implementation.</li>
+<li><code>OrderingModeDecl</code> (<code>declare ordering</code>): Ok.
+<li><code>EmptyOrderDecl</code> (<code>declare default oder empty</code>): Ok.
+<li><code>CopyNamespacesDecl</code> (<code>declare copy-namespaces</code>): Ok.
+<li><code>SchemaImport</code> (<code>import scheme</code>): Not implemented.</li>
+<li><code>ModuleImport</code> (<code>module import</code>): Works, including support for separate compilation.</li>
+<li><code>OptionDecl</code> (<code>declare option</code>): Ok, though
+there are no options handled yet.
 </ul>
 
 <h2>Standard functions and operators</h2>
 
 <h3>2 Accessors</h3>
-<ol>
-      <li><code>fn:node-name</code>: Ok.</li>
-      <li><code>fn:nilled</code>: Not implemented.</li>
-      <li><code>fn:string</code>: Ok.</li>
-      <li><code>fn:data</code>: Not implemented.</li>
-      <li><code>fn:base-uri</code>: Only the 1-argument version is implemented.</li>
-      <li><code>fn:static-base-uri</code>: Not implemented.</li>
-      <li><code>fn:document-uri</code>: Not implemented.</li>
-    </ol>
+<p>These should all work correctly.</p>
+<p>Note that <code>nilled</code> always returns false, since Qexo doesn't do validation.</p>
 <h3>3 The Error Function</h3>
-<p>Not implemented.</p>
+<p>Ok.</p>
 <h3>4 The Trace Function</h3>
 <p>Ok.</p>
 <h3>5 Constructor Functions</h3>
-    <ol>
-      <li>Constructor Functions for XML Schema Built-in Types<br />
-	Only <code>xs:QName</code> implemented so far.</li>
-      <li>A Special Constructor Function for <code>xs:dateTime</code>: Not implemented.</li>
-      <li>Constructor Functions for User-Defined Types: Not applicable.</li>
-      </ol>
+<p>These should all work correctly.</p>
 <h3>6 Functions and Operators on Numerics</h3>
-    <ol>
-      <li>Numeric Types</li>
-      <li>Operators on Numeric Values<br/>
-	Arithmetic on numeric values should work Ok.<br/>
-	<ol>
-	  <li><code>op:numeric-add</code>: Ok.</li>
-	  <li><code>op:numeric-subtract</code>: Ok.</li>
-	  <li><code>op:numeric-multiply</code>: Ok.</li>
-	  <li><code>op:numeric-divide</code>:
-	    Implements the <code>div</code> operator.
-	    The <code>div</code> operator on integer values returns
-	    an exact fraction, which isn't as expected.  Output may look
-	    different, but arithmetic should work ok (if slower).</li>
-	  <li><code>op:numeric-integer-divide</code>: Not implemented.</li>
-	  <li><code>op:numeric-mod</code>: Ok.</li>
-	  <li><code>op:numeric-unary-plus</code>: Ok.</li>
-	  <li><code>op:numeric-unary-plus</code>: Ok.</li>
-	</ol></li>
-      <li>Comparison of Numeric Values<br />
-	<ol>
-	  <li><code>op:numeric-equal</code>: Ok.</li>
-	  <li><code>op:numeric-less-than</code>: Ok.</li>
-	  <li><code>op:numeric-greater-than</code>: Ok.</li>
-	</ol></li>
-      <li>Operators on Numeric Values<br />
-	<ol>
-	  <li><code>fn:abs</code>: Not implemented.</li>
-	  <li><code>fn:ceiling</code>: Not implemented.</li>
-	  <li><code>fn:floor</code>: Not implemented.</li>
-	  <li><code>fn:round</code>: Not implemented.</li>
-	  <li><code>fn:round-half-to-even</code>: Not implemented.</li>
-	</ol></li>
-    </ol>
+<p>These should all work correctly.</p>
 <h3>7 Functions on Strings</h3>
-<ol><li>String Types</li>
-    <li>Functions to Assemble and Disassemble Strings<br/>
-	<ol>
-	<li><code>fn:codepoints-to-string</code>: Not implemented.</li>
-        <li><code>fn:string-to-codepoints</code>: Not implemented.</li>
-	</ol></li>
-    <li>Equality and Comparison of Strings<br/>
-        <ol>
-	  <li>Collations</li>
-	  <li><code>fn:compare</code>: Not implemented.</li>
-	</ol></li>
-    <li>Functions on String Values<br/>
-	<ol>
-	  <li><code>fn:concat</code>: Ok.</li>
-	  <li><code>fn:string-join</code>: Ok.</li>
-	  <li><code>fn:substring</code>: Ok.</li>
-	  <li><code>fn:string-length</code>: Ok.</li>
-	  <li><code>fn:normalize-space</code>: Not implemented.</li>
-	  <li><code>fn:normalize-unicode</code>: Not implemented.</li>
-	  <li><code>fn:upper-case</code>: Ok.</li>
-	  <li><code>fn:lower-case</code>: Ok.</li>
-	  <li><code>fn:translate</code>: Ok.</li>
-	  <li><code>fn:escape-uri</code>: Not implemented.</li>
-	</ol></li>
-      <li>Functions Based on Substring Matching<br/>
-	<ol>
-	  <li><code>fn:contains</code>: Ok.</li>
-	  <li><code>fn:starts-with</code>: Ok.</li>
-	  <li><code>fn:ends-with</code>: Ok.</li>
-	  <li><code>fn:substring-before</code>: Ok.</li>
-	  <li><code>fn:substring-after</code>: Ok.</li>
-	</ol></li>
-      </li>
-      <li>String Functions that Use Pattern Matching<br/>
-	None of these have been implemented yet.
-      </li>
-      </ol>
-<h3>8 Functions and Operators for anyURI</h3>
-<ol>
-    <li><code>fn:resolve-uri</code>: Not implemented.</li>
-    <li><code>op:anyURI-equal</code>: Not implemented.</li>
-</ol>
-<h3>9 Functions and Operators on Boolean Values</h3>
-    <ol><li>Additional Boolean Constructor Functions<br>
-    <ol>
-      <li><code>fn:true</code>: Ok.</li>
-      <li><code>fn:false</code>: Ok.</li>
-    </ol></li>
-	<li>Operators on Boolean Values<br>
-	<ol>
-	  <li><code>op:boolean-equal</code>: Ok.</li>
-	  <li><code>op:boolean-less-than</code>: Ok.</li>
-	  <li><code>op:boolean-greater-than</code>: Ok.</li>
-	</ol></li>
-      <li>Functions on Boolean Values<br/>
-	<ol>
-	  <li><code>fn:not</code>: Ok.</li>
-	</ol></li>
-    </ol>
-<h3>10 Functions and Operators on Durations, Dates and Times</h3>
+<p>These generally work correctly.
+A few of the functions do not support an optional collation argument.</p>
+<p>
+Strings can contain characters outside the Unicode 16-bite base plane,
+and most operations correctly handle such characters using surrogate pairs.
+This means that an operation like <code>string-length</code>
+has to scan the string to see if there are any surrogate characters,
+rather than using the Java <code>String.length()</code> method.
+Some of the regex functions require JDK 1.5 or better to correctly
+handle surrogate charscters.</p>
+<p>
+The regular expression (pattern patching) functions use
+the Java <code>java.util.regex</code> classes.  These recognize
+a pattern syntax which is close to but not identical to that
+required by the Schema specification.</p>
+<p><code>normalize-unicode</code> only works
+if Kawa has been configured and built with <code>--select-java6</code>.
 
-    None of these have been implemented yet.
+<h3>8 Functions and Operators for anyURI</h3>
+<p>These should all work correctly.</p>
+
+<h3>9 Functions and Operators on Boolean Values</h3>
+<p>These should all work correctly.</p>
+
+<h3>10 Functions and Operators on Durations, Dates and Times</h3>
+<p>These are all implememented and should work correctly.
+There a few edge cases not quite right, because we use
+<code>java.util.Calendar</code> in the implementation of the date and time
+classes, and <code>Calendar</code> doesn't completely match
+our needs.</p>
 
 <h3>11 Functions Related to QNames</h3>
-    <ol>
-      <li>Additional Constructor Functions for QNames<br />
-	<ol>
-	  <li><code>fn:resolve-QName</code>: Not implemented.</li>
-	  <li><code>fn:QName</code>: Ok.</li>
-	</ol></li>
-    <li>Operators and Functions Related to QNames<br/>
-	<ol>
-	  <li><code>op:QName-equal</code>: Ok.</li>
-	  <li><code>fn:prefix-from-QName</code>: Ok.</li>
-	  <li><code>fn:local-name-from-QName</code>: Ok.</li>
-	  <li><code>fn:namespace-uri-from-QName</code>: Ok.</li>
-	  <li><code>fn:namespace-uri-for-prefix</code>: Ok.</li>
-	  <li><code>fn:in-scope-prefixes</code>: Not implemented.</li>
-	  </ol></li>
-    </ol>
+<p>These should all work correctly.</p>
+
 <h3>12 Functions and Operators on <code>base64Binary</code> and <code>hexBinary</code></h3>
-    None of these have been implemented yet.
+<p>These should all work correctly.</p>
+
 <h3>13 Functions and Operators on <code>NOTATION</code></h3>
-    None of these have been implemented yet.
+<p>This (i.e. <code>op:NOTATION-equal</code>) should work correctly.</p>
+
 <h3>14 Functions and Operators on Nodes</h3>
-<ol>
-      <li><code>fn:name</code>: Not implemented.<br/>
-(Workaround: <code>fn:string(fn:node-name(<var>node</var>))</code>.)</li>
-      <li><code>fn:local-name</code>: Ok.</li>
-</li>
-      <li><code>fn:namespace-uri</code>: Ok.</li>
-</li>
-      <li><code>fn:number</code>: Only 1-argument version is implemented.</li>
-      <li><code>fn:lang</code>: Not implemented.</li>
-      <li><code>op:is-same-node</code> (<code>is</code> operator on nodes): Ok.</li>
-      <li><code>op:node-before</code> (<code>&lt;&lt;</code> operator on nodes): Ok.</li>
-      <li><code>op:node-after</code>(<code>&gt;&gt;</code> operator on nodes): Ok.</li>
-      <li><code>fn:root</code>: Ok.</li>
-    </ol>
+<p>These should all work correctly.</p>
+
 <h3>15 Functions and Operators on Sequences</h3>
-    <ol>
-      <li>General Functions and Operators on Sequences<br />
-	<ol>
-	  <li><code>fn:boolean</code>: Not implemented.</li>
-	  <li><code>fn:index-of</code>: Ok.</li>
-	  <li><code>fn:empty</code>: Ok.</li>
-	  <li><code>fn:exists</code>: Ok.</li>
-	  <li><code>fn:distinct-values</code>: Ok.</li>
-	  <li><code>fn:insert-before</code>: Not implemented.</li>
-	  <li><code>fn:remove</code>: Not implemented.</li>
-	  <li><code>fn:reverse</code>: Ok.</li>
-	  <li><code>fn:subsequence</code>: Not implemented.</li>
-	  <li><code>fn:unordered</code>: Not implemented.</li>
-	</ol></li>
-      <li>Functions That Test the Cardinality of Sequences<br/>
-	<ol>
-	  <li><code>fn:zero-or-one</code>: Not implemented.</li>
-	  <li><code>fn:one-or-more</code>: Not implemented.</li>
-	  <li><code>fn:exactly-one</code>: Not implemented.</li>
-	</ol></li>
-    <li>Equals, Union, Intersection and Except<br />
-	<ol>
-	  <li><code>fn:deep-equal</code>: Not implemented.</li>
-	  <li><code>op:union</code>: Ok.</li>
-	  <li><code>op:intersect</code>: Ok.</li>
-	  <li><code>op:except</code>: Ok.</li>
-	</ol></li>
-      <li>Aggregate Functions<br/>
-	<ol>
-	  <li><code>fn:count</code>: Ok.</li>
-	  <li><code>fn:avg</code>: Ok.</li>
-	  <li><code>fn:max</code>: Ok.</li>
-	  <li><code>fn:min</code>: Ok.</li>
-	  <li><code>fn:sum</code>: Ok.</li>
-	</ol></li>
-      <li>Functions and Operators that Generate Sequences<br/>
-	<ol>
-	  <li><code>op:to</code> (implemnt <code>to</code> operation): Ok.</li>
-	  <li><code>fn:id</code>: Not implemented.</li>
-	  <li><code>fn:idref</code>: Not implemented.</li>
-	  <li><code>fn:doc</code>: Ok.</li>
-	  <li><code>fn:doc-available</code>: Ok.</li>
-	  <li><code>fn:collection</code>: Not implemented.</li>
-	</ol></li>
-      </ol>
+<p>These generally work fine, expect:</p>
+<ul>
+<li><code>deep-equal</code> does not take collation into account,
+and there are are probably some other data types not handled quite correctly.
+<li><code>id</code> works and automatically generates an efficient index the
+first time it is called.  However, because Qexo does not do validation,
+only attributes named <code>xml:id</code> are recognzied as having
+the <code>is-id</code> property.
+<li><code>idref</code> always returns the empty sequence.
+</ul>
+
 <h3>16 Context Functions</h3>
-    <ol>
-      <li><code>fn:position</code>: Ok.</li>
-      <li><code>fn:last</code>: Ok.</li>
-      <li><code>fn:current-dateTime</code>: Not implemented.</li>
-      <li><code>fn:current-date</code>: Not implemented.</li>
-      <li><code>fn:current-time</code>: Not implemented.</li>
-      <li><code>fn:default-collation</code>: Not implemented.</li>
-      <li><code>fn:implicit-timezone</code>: Not implemented.</li>
-      </ol>
+<p>These should all work.</p>
 <h3>17 Casting</h3>
-    <ol>
-      <li>Casting from primitive types to primitive types</li>
-      <li>Casting to derived types</li>
-      <li>Casting from derived types to parent types</li>
-      <li>Casting within a branch of the type hierarchy</li>
-      <li>Casting across the type hierarchy</li>
-      <li>Casting from xs:string and xdt:untypedAtomic</li>
-      <li>Casting to xs:string and xdt:untypedAtomic</li>
-      <li>Casting to numeric types<br/>
-	<ol>
-	  <li>Casting to xs:float</li>
-	  <li>Casting to xs:double</li>
-	  <li>Casting to xs:decimal</li>
-	  <li>Casting to xs:integer and its subtypes</li>
-	  </ol></li>
-      <li>Casting to duration types</li>
-      <li>Casting to date and time types</li>
-      <li>Casting to xs:boolean</li>
-      <li>Casting to xs:base64Binary and xs:hexBinary</li>
-      <li>Casting to xs:anyURI</li>
-    </ol>
+<p>These should all work.</p>
 
     <hr>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
