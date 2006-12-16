@@ -1,5 +1,7 @@
+// Copyright 2006 Per Bothner
+
 var hidePreamble = uphash.indexOf("scaled-only") > 0;
-var up_button_link;
+var up_button_link, prev_button_link, next_button_link;
 var scaled = uphash.indexOf("scaled") > 0;
 
 function addStyleRule(sel, spec) {
@@ -18,10 +20,20 @@ if (scaled) {
   addStyleRule("img#main-image", "visibility: hidden");
  }
 
-function OnLoad() {
-  up_button_link = document.getElementById("up-button");
+function StyleFixLinks() {
   if (up_button_link)
     up_button_link.href = "index.html"+uphash;
+  if (prev_button_link)
+    prev_button_link.href = prev_button_link.href.replace("#.*$","")+hash;
+  if (next_button_link)
+    next_button_link.href = next_button_link.href.replace("#.*$","")+hash;
+}
+
+function OnLoad() {
+  up_button_link = document.getElementById("up-button");
+  prev_button_link = document.getElementById("prev-button");
+  next_button_link = document.getElementById("next-button");
+  StyleFixLinks();
   var td_nodes = document.getElementsByTagName("td");
   for (var i = td_nodes.length;  --i >= 0; )
     {
@@ -49,8 +61,6 @@ function ScaledLoad() {
   preamble.style.visibility = hidePreamble ? "hidden" : "visible";
   ScaledResize();
   image.style.visibility = "visible";
-}
-function changeStyle(style) {
 }
 
 function ScaledResize() {
@@ -113,8 +123,9 @@ function handler(e) {
     location=prevId+style_link+".html"+hash; return true;
   }
   if (key == 117) { location="index.html"+uphash; return true; }
+  if (key == 115) { location="slider.html#"+thisId; return true; }
   if (key == 105) { location=thisId+"info.html"; return true; }
-  if (key == 108) { location=thisId+"large.html"; return true; }
+  if (key == 108) { location=thisId+"large.html#large-scaled"; return true; }
   if (key == 109) { location=thisId+".html"; return true; }
   if (scaled && key == 104 ) {
     hidePreamble = !hidePreamble;
@@ -125,8 +136,7 @@ function handler(e) {
       hash = hidePreamble ? "#medium-scaled-only" : "#medium-scaled";
     uphash = hash;
     location.hash = hash;
-    if (up_button_link)
-      up_button_link.href = "index.html"+hash;
+    StyleFixLinks();
     return true;
   }
 }
@@ -142,6 +152,7 @@ function styleChange (element) {
       top.location = element.options[i].getAttribute("target");
       scaled = uphash.indexOf("scaled") > 0;
       hash = top.location.hash;
+      //StyleFixLinks();
       if (old_pathname==top.location.pathname && scaled && ! old_scaled) {
         if (up_button_link)
           up_button_link.href = "index.html"+uphash;

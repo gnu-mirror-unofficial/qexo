@@ -24,25 +24,21 @@ function scale {
     test -z "$height" && height=$maxheight
     test -z "$width" && width=$maxwidth
     echo scaling $img to $scimg maxsize: ${width}x${height} 
-    $JAVA -Djava.awt.headless=true -cp $PICLIBDIR \
-      Thumbnail $img $scimg $maxwidth
+    $JAVA -Djava.awt.headless=true -cp $PICLIBDIR/.. \
+      qalbum.Thumbnail $img $scimg $maxwidth
 #    cp $img $scimg
 #    mogrify -geometry ${width}x${height} $scimg
   fi
   # First delete any old tags for <$tag ...>$scimg</$tag>, then add new ones.
-  sed -e '/^ *<'$tag'[^>]*>'$scimg'<[/]'$tag'> *$/d' \
-      -e 's|<'$tag'[^>]*>'$scimg'<[/]'$tag'>||' <$group.xml | \
+  sed -e '\@^ *<'$tag'[^>]*>'$scimg'<[/]'$tag'> *$@d' \
+      -e 's@<'$tag'[^>]*>'$scimg'<[/]'$tag'>@@' <$group.xml | \
     sed -e 's|\(<[a-z-]*image[^>]*>'$img'</[a-z-]*image>\)|\1\
 <'$tag'>'$scimg'</'$tag'>|' >tmp.xml
     cat <tmp.xml >$group.xml
 }
 
-test $PICLIBDIR/Thumbnail.class -ot $PICLIBDIR/Thumbnail.java && (\
-  cd $PICLIBDIR
-  echo Re-compiling $PICLIBDIR/Thumbnail.class
-  ${JAVAC} -g Thumbnail.java
-)
-
+#test -d thm || mkdir thm
+#test -d med || mkdir med
 for fullimg in `sed -n -e 's|<full-image[^>]*>\([^<]*\)</full-image>|\1|p' <$group.xml`
 do
   img=$fullimg
@@ -58,5 +54,6 @@ do
   test -f $pimg -a '!' -f $img && img=$pimg
   scale t small-image 240 250
 done
-$scriptdir/sizes.sh $group
+#No longer needed, plus seems to complicate changes/fixes due to rotations.
+#$scriptdir/sizes.sh $group
 $scriptdir/group.sh

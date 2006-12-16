@@ -1,31 +1,24 @@
+declare namespace PictureInfo = "class:qalbum.PictureInfo";
 declare boundary-space preserve;
 declare variable $libdir external;
 declare variable $nl := "&#10;";
-declare namespace PictureInfo = "class:qalbum.PictureInfo";
 
 declare function local:make-img($image, $scale as xs:double, $class, $picinfo) {
-  let $image-name := string($image) return
+  let $image-name := PictureInfo:getScaledFile($picinfo, $class) return
   <img class="{$class}" src="{$image-name}"
-    width="{PictureInfo:getWidthFor($picinfo, $image-name) * $scale}"
-    height="{PictureInfo:getHeightFor($picinfo, $image-name) * $scale}"/>
+    width="{PictureInfo:getScaledWidth($picinfo, $class) * $scale}"
+    height="{PictureInfo:getScaledHeight($picinfo, $class) * $scale}"/>
 };
 
-declare function local:make-main-img($image, $scale as xs:double, $picinfo) {
-  let $image-name := string($image) return
+declare function local:make-main-img($image, $scale as xs:double, $class, $picinfo) {
+  let $image-name := PictureInfo:getScaledFile($picinfo, $class) return
   <img class="main" id="main-image" src="{$image-name}"
     width="{PictureInfo:getWidthFor($picinfo, $image-name) * $scale}"
     height="{PictureInfo:getHeightFor($picinfo, $image-name) * $scale}"/>
 };
 
 declare function local:make-thumbnail($pic, $picinfo) {
-  if ($pic/small-image) then
-    local:make-img($pic/small-image, 1.0e0, "thumb", $picinfo)
-  else if ($pic/image) then
-    local:make-img($pic/image, 0.5e0, "thumb", $picinfo)
-  else if ($pic/full-image) then
-    local:make-img($pic/full-image, 0.2e0, "thumb", $picinfo)
-  else
-  ( "(missing small-image)", string($pic), ")" )
+  local:make-img($pic/small-image, 1.0e0, "thumb", $picinfo)
 };
 
 declare function local:style-link($style) {
@@ -33,7 +26,7 @@ declare function local:style-link($style) {
 };
 
 declare function local:make-link($picture-name, $style, $text) {
-  <a class="button" href="{$picture-name}{local:style-link($style)}.html" onclick='OnClick("{$picture-name}")'>{$text}</a>
+  <a class="button" href="{$picture-name}{local:style-link($style)}.html" onclick="OnClick('{$picture-name}')">{$text}</a>
 };
 
 declare function local:format-row($first, $last, $pictures, $picinfos) {
@@ -132,10 +125,12 @@ declare function local:nav-bar($picture, $name, $prev, $next, $style) {
   <tr>
     <td><a class="button" id="up-button" href="index.html" onclick="top.location='index.html'">Index</a></td>
     <td width="100" align="right">{
-      if ($prev) then local:make-link($prev/@id, $style, " < Previous ")
+      if ($prev) then
+      <a class="button" id="prev-button" href="{$prev/@id}{local:style-link($style)}.html"> &lt; Previous </a>
       else ()}</td>
     <td width="100" align="left">{
-      if ($next) then local:make-link($next/@id, $style, " Next > ")
+      if ($next) then
+      <a class="button" id="next-button" href="{$next/@id}{local:style-link($style)}.html"> Next &gt; </a>
       else ()
     }</td>{
     if ($style="info") then () else ("
@@ -151,10 +146,13 @@ declare function local:nav-bar($picture, $name, $prev, $next, $style) {
 </table>
 };
 
-declare function local:raw-jpg-link($image, $description, $picinfo) {
-  if (empty($image)) then () else
+declare function local:raw-jpg-link($class, $description, $picinfo) {
+  if (PictureInfo:getScaledExists($picinfo, $class)) then
+   let $image := PictureInfo:getScaledFile($picinfo, $class) return
   <td><span class="button"><a href="{$image}">{$description} {PictureInfo:getSizeDescription($picinfo, string($image))}</a></span></td>
+  else ()
 };
+
 
 (: Generate a page picture image with links etc.
  : $picture:  The <picture> node to use.
@@ -228,10 +226,10 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
     </tr></table>,"
 ", (: FIXME use $nl :)
     <table><tr><td>Plain JPEG images:</td>
-    {local:raw-jpg-link($picture/full-image, "Original", $picinfo)}
-    {local:raw-jpg-link($picture/image,
+    {local:raw-jpg-link("original", "Original", $picinfo)}
+    {local:raw-jpg-link("medium",
     if ($full-image) then "Scaled" else "Original", $picinfo)}
-    {local:raw-jpg-link($picture/small-image, "Thumbnail", $picinfo)}
+    {local:raw-jpg-link("thumb", "Thumbnail", $picinfo)}
     </tr></table>,"
 ", (: FIXME use $nl :)
     let $outtakes := $picture/outtake return
@@ -243,18 +241,18 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
         </tr></table>
   )
   else if (($style="large" or $style="full") and $full-image) then
-    local:make-main-img($full-image, 1e0, $picinfo)
+    local:make-main-img($full-image, 1e0, "l", $picinfo)
   else if ($style="full" and $image) then
-    local:make-main-img($image, 1e0, $picinfo)
+    local:make-main-img($image, 1e0, "m", $picinfo)
   else if ($style="large" and $image
            and (let $image-name := string($image) return
                  PictureInfo:getWidthFor($picinfo, $image-name) <= 640 and
                  PictureInfo:getHeightFor($picinfo, $image-name) <= 640)) then
-    local:make-main-img($image, 2e0, $picinfo)
+    local:make-main-img($image, 2e0, "m", $picinfo)
   else if ($image) then
-    local:make-main-img($image, 1e0, $picinfo)
+    local:make-main-img($image, 1e0, "m", $picinfo)
   else
-    local:make-main-img($full-image, 0.5e0, $picinfo)
+    local:make-main-img($full-image, 0.5e0, "l", $picinfo)
  }
  }
 </html>,$nl
@@ -362,7 +360,7 @@ declare function local:slider-index-page-helper($nodes, $i, $n,
       </tr> {
       if ($item/caption) then
       <tr>
-        <td  bgcolor="#FFFF99" align="center"><a class="textual" target="main"
+        <td  bgcolor="#FFFF99" align="center"><a class="textual"
           href="{$item/@id}.html" target="main">{$item/caption/node()}</a></td>
       </tr>
       else ()}
@@ -426,17 +424,17 @@ declare function local:loop-pictures($group, $date, $pictures, $i, $count, $styl
         $rest := subsequence($unseen, 2)
     return
       typeswitch ($cur)
-      case element(row,*) return (
+      case element(row) return (
 	 local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts, $cur/*, $picinfos),
          local:loop-pictures($group, $date, $pictures, $i+count($cur//picture),
            $count, $style, (), $rest, $picinfos))
-      case element(text,*) return
+      case element(text) return
         local:loop-pictures($group, $date, $pictures, $i, $count, $style,
                       ($texts,<p>{$cur/node()}</p>), $rest, $picinfos)
-      case element(date,*) return
+      case element(date) return
         local:loop-pictures($group, $cur, $pictures, $i, $count, $style,
                       $texts, $rest, $picinfos)
-      case element(picture,*) return
+      case element(picture) return
         let $prev := if ($i > 1) then item-at($pictures, $i - 1) else (),
             $next := if ($i < $count) then item-at($pictures, $i + 1) else (),
             $pdate := if ($cur/date) then $cur/date else $date,
@@ -455,10 +453,9 @@ let $group := doc("file:./index.xml")/group,
     $pictures := $group//picture,
     $picinfos :=
       for $p in $pictures
-        return PictureInfo:make(string($p/@id),
-                                string($p/small-image),
-                                string($p/image),
-                                string($p/full-image)),
+        return PictureInfo:getImages(string($p/@id),
+                                            string($p/original/@rotated),
+                                            string($p/full-image)),
     $count := count($pictures)
   return (
     write-to-if-changed(local:make-slider-page($group), "slider.html"),
@@ -466,4 +463,5 @@ let $group := doc("file:./index.xml")/group,
     write-to-if-changed(local:make-group-page($group, $pictures, $picinfos), "index.html"),
     for $style in ("", "info", "full")
     return
-    local:loop-pictures($group, $group/date[1], $pictures, 1, $count, $style, (), $group/*, $picinfos))
+    local:loop-pictures($group, $group/date[1], $pictures, 1, $count, $style, (), $group/*, $picinfos)
+)

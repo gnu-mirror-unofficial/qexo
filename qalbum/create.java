@@ -103,6 +103,7 @@ public class create
         out.println("<title>" + title + "</title>");
 
         int iend = args.length;
+        String prevDate = null;
         for (int i = iarg;  i < iend;  i++)
           {
             String filename = args[i];
@@ -123,10 +124,21 @@ public class create
                 width = reader.getWidth(0);
                 height = reader.getHeight(0);
                 iis.close();
+                ImageInfo info = ImageInfo.readMetadata(file, filename);
+                String date = info.getExifString(ExifDirectory.TAG_DATETIME);
+                if (date != null && date.length() >= 10)
+                  {
+                    date = date.substring(0, 10).replace(':', '/');
+                    if (! date.equals(prevDate))
+                      {
+                        out.print("<date>");
+                        out.print(date);
+                        out.println("</date>");
+                        prevDate = date;
+                      }
+                  }
                 out.print("<picture id=\"");  out.print(base);
                 out.println("\">");
-
-                ImageInfo info = ImageInfo.readMetadata(file, filename);
                 String orientation = info.getExifString(ExifDirectory.TAG_ORIENTATION);
                 if (orientation != null && ! orientation.equals("1"))
                   {
@@ -138,11 +150,8 @@ public class create
                   }
 
                 String tag = width <= 700 || height <= 700 ? "image" : "full-image";
-                //System.err.println("file: "+filename+" width: "+width+" height: "+height+" tag:"+tag);
                 out.print('<');  out.print(tag);
-                out.print(" width=\"");  out.print(width);
-                out.print("\" height=\"");  out.print(height);
-                out.print("\">");  out.print(filename);
+                out.print('>');  out.print(filename);
                 out.print("</");  out.print(tag);  out.println('>');
                 out.println("</picture>");
               }

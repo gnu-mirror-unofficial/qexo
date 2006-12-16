@@ -1,10 +1,11 @@
 #! /bin/bash
-if test -z "$1"
-then cmd="$0"
-else cmd="$1"
-fi
-scriptdir=$(dirname $(which $cmd))
+#if test -z "$1"
+#then cmd="$0"
+#else cmd="$1"
+#fi
+#scriptdir=$(dirname $(which $cmd))
 PICLIBDIR=${scriptdir}
+ExifExtractor_JAR=${scriptdir}/metadata-extractor-2.3.0.jar
 
 JAVA=${JAVA-java}
 JAVAC=${JAVAC-javac}
@@ -18,7 +19,6 @@ then
 fi
 PATH=$JAVA_HOME/bin:$PATH
 
-JHEAD=jhead
 KAWAJAR=${KAWAJAR-${scriptdir}/kawa.jar}
-KAWA="$JAVA -cp ${KAWAJAR} kawa.repl"
+KAWA="$JAVA -cp ${KAWAJAR}:${ExifExtractor_JAR} kawa.repl"
 
