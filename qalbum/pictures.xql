@@ -1,13 +1,14 @@
 declare namespace PictureInfo = "class:qalbum.PictureInfo";
+declare namespace CallContext = "class:gnu.mapping.CallContext";
 declare boundary-space preserve;
 declare variable $libdir external;
 declare variable $nl := "&#10;";
 
-declare function local:make-img($image, $scale as xs:double, $class, $picinfo) {
+declare function local:make-img($class, $picinfo) {
   let $image-name := PictureInfo:getScaledFile($picinfo, $class) return
   <img class="{$class}" src="{$image-name}"
-    width="{PictureInfo:getScaledWidth($picinfo, $class) * $scale}"
-    height="{PictureInfo:getScaledHeight($picinfo, $class) * $scale}"/>
+    width="{PictureInfo:getScaledWidth($picinfo, $class)}"
+    height="{PictureInfo:getScaledHeight($picinfo, $class)}"/>
 };
 
 declare function local:make-main-img($image, $scale as xs:double, $class, $picinfo) {
@@ -18,7 +19,7 @@ declare function local:make-main-img($image, $scale as xs:double, $class, $picin
 };
 
 declare function local:make-thumbnail($pic, $picinfo) {
-  local:make-img($pic/small-image, 1.0e0, "thumb", $picinfo)
+  local:make-img("thumb", $picinfo)
 };
 
 declare function local:style-link($style) {
@@ -227,8 +228,16 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
 ", (: FIXME use $nl :)
     <table><tr><td>Plain JPEG images:</td>
     {local:raw-jpg-link("original", "Original", $picinfo)}
-    {local:raw-jpg-link("medium",
-    if ($full-image) then "Scaled" else "Original", $picinfo)}
+    {if (PictureInfo:getScaledExists($picinfo, "medium")
+         and PictureInfo:getScaledExists($picinfo, "original")) then
+     let $mimage := PictureInfo:getScaledFile($picinfo, "medium"),
+         $oimage := PictureInfo:getScaledFile($picinfo, "original"),
+         $mfile := string($mimage),
+         $ofile := string($oimage)
+     where $mfile ne $ofile
+     return
+    <td><span class="button"><a href="{$mfile}">Scaled {PictureInfo:getSizeDescription($picinfo, $mfile)}</a></span></td>
+    else ()}
     {local:raw-jpg-link("thumb", "Thumbnail", $picinfo)}
     </tr></table>,"
 ", (: FIXME use $nl :)
@@ -448,14 +457,17 @@ declare function local:loop-pictures($group, $date, $pictures, $i, $count, $styl
          local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts,  $rest, $picinfos)
 };
 
-let $group := doc("file:./index.xml")/group,
+let $index-file-uri := resolve-uri("index.xml", CallContext:getBaseUri(CallContext:getInstance())),
+    $group := doc($index-file-uri)/group,
     $group-name := $group/title,
     $pictures := $group//picture,
     $picinfos :=
       for $p in $pictures
+      let $full-image := $p/full-image,
+          $image := if ($full-image) then $full-image else $p/image
         return PictureInfo:getImages(string($p/@id),
                                             string($p/original/@rotated),
-                                            string($p/full-image)),
+                                            resolve-uri($image, $index-file-uri)),
     $count := count($pictures)
   return (
     write-to-if-changed(local:make-slider-page($group), "slider.html"),

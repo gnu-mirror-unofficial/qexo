@@ -8,6 +8,8 @@ import com.drew.metadata.exif.ExifDirectory;
 
 public class create
 {
+  public static String scriptdir = null;
+
   static void error (String msg)
   {
     System.err.println(msg);
@@ -19,14 +21,11 @@ public class create
     int iarg = 0;
     String title = null;
     String libdir = null;
-    String scriptdir = null;
     boolean force = false;
     for (; ; iarg++)
       {
         if (iarg == args.length)
-          {
-            error("Usage: \"album title\" file1.jpg file2.jpg ...");
-          }
+          break;
         String arg = args[iarg];
         if (! arg.startsWith("-"))
           break;
@@ -60,38 +59,57 @@ public class create
       }
     if (title == null)
       {
-        if (iarg+1==args.length
+        if (iarg==args.length
             || args[iarg].endsWith(".jpg")
             || args[iarg].endsWith(".jpeg"))
           error("missing title");
         title = args[iarg];
         iarg++;
       }
-    if (libdir == null)
+    File dir = new File(System.getProperty("user.dir"));
+    if (iarg == args.length)
       {
-        File dir = new File(System.getProperty("user.dir"));
-        File parent = dir.getParentFile();
-        libdir = "";
-        for (;;)
+        String[] list = dir.list();
+        int nfiles = list.length;
+        int npics = 0;
+        String[] slist = new String[nfiles];
+        for (int i = 0;  i < nfiles;  i++)
           {
-            if (parent == null)
-              error("cannot find an existing ..../lib for libdir");
-            String dpath = dir.getPath();
-            File ldir = new File(dir, "lib");
-            if (ldir.isDirectory())
-              {
-                libdir = libdir+"lib";
-                break;
-              }
-            dir = parent;
-            parent = dir.getParentFile();
-            libdir = "../"+libdir;
+            String fname = list[i];
+            int dot = fname.lastIndexOf('.');
+            if (dot <= 0)
+              continue;
+            String ext = fname.substring(dot+1).toLowerCase();;
+            if (! (ext.equals("jpg") || ext.equals("jpeg")))
+              continue;
+            char c = fname.charAt(dot-1);
+            if (! Character.isDigit(c))
+              continue;
+            int dstart = dot-1;
+            while (dstart >= 0 && Character.isDigit(fname.charAt(dstart-1)))
+              dstart--;
+            String base = fname.substring(0, dot);
+            int n = Integer.parseInt(fname.substring(dstart, dot));
+            StringBuffer sbuf = new StringBuffer();
+            sbuf.append((char) ((n >> 24) & 0xFFF));
+            sbuf.append((char) ((n >> 12) & 0xFFF));
+            sbuf.append((char) (n & 0xFFF));
+            sbuf.append(fname);
+            slist[npics++] = sbuf.toString();
           }
+        java.util.Arrays.sort(slist, 0, npics);
+        args = new String[npics];
+        iarg = 0;
+        for (int i = npics; --i >= 0; )
+          args[i] = slist[i].substring(3);
       }
-    else if (! new File(libdir).isDirectory())
-      {
-        error("libdir "+libdir+" is not a directory");
-      }
+    if (libdir == null)
+        libdir = libdirSearch(dir);
+    File libdirFile;
+    if (libdir == null || ! (libdirFile = new File(libdir)).isDirectory())
+      error("libdir "+libdir+" is not a directory");
+    else
+      create.updateLibdir(libdirFile);
     // We build the output in an initial StringWriter, so we don't
     // create a partial index.xml if there is an exception.
     StringWriter sout = new StringWriter(8000);
@@ -170,5 +188,67 @@ public class create
       {
 	error("Caught exception: "+ex+" msg:"+ex.getMessage());
       }
+  }
+
+  static String libdirSearch (File dir)
+  {
+    File parent = dir.getParentFile();
+    String libdir = "";
+    for (;;)
+      {
+        if (parent == null)
+          error("cannot find an existing ..../lib for libdir");
+        String dpath = dir.getPath();
+        File ldir = new File(dir, "lib");
+        if (ldir.isDirectory())
+          {
+            libdir = libdir+"lib";
+            break;
+          }
+        dir = parent;
+        parent = dir.getParentFile();
+        libdir = "../"+libdir;
+      }
+    return libdir;
+  }
+
+  public static void updateLibFile (File libdir, String file)
+  {
+    if (scriptdir == null)
+      return;
+    File libFile = new File(libdir, file);
+    File scriptFile = new File(scriptdir, file);
+    try
+      {
+        long libTime = libFile.lastModified();
+        long scriptTime = scriptFile.lastModified();
+        if (scriptTime > libTime)
+          {
+            InputStream in = new FileInputStream(scriptFile);
+            OutputStream out = new FileOutputStream(libFile);
+            byte[] buf = new byte[8192];
+            for (;;)
+              {
+                int n = in.read(buf);
+                if (n <= 0)
+                  break;
+                out.write(buf, 0, n);
+              }
+            in.close();
+            out.close();
+            libFile.setLastModified(scriptTime);
+          }
+      }
+    catch (Throwable ex)
+      {
+        System.err.println("caught "+ex+" while trying to copy "+scriptFile+" to "+libFile);
+      }
+  }
+
+  public static void updateLibdir (File libdir)
+  {
+    updateLibFile(libdir, "picture.js");
+    updateLibFile(libdir, "group.js");
+    updateLibFile(libdir, "help.html");
   }
 }
