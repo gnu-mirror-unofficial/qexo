@@ -1,0 +1,11 @@
+This is qalbum, a tool from generating web pages from images.
+
+See index.html for documentation.
+The home page is http://www.gnu.org/software/qexoo/qalbum.
+
+This requires Java, including the JDK 1.5 image features.
+Included are both source code and a pre-compiled jar, qalbum.jar.
+For convenience, it also includes Dawn Oakes' metadata-extractor.
+(http://www.drewnoakes.com/code/exif/).
+
+Copyright 2007 Per Bothner.
