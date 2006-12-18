@@ -152,12 +152,9 @@ function styleChange (element) {
       top.location = element.options[i].getAttribute("target");
       scaled = uphash.indexOf("scaled") > 0;
       hash = top.location.hash;
-      //StyleFixLinks();
-      if (old_pathname==top.location.pathname && scaled && ! old_scaled) {
-        if (up_button_link)
-          up_button_link.href = "index.html"+uphash;
+      StyleFixLinks();
+      if (old_pathname==top.location.pathname && scaled && ! old_scaled)
         ScaledLoad();
-      }
       return;
     }
 }
