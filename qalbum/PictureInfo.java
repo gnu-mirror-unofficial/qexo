@@ -1,5 +1,6 @@
 package qalbum;
 import java.io.*;
+import java.net.URI;
 
 public class PictureInfo
 {
@@ -18,9 +19,12 @@ public class PictureInfo
 
   public static PictureInfo getImages(String label,
                                       String rotated,
-                                      String image)
+                                      Object path)
     throws Throwable
   {
+    if (path instanceof URI)
+      path = new File((URI) path);
+    String image = path.toString();
     PictureInfo info = new PictureInfo();
     info.label = label;
     info.original = ImageInfo.readMetadata(image);
@@ -73,7 +77,10 @@ public class PictureInfo
       info.large = info.original;
     String large_image = info.large.filename;
     info.thumbnail = forceReadMetadata(base+'t'+suffix, large_image, 240);
-    info.medium = forceReadMetadata(base+'p'+suffix, large_image, 740);
+    if (info.large.width <= 740 && info.large.height <= 740)
+      info.medium = info.large;
+    else
+      info.medium = forceReadMetadata(base+'p'+suffix, large_image, 740);
     return info;
   }
 
