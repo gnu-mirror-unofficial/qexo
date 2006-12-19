@@ -19,35 +19,59 @@
 <p id="p2"><a rel="bookmark" href="#Download">Getting and installing</a>
 </td></tr></table>
 
-<div id="content">
 <p>
-The idea of these scripts is that you write a "picture-group file",
-which is an XML file which describes a group of images (such as jpegs
-from a digital camera).
-You then run the script <code><a href="group.sh">group.sh</a></code>
-which reads the picture-group file, and the script generates a series
-of html files:  An overview page containing small images, plus one page
-for each picture.  The advantage is that you just edit the
-picture-group file, tweak the scripts to your preference, and
-automatically get nice linked web pages.
-<p>
-There are also some helper scripts for generating scaled images
-(thumbnails) and that help with some of the tedious parts
-of editing the picture-group file.
-See the <a href="#Download">Installation section below</a>.
-</p>
+The idea of these scripts is that each <q>folder</q> (directory
+of images) contains a descriptior file named <code>index.xml</code>,
+which lists the images, along with captions or other descritive
+information.  This <code>index.xml</code> can be created and managed
+using various tools/scripts, or edited manualy with a text editor.
+Then running <code><a href="qalbum">qalbum</a></code> generates all
+the HTML pages, creating scaled images as needed.
+The resulting web pages can be uploaded to a web server, or
+browsed as-is from the file system.
+You can go back
+and edit the <code>index.xml</code>, and then re-run
+<code>qalbum</code> to get an updated web folder.</p>
+
 <p>
 Here is an <a href="http://pics.bothner.com/2003/Vancouver/">example</a>
-page generated with these scripts, and here is the
+page that illustrates many <code>qlbum</code> features, and here is the
 <a href="http://pics.bothner.com/2003/Vancouver/index.xml">picture group
 file</a> describing it.
+
+<h2>Features</h2>
+<p>
+There are a number of tools which do similar things.
+This one has some nice little extras:</p>
+<ul>
+<li>
+Uses JavaScript for some useful effects,
+but works fine without it.</li>
+<li>All the <q>fancy</q> features are implemented using
+fairly portable client-side JavaScript.  No server support is needed.
+Everything works even if the <q>web folder</q> is burned to a CD-ROM, say.</li>
+</li>
+<li>Keyboard navigation (if JavaScript is available).</li>
+<li>Can optionally scale the image to fill the browser windows.
+The image is automatically rescaled if the browser window is resized.
+This is nice for full-screen mode, for example.
+(This feature requires JavaScript.)</li>
+<li>A nice slider mode.</li>
+<li>Nice bookmarkable (and search-engine-friendly) URLs for everything.</li>
+<li>The user can select between a number of styles for viewing
+each picture.  The style is remembered between pictures,
+encoded in the URL.</li>
+</ul>
 
 <h2>Naming convention</h2>
 <p>A suggested naming convention:  Each <code>.jpg</code>
 file should follow this naming convention:  <code>prefixNnX.jpg</code>,
 where <code>prefix</code> is name common to a group of files,
-and <code>Nn</code> is a serial number.  The <code>X</code> is an
-optional code letter, where <code>r</code> means the picture is
+and <code>Nn</code> is a serial number.
+(Hence <code>prefix</code> should not end in a digit.)
+The <code>X</code> is an
+optional code letter, for scaled/rotated images that are
+normlly generated automatically: Where <code>r</code> means the picture is
 right-side-up but rotated relative to the camera original;
 <code>p</code> is a page-size image (scaled and perhaps cropped and rotated
 so it is suitable for viewing in a web page by itself); and
@@ -72,35 +96,46 @@ However, if you use <code>../lib</code>, <code>../../lib</code>, or
 then the scripts will find it automatically.
 So create a directory named <code>lib</code> next to your
 top-level album.
-When you run <code>group.sh</code> later, it will copy the necessary
+When you run <code>qalbum</code> later, it will copy the necessary
 files over.
 
 <h3>Generate initial overview files</h3>
-<p>Put the scripts directory in your path:
-<pre>
-PATH=/home/pics/public_html/scripts:$PATH
-</pre>
+<p>
+I assume the <code>qalbum</code> script is in your path. (Alternatively,
+you can type the full path instead iof just <code>qalbum</code>.)
 <p>
 Start by putting the <code>.jpg</code> files in the desired directory.
 Then <code>cd</code> to that directory.</p>
-<p>Run the <code>make-xml.sh</code> script.
+<p>Run the <code>qalbum</code> script as follows.
 If you follow the naming convention given below, you can do:
 <pre>
-make-xml.sh "Title" prefix[0-9][0-9].jpg
+qalbum new "Title" image1.jpg ... imageN.jpg
 </pre>
 <p>Here <code>"Title"</code> is the name you want on the title page
-of your overview page, and <code>prefix</code> is the common prefix.
+of your overview page, and <code>image1.jpg ... imageN.jpg</code>
+are the image you want to display.
 <p>
-This creates <code>index.xml</code>.  To generate the initial
-overview do:
-<pre>
-group.sh index
-</pre>
+You can leave out the <code>image1.jpg ... imageN.jpg</code> list.
+In that case <code>qalbum</code> will make a list from all the
+<code>.jpg</code> files in the directory
+which have the form <code>prefixNN.jpg</code> (i.e. without
+the <code>X</code> code letter).  The images will be sorted by
+the <code>NN</code> sequence numbers - not alphabethically.
 <p>
-You now have a rough overview page in <code>index.html</code>,
-which you can view using a browser.  Some of the pictures are rotated.
-Next we fix this.
+Either way, this creates an initial <code>index.xml</code>.
+It also creates an initial set of web pages.
+If the current directory is <code>/home/me/vacation</code>,
+then you can view the web pages and images by pointing
+your browser at <code>file:/home/me/vacation/index.html</code>.
+
 <h3>Unrotating rotated picture</h3>
+<p>
+Some cameras (including my current Canon A540) can detect
+their <q>orientation</q> (i.e. if the camera is rotated), and write
+that into the saved file.
+The <code>qalbum</code> script can detect this (at least for the Canon A540!),
+and automatically takes care of the rotation.
+If you have such a camera, you can skip this section.
 <p>
 Suppose when viewing <code>index.html</code>, a picture is rotated 90 degrees
 counter-clockwise (to the left).  In that case, edit <code>index.xml</code>
@@ -116,7 +151,7 @@ instead add the following:
 <p>
 Then run:
 <pre>
-rotations.sh index
+qalnum
 </pre>
 <p>
 This creates rotated copies of the files you specified
@@ -124,10 +159,6 @@ as <code>&lt;orginal rotated="xxx"&gt;</code>, and
 also edits <code>index.xml</code> for you.
 If the original file was named <code>xxxNN.jpg</code>,
 the rotated file will be named <code>xxxNNr.jpg</code>.
-<p>Next re-run:
-<pre>
-group.sh index
-</pre>
 <p>Check <code>index.html</code> with a browser to see if you got it right.
 If you didn't, re-edit <code>index.xml</code>.
 For any picture that was rotated the wrong way,
@@ -135,40 +166,8 @@ delete the rotated file:
 <pre>
 rm xxxNNr.jpg
 </pre>
-<p>Re-run <code>rotations.sh index</code> and <code>group.sh index</code>.
-Check again;  continue until all the pictures are upright.
-
-<h3>Generate scaled images</h3>
-<p>
-At this point the overview page <code>index.html</code>
-shows you thumbnails of each image.  However, the reducation in
-scale is handled in the browser, which means a browsers still
-has to download the full-size image.  To generate
-images that take less space, do:
-<pre>
-gen-images
-</pre>
-<p>
-This also updates <code>index.xml</code>, and re-runs <code>group.sh</code>
-for you.
-
-<h3>Cropping/editing</h3>
-<p>
-You may want to edit some of the images.
-Perhaps you want to crop out boring bits.
-I suggest you use gimp.  Don't edit the original
-(<samp><var>picNn</var>.jpg</samp> or <samp><var>picNn</var>t.jpg</samp>).
-Instead, edit the page-sized version: <samp>picNnp.jpg</samp>.
-Once you are satisfied, delete the thumbnail version (assuming you
-want that to be re-generated from the cropped version).
-Next edit <samp>index.xml</samp> to remove the <samp>width</code>
-and <samp>height</code> attributes from those to images, so
-what you have is:
-<pre>
-&lt;image&gt;<var>picNn</var>p.jpg&lt;/image&gt;
-&lt;small-image&gt;<var>picNn</var>t.jpg&lt;/small-image&gt;
-</pre>
-<p>Finally, re-run <code>gen-images</code>.
+<p>Re-run <code>qalbum</code>.
+Check again;  continue until all the pictures are right way up.
 
 <h2 id="Format">Format of the picture-group file</h2>
 <p>A picture-group file is an xml file, which looks rather like an
@@ -178,11 +177,116 @@ is more strict:  For example, for every start tag
 (e.g. <samp>&lt;/text&gt;</samp>), and they have to be properly nested.
 Also, attribute values (such as in <samp>width="1280"</samp>) have to be
 quoted (with single or double quotes).
-<p>
-Each picture-group file contains a single <samp>&lt;group&gt;</samp>
-element.  Each <samp>&lt;group&gt;</samp> should have
-a <samp>&lt;title&gt;</samp>, which is a short decription of the
-pictures in the group; it is used as the title of the overview page.
+<dl>
+<dt>The <code><b>&lt;group&gt;</b></code> element:
+<dd>
+Each picture-group file contains a single <code><b>&lt;group&gt;</b></code>
+element.
+Each <samp>&lt;group&gt;</samp> must contain  <samp>&lt;title&gt;</samp>
+element, fullowed by any number of <code>&lt;date&gt;</code>,
+<code>&lt;picture&gt;</code>, <code>&lt;text&gt;</code>,
+and <code>&lt;row&gt;</code> elements.
+</p><p>
+<dt>The <code><b>&lt;title&gt;</b></code> element:
+<dd>This must appear in  <code>&lt;group&gt;</code> element
+(usually at the start), and contains the title of the folder.
+It should be a short phrase describing the pictures in the group.
+It is used for the HTML <code>&lt;title&gt;</code> of the overview page,
+and can contain whatever HTML markup is legal for that.
+</p><p>
+<dt>The <code><b>&lt;picture&gt;</b></code> element:
+<dd>
+Each  <samp>&lt;picture&gt;</samp> element describes one image.
+It must have an <code>id</code> attribute, which is used
+to name the web page generated for that picture.
+The <samp>&lt;picture&gt;</samp>
+must contain an <code>&lt;image&gt;</code> element,
+and may optionally contain <code>&lt;caption&gt;</code>,
+<code>&lt;text&gt;</code> (zero or more),
+<code>&lt;date&gt;</code>, and <code>&lt;original&gt;</code> elements.
+(Old <code>index.xml</code> may also contain
+<code>&lt;full-image&gt;</code> and <code>&lt;small-image&gt;</code> elements.)
+</p><p>
+<dt>The <code><b>&lt;image&gt;</b></code> element:
+<dd>This contains the name of the actual <code>jpg</code> image file.
+This is normally the original, un-rotated, un-scaled image
+downloaded from the camera.
+(In old <code>index.xml</code> files, this is used for the scaled
+medium-sized image, and <code>&lt;full-image&gt;</code> is the
+large un-scaled file.)
+</p><p>
+<dt>The <code><b>&lt;full-image&gt;</b></code> element:
+<dd>This only appears in old <code>index.xml</code> files,
+where it contains the name of the large unscaled image file.
+</p><p>
+<dt>The <code><b>&lt;small-image&gt;</b></code> element:
+<dd>This only appears in old <code>index.xml</code> files,
+where it contains the name of the thumbnail-sized scaled image file.
+</p><p>
+<dt>The <code><b>&lt;date&gt;</b></code> element:
+<dd>
+Each <samp>&lt;picture&gt;</samp> may also have a <samp>&lt;date&gt;</samp>
+element specifying when the picture was taken.
+The format is not free-form; I suggest (and the <code>qalbum</code>
+script generates) <code>YYYY/MM/DD</code>.
+(Unfortunately, ISO format <code>YYYY-MM-DD</code> is awkward for ranges.)
+The <samp>&lt;date&gt;</samp> can appear in a <samp>&lt;picture&gt;</samp>,
+or at <samp>&lt;group&gt;</samp> level; in the latter case it applies
+to all following <samp>&lt;picture&gt;</samp> until overridden.
+</p><p>
+<dt>The <code><b>&lt;caption&gt;</b></code> element:
+<dd>
+Each <samp>&lt;picture&gt;</samp> may in addition have a
+short <samp>&lt;caption&gt;</samp>.  This is used as a short
+description of the picture in the overview page, and it is used
+as the page title in the picture page.
+It can contain HTML markup.
+</p><p>
+<dt>The <code><b>&lt;text&gt;</b></code> element:
+<dd>This can appear either in a <samp>&lt;group&gt;</samp>
+or in a <samp>&lt;picture&gt;</samp>.
+In both cases, it can contain aribitrary HTML markup, and is formatted
+as a paragraph.  (Multiple <samp>&lt;text&gt;</samp> elements
+translate to multiple HTML paragraphs.)
+Any <samp>&lt;text&gt;</samp> elements at <code>&lt;group&gt;</code>
+level (i.e. not in a <code>&lt;picture&gt;</code>) are displayed
+on the overview page, the slider, and the next following
+picture page.
+Any <samp>&lt;text&gt;</samp> elements inside a <code>&lt;picture&gt;</code>
+are only displayed on that picture's page, not the overview page.
+</p><p>
+<dt>The <code><b>&lt;original&gt;</b></code> element:
+<dd>
+This is used to mark an image that was rotated.
+It has n attribute <code>rotated</code>, which value is
+either <code>"left"</code> (if the original camara image is
+rotated 90 degrees left) or <code>"right"</code> (the original was rotated
+right).
+</p><p>
+<dt>The <code><b>&lt;outtake&gt;</b></code> element:
+<dd>
+This is used to name alternative but presumably inferior images.
+It has the form:
+<pre>
+&lt;outtake img="<i>filenameNN</i>.jpg"/&gt;
+</pre>
+or
+<pre>
+&lt;outtake img="<i>filenameNN</i>.jpg"&gt;<i>descriptive-text</i>&lt;/outtake&gt;
+</pre>
+The elements are ignored, except in the information page of the
+enclosing <code>&lt;picture&gt;</code>,
+which contains links to the outtake images.
+This allows the interested viewer to look at alternate images,
+without cluttering up the normal view.
+Note that you would remove <code>&lt;picture&gt;</code> elements
+for outtake pictures, and instead place <code>&lt;outtake&gt;</code> elements
+in the selected (non-outtake) <code>&lt;picture&gt;</code> elements.
+</p><p>
+<dt>The <code><b>&lt;row&gt;</b></code> element:
+<dd>This is seldom used, but can be used to ensure that a
+group of <code>&lt;picture&gt;</code> are all displayed on the same
+row in the overview page.
 Each <samp>&lt;group&gt;</samp> has one or more 
 <samp>&lt;row&gt;</samp> elements, where each <samp>&lt;row&gt;</samp>
 contains one or more <samp>&lt;picture&gt;</samp> elements.
@@ -190,137 +294,63 @@ The <samp>&lt;row&gt;</samp> element has no semantic meaning,
 but it is used to group together those <samp>&lt;picture&gt;</samp>
 elements that should be shown next to each other (on the same row)
 of the overview page.
-<p>
-A <samp>&lt;group&gt;</samp> can also contain any number of
-<samp>&lt;text&gt;</samp>, which provide extended description
-about the pictures in the group; they are is also included in
-the overview page.
-You can mix <samp>&lt;row&gt;</samp> and <samp>&lt;text&gt;</samp> elements;
-the resulting overview page shows the text and pictures in the same order.
-Each <samp>&lt;text&gt;</samp> results in a single HTML paragraph
-(<samp>&lt;p&gt;</samp> element), the <samp>&lt;text&gt;</samp> can contain
-arbitrary HTML markup (as long as it is also valid XML), which is
-copied as is to the overview page.
-<p>
-Each  <samp>&lt;picture&gt;</samp> element describes one image.
-It must have an <code>id</code> attribute, which is used
-to name the web page generated for that picture.
-The <samp>&lt;picture&gt;</samp> element names one, two or three
-<em>image files</em> showing the same
-image but at possibly different resolutions.
-<p>
-If there is a <samp>&lt;full-image&gt;</samp> element, it should contain
-the name of the original full-size, uncropped, image file.  This is typically
-what you download from the camera, but it may be at too high a resolution
-(and slow to download) for convenient browsing.
-<p>
-If there is an <samp>&lt;image&gt;</samp> element, it should contain
-the name of an image file suitable for showing in a web browser
-on a page by itself (with some descriptive text).  Ideally, this
-will by 500-800 pixels in the largest dimension.  (If the original
-fullsize uncropped image is this size, you should just use
-<samp>&lt;image&gt;</samp> and leave out the <samp>&lt;full-image&gt;</samp>
-element)
-(If there is no <samp>&lt;image&gt;</samp> element, the scripts
-will use the file named in <samp>&lt;full-image&gt;</samp>, but
-scaled by 60%.  If there is no <samp>&lt;full-image&gt;</samp> either,
-then the <samp>&lt;small-image&gt;</samp> will be chosen.)
-<p>
-If there is a <samp>&lt;small-image&gt;</samp> element, its should
-contain the name of a small ("thumbnail") image file, suitable for showing
-with a number of other small images on the same web page.
-Typically, a <samp>&lt;small-image&gt;</samp> should be 100-300 pixels
-in the largest dimensions.  This is the image that will be chosen
-for the group overview page.
-(If there is no <samp>&lt;small-image&gt;</samp> element,
-the script will use the file named by <samp>&lt;image&gt;</samp>,
-but scaled by 50%; if there is no <samp>&lt;image&gt;</samp> element
-either, the script will use the <samp>&lt;full-image&gt;</samp>
-scaled by 20%.  This of course means that download will require
-downloading the larger images so the browser can scale them;
-thus downloads will be slower.)
-<p>
-Each of <samp>&lt;full-image&gt;</samp>, <samp>&lt;image&gt;</samp>,
-and <samp>&lt;small-image&gt;</samp> must have <code>width</code>
-and <code>height</code> attributes.
-You can use the <code><a href="sizes.sh">sizes.sh</a></code>
-to set the width and height attribute from the jpg files
-in the current directory, as long as you have the <code>rdjpgcom</code>
-program installed.
-<p>
-Each <samp>&lt;picture&gt;</samp> may in addition have a
-short <samp>&lt;caption&gt;</samp>.  This is used as a short
-description of the picture in the overview page, and it is used
-as the page title in the picture page.</p>
-<p>
-Each <samp>&lt;picture&gt;</samp> may also have a <samp>&lt;date&gt;</samp>
-element specifying when the picture was taken; it should have the format
-<code>YYYY-MM-DD</code>.  If there is no <samp>&lt;date&gt;</samp>
-element for the <samp>&lt;picture&gt;</samp>, but there is one
-for the <samp>&lt;group&gt;</samp>, that is used instead.
-<p>Each <samp>&lt;picture&gt;</samp> may also have
-a <samp>&lt;text&gt;</samp> element which describes the picture in detail.
-
-<h2>Running <code>group.sh</code></h2>
-<p>
-If the picture-group file is named <code><var>mypics</var>.xml</code>,
-you do:
-<pre>
-scripts/group.sh <var>mypics</var>
-</pre>
-This creates <code><var>mypics</var>.html</code>.
-It also creates a <code><var>picn</var>.html</code> for each
-<samp>&lt;picture&gt;</samp> element in <code><var>mypics</var>.xml</code>,
-where <code><var>picn</var></code> is the <code>id</code> attribute of the
-<samp>&lt;picture&gt;</samp>.  (A suggested naming convention:
-The pictures in <code>mypics.xml</code> should be
-named <code>mypics1</code>, <code>mypics2</code>, and so on.)
-(Note the names of the image files need not be related to the <code>id</code>,
-but it makes sense for them to be consistent.)
+If you leave out <samp>&lt;row&gt;</samp> elements,
+the pictures will be displayed 3 in a line, except that if
+there are 4 pictures they will be displayed as 2+2.</p><p>
+</dl>
 
 <h2 id="Download">Installing: Files to download and dependencies</h2>
 <p>These scripts have been run using the
 <a href="http://www.gnu.org/software/qexo/">Qexo (Kawa XQuery)</a>
 XML processor.  There is
-<a href="http://www.gnu.org/software/qexo/XQ-Gen-XML.html">an article</a>
+<a href="http://www.gnu.org/software/qexo/XQ-Gen-XML.html">an (old) article</a>
 that explains how it works.
-(An older version of these scripts used XSLT.)
+<h3>Requirements</h3>
+<ul>
+<li>
+<p>Most of <code>qlbum</code> is pure Java, except for a small
+<code>bash</code> wrapper, and should run
+on any system with JDK 1.4.  However, I have made no attempt to
+run <code>qlbum</code> on anything except GNU/Linux system (specifically
+Fedora).  It should work fine on any-Unix-like OS.
+If you try to get this working on Windows, I'd like to hear about it.
+<li><p>You need a Java implementation,
+specifically one that has the <code>javax.imagio</code>
+classes added in JDK 1.4.</li>
+<li><p>You need <a href="http://www.gnu.org/software/kawa/">Kawa</a>
+(version 1.8.92 or newer or the latest from SVN);
+see the <a href="http://www.gnu.org/software/kawa/Getting-Kawa.html">instructions for getting Kawa</a>.
+<li><p>
+You need the <code>jpegtran</code> program installed in your path.
+This is used to loss-lessly rotate images when needed.
+This could probably be replaced by pure Java code,
+but I haven't done so yet.
+<li><p>
+You also need <a href="http://www.drewnoakes.com/code/exif/">Dawn Oakes's
+metadata-extractor</a>, but this is included in the <code>qalbum</code>
+distribution for convenience.
+</ul>
+<h3>Download</h3>
+<p>Get <a href="ftp://ftp.gnu.org/pub/gnu/kawa/qalbum.tgz"><code>qalbum.tgz</code></a> from <a href="ftp://ftp.gnu.org/pub/gnu/kawa/"><code>ftp://ftp.gnu.org/pub/gnu/kawa/</code></a>.
+<h3>Installation</h3>
+<p>Extract <code>qalbum.tgz</code> into a suitable directory.
+<p>In that directory create a <code>kawa.jar</code> link:
+<pre>
+cd qalbum && ln -s /my/path/to/kawa-1.9.jar kawa.jar
+</pre>
 <p>
-The scripts mentioned before are bash shell scripts that
-should run on most Unix-like systems, including GNU/Linux and Mac OS X,
-and probably also CygWin under Windows.
-Most of them read environment variables
-from the <code><a href="setup.sh">setup.sh</a></code> file,
-which you will need to configure for your own setup.
+You might want to create a symlink from some directory on your
+<code>$PATH</code> to the <code>qalbum/qalbum</code> script.
 <p>
-Start with <code><a href="make-xml.sh">make-xml.sh</a></code> script.
-This requires the <code>rdjpgcom</code> program to get the sizes of the image.
-Alternatively, you can use the
-<code><a href="MakeXml.java">qalbum/create</a></code> program which does
-the same thing.
-<p>
-The most "work-horse" is the
-<code><a href="group.sh">group.sh</a></code> script.
-It uses the <code><a href="http://www.sentex.net/~mwandel/jhead/">jhead</a></code> program to EXIF information from digital photos.
-</div>
-<p>
-To rotate an images you can use
-the <code><a href="rotations.sh">rotations.sh</a></code> script.
-It uses the <code>jpegtran</code> program to do the actual rotations.
-It also uses <code><a href="http://xmlsoft.org/XSLT/">xsltproc</a></code>
-to run the <code><a href="rotations.xsl">rotations.xsl</a></code>
-XLST stylesheet to update <code>index.xml</code>.
-<p>
-The <code><a href="gen-images">gen-images</a></code> script
-is used to generate scaled images.
-It depends on the <code><a href="Thumbnail.java">Thumbnail.java</a></code>
-program, which requires JDK 1.4.x.
-Alternatively, you can use the <code><a href="http://www.imagemagick.org/www/mogrify.html">mogrify</a></code>, which is part of
-the <a href="http://www.imagemagick.org/">ImageMagick</a> suite of programs.
-When <code>gen-images</code> is done, it also runs
-<code><a href="sizes.sh">sizes.sh</a></code>,
-which also depends on <code>rdjpgcom</code>, though it could be re-written
-to use the JDK 1.4 image facilties.
+That should be it.  The <code>qalbum</code> script is smart enough to chase
+symlinks and find the needed helper files.
+It assumes either of the environment variables <code>JAVA</code>
+or <code>JAVA_HOME</code> has been set, or <code>java</code> is in
+your <code>$PATH</code>.
+
+<h3>Home page</h3>
+
+<p>The <code>qalbum</code> <a href="http://www.gnu.org/software/qexo/qalbum">home page</a>.
 
 <h2>Author and license stuff</h2>
 <p>
@@ -331,15 +361,20 @@ These scripts were written by
 You are free to use these for your own images (personal or business).
 I of course make NO WARRANTY; if they should happen to destroy
 your critical files, I'm sorry, but you should have been more careful.
+<p>
+If you use <code>qalbum</code> for you pictures, I would appreciate
+hearing about it.
+<p>
 Please do not redistribute the scripts in a product or as
 part of some other software distribution without permission.
+(
 I expect you to customise the scripts for your own use; if you
 make significant enhancements, I would appreciate hearing about it.
     <hr>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Mon Feb 14 15:42:29 PST 2000 -->
 <!-- hhmts start -->
-Last modified: Sun Nov  7 12:43:20 PST 2004
+Last modified: Mon Dec 18 15:46:29 PST 2006
 <!-- hhmts end -->
   </body>
 </html>
