@@ -1,0 +1,15 @@
+#! /bin/bash
+thisfile=`which $0`
+while test -L "$thisfile"; do thisfile=$(readlink -f "$thisfile"); done
+scriptdir=$(dirname $thisfile)
+if test -z "$JAVA"
+then
+  if test -n "$JAVA_HOME"
+  then JAVA="$JAVA_HOME/bin/java"
+  else JAVA=java
+  fi
+fi
+KAWA_JAR=${KAWA_JAR-${scriptdir}/kawa.jar}
+ExifExtractor_JAR=${ExifExtractor_JAR-$scriptdir/metadata-extractor-2.3.1.jar}
+exec $JAVA -cp $scriptdir/qalbum.jar:${KAWA_JAR}:${ExifExtractor_JAR}:$scriptdir/.. qalbum.qalbum --scriptdir="$scriptdir" "$@"
+exit -1
