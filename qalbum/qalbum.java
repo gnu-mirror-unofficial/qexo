@@ -43,6 +43,8 @@ public class qalbum
             if (xargs.length > 0)
               System.arraycopy(args, iarg+1, xargs, 0, xargs.length);
             create.main(xargs);
+            if (arg.equals("new") || arg.equals("--new"))
+              generate(dir, new String[0]);
           }
         else if (arg.equals("version") || args.equals("--version"))
           {
