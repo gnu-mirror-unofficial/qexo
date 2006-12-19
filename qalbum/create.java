@@ -5,6 +5,7 @@ import java.util.*;
 import javax.imageio.*;
 import javax.imageio.stream.*;
 import com.drew.metadata.exif.ExifDirectory;
+import gnu.text.URI_utils;
 
 public class create
 {
@@ -125,10 +126,9 @@ public class create
         for (int i = iarg;  i < iend;  i++)
           {
             String filename = args[i];
-            File file =  new File(filename);
-            if (! file.exists())
+            if (! URI_utils.exists(filename))
               error(filename+": No such file");
-            String base = file.getName();
+            String base = filename;
             int dotIndex = base.lastIndexOf('.');
             if (dotIndex > 0)
               base = base.substring(0, dotIndex);
@@ -137,12 +137,15 @@ public class create
             int width, height;
             try
               {
-                ImageInputStream iis = ImageIO.createImageInputStream(file);
+                ImageInputStream iis
+                  = ImageIO.createImageInputStream(URI_utils.getInputStream(filename));
+                if (iis == null) // This happens with gcj 4.1.1
+                  throw new Error("ImageIO.createImageInputStream("+filename+") failed - internal error or wrong java in PATH?");
                 reader.setInput(iis, true);
                 width = reader.getWidth(0);
                 height = reader.getHeight(0);
                 iis.close();
-                ImageInfo info = ImageInfo.readMetadata(file, filename);
+                ImageInfo info = ImageInfo.readMetadata(filename);
                 String date = info.getExifString(ExifDirectory.TAG_DATETIME);
                 if (date != null && date.length() >= 10)
                   {
@@ -167,10 +170,8 @@ public class create
                     out.println("\"/>");
                   }
 
-                String tag = width <= 700 || height <= 700 ? "image" : "full-image";
-                out.print('<');  out.print(tag);
-                out.print('>');  out.print(filename);
-                out.print("</");  out.print(tag);  out.println('>');
+                out.print("<image>");  out.print(filename);
+                out.println("</image>");
                 out.println("</picture>");
               }
             catch (Throwable ex)

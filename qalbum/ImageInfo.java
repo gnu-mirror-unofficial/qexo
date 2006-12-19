@@ -4,6 +4,7 @@ import com.drew.metadata.*;
 import com.drew.metadata.exif.*;
 import com.drew.metadata.jpeg.*;
 import java.io.*;
+import gnu.text.URI_utils;
 
 /** Information relating to and extracted from a JPEG image. */
 
@@ -12,25 +13,14 @@ public class ImageInfo
   Metadata metadata;
   Directory exifDirectory;
   int width, height;
-  File jpegFile;
-  String filename;
+  Object filename;
 
-  public static ImageInfo readMetadata (String filename)
+  public static ImageInfo readMetadata (Object filename)
     throws Throwable
   {
-    return readMetadata(new File(filename), filename);
-  }
-
-  public static ImageInfo readMetadata (File jpegFile)
-    throws Throwable
-  {
-    return readMetadata(jpegFile, jpegFile.getPath());
-  }
-
-  public static ImageInfo readMetadata (File jpegFile, String filename)
-    throws Throwable
-  {
-    Metadata metadata = JpegMetadataReader.readMetadata(jpegFile);
+    InputStream in
+      = new BufferedInputStream(URI_utils.getInputStream(filename));
+    Metadata metadata = JpegMetadataReader.readMetadata(in);
     Directory exifDirectory = metadata.getDirectory(ExifDirectory.class);
     Directory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
     ImageInfo info = new ImageInfo();
@@ -39,7 +29,6 @@ public class ImageInfo
     info.width = jpegDirectory.getInt(JpegDirectory.TAG_JPEG_IMAGE_WIDTH);
     info.height = jpegDirectory.getInt(JpegDirectory.TAG_JPEG_IMAGE_HEIGHT);
     info.filename = filename;
-    info.jpegFile = jpegFile;
     return info;
   }
 
@@ -130,9 +119,9 @@ public class ImageInfo
     sbuf.append("File name:     ");  sbuf.append(filename);  sbuf.append('\n');
 
     sbuf.append("File size:     ");
-    sbuf.append(jpegFile.length());  sbuf.append(" bytes\n");
+    sbuf.append(URI_utils.contentLength(filename));  sbuf.append(" bytes\n");
     sbuf.append("File date:     ");
-    sbuf.append(new java.util.Date(jpegFile.lastModified()));
+    sbuf.append(new java.util.Date(URI_utils.lastModified(filename)));
     sbuf.append('\n');
 
     appendExifString("Camera make:   ", ExifDirectory.TAG_MAKE, sbuf);

@@ -3,6 +3,7 @@ declare namespace CallContext = "class:gnu.mapping.CallContext";
 declare boundary-space preserve;
 declare variable $libdir external;
 declare variable $nl := "&#10;";
+declare variable $pwd := CallContext:getBaseUri(CallContext:getInstance());
 
 declare function local:make-img($class, $picinfo) {
   let $image-name := PictureInfo:getScaledFile($picinfo, $class) return
@@ -11,7 +12,7 @@ declare function local:make-img($class, $picinfo) {
     height="{PictureInfo:getScaledHeight($picinfo, $class)}"/>
 };
 
-declare function local:make-main-img($image, $scale as xs:double, $class, $picinfo) {
+declare function local:make-main-img($picinfo, $scale as xs:double, $class) {
   let $image-name := PictureInfo:getScaledFile($picinfo, $class) return
   <img class="main" id="main-image" src="{$image-name}"
     width="{PictureInfo:getWidthFor($picinfo, $image-name) * $scale}"
@@ -215,9 +216,6 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
     attribute onload {"javascript:OnLoad();"},
     attribute onresize {"javascript:ScaledResize();"},
     local:above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count),
-  let $full-image := $picture/full-image,
-      $image := $picture/image
-  return
   if ($style = "info") then (
     <table><tr>
       <td style="padding: 20 20 20 10">{local:make-thumbnail($picture, $picinfo)} </td>
@@ -249,19 +247,21 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
             <td><span class="button"><a href="{string($outtake/@img)}">{if (empty($outtext)) then "picture" else $outtext}</a></span></td>}
         </tr></table>
   )
-  else if (($style="large" or $style="full") and $full-image) then
-    local:make-main-img($full-image, 1e0, "l", $picinfo)
-  else if ($style="full" and $image) then
-    local:make-main-img($image, 1e0, "m", $picinfo)
-  else if ($style="large" and $image
-           and (let $image-name := string($image) return
+  else if (($style="large" or $style="full")
+           and PictureInfo:getScaledExists($picinfo, "large")) then
+    local:make-main-img($picinfo, 1e0, "l")
+  else if (not(PictureInfo:getScaledExists($picinfo, "medium"))) then
+    local:make-main-img($picinfo, 0.5e0, "l")
+  else if ($style="full") then
+    local:make-main-img($picinfo, 1e0, "m")
+  else if ($style="large"
+           and (let $image-name := PictureInfo:getScaledFile($picinfo, "medium")
+                return
                  PictureInfo:getWidthFor($picinfo, $image-name) <= 640 and
                  PictureInfo:getHeightFor($picinfo, $image-name) <= 640)) then
-    local:make-main-img($image, 2e0, "m", $picinfo)
-  else if ($image) then
-    local:make-main-img($image, 1e0, "m", $picinfo)
+      local:make-main-img($picinfo, 2e0, "m")
   else
-    local:make-main-img($full-image, 0.5e0, "l", $picinfo)
+      local:make-main-img($picinfo, 1e0, "m")
  }
  }
 </html>,$nl
@@ -451,13 +451,13 @@ declare function local:loop-pictures($group, $date, $pictures, $i, $count, $styl
         return
         (write-to-if-changed(local:picture($cur,  $group, $name,
 		    $texts, $prev, $next, $pdate, $style, $i, $count, item-at($picinfos, $i)),
-                  concat($name, local:style-link($style), ".html")),
+                  resolve-uri(concat($name, local:style-link($style), ".html"), $pwd)),
          local:loop-pictures($group, $date, $pictures, $i+1, $count, $style, (),  $rest, $picinfos))
       default return
          local:loop-pictures($group, $date, $pictures, $i, $count, $style, $texts,  $rest, $picinfos)
 };
 
-let $index-file-uri := resolve-uri("index.xml", CallContext:getBaseUri(CallContext:getInstance())),
+let $index-file-uri := resolve-uri("index.xml", $pwd),
     $group := doc($index-file-uri)/group,
     $group-name := $group/title,
     $pictures := $group//picture,
@@ -467,12 +467,12 @@ let $index-file-uri := resolve-uri("index.xml", CallContext:getBaseUri(CallConte
           $image := if ($full-image) then $full-image else $p/image
         return PictureInfo:getImages(string($p/@id),
                                             string($p/original/@rotated),
-                                            resolve-uri($image, $index-file-uri)),
+                                            string($image)),
     $count := count($pictures)
   return (
-    write-to-if-changed(local:make-slider-page($group), "slider.html"),
-    write-to-if-changed(local:make-slider-index-page($group, $picinfos), "sindex.html"),
-    write-to-if-changed(local:make-group-page($group, $pictures, $picinfos), "index.html"),
+    write-to-if-changed(local:make-slider-page($group), resolve-uri("slider.html", $pwd)),
+    write-to-if-changed(local:make-slider-index-page($group, $picinfos), resolve-uri("sindex.html", $pwd)),
+    write-to-if-changed(local:make-group-page($group, $pictures, $picinfos), resolve-uri("index.html", $pwd)),
     for $style in ("", "info", "full")
     return
     local:loop-pictures($group, $group/date[1], $pictures, 1, $count, $style, (), $group/*, $picinfos)

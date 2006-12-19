@@ -1,6 +1,7 @@
 package qalbum;
 import java.io.*;
 import java.net.URI;
+import gnu.text.URI_utils;
 
 public class PictureInfo
 {
@@ -33,6 +34,7 @@ public class PictureInfo
     int flen = image.length();
     if (dot <= 0 || dot > flen - 4 || dot < flen - 5)
       throw new RuntimeException("missng type type suffix for image  file name '"+image+"'");
+    boolean forceReScale = false;
     String suffix = image.substring(dot);
     boolean alreadyRotated;
     String base = image.substring(0, dot);
@@ -45,10 +47,9 @@ public class PictureInfo
     else if (rotated.length() != 0)
       {
         
-        String rotname = base+'r'+suffix;
-        File rotfile = new File(rotname);
-        if (rotfile.exists())
-          info.large = ImageInfo.readMetadata(rotfile, rotname);
+        String/*Path*/ rotname = base+'r'+suffix;
+        if (URI_utils.exists(rotname))
+          info.large = ImageInfo.readMetadata(rotname);
         else if (autoScale)
           {
             String rot;
@@ -65,7 +66,8 @@ public class PictureInfo
             int exitCode = process.waitFor();
             if (exitCode != 0)
               System.err.println("Unexpected jpegtran exitCode:"+exitCode);
-            info.large = ImageInfo.readMetadata(rotfile, rotname);
+            info.large = ImageInfo.readMetadata(rotname);
+            forceReScale = true;
           }
         else
           {
@@ -75,20 +77,25 @@ public class PictureInfo
       }
     else
       info.large = info.original;
-    String large_image = info.large.filename;
-    info.thumbnail = forceReadMetadata(base+'t'+suffix, large_image, 240);
+    Object large_image = info.large.filename;
+    info.thumbnail = forceReadMetadata(base+'t'+suffix, large_image,
+                                       240, forceReScale);
     if (info.large.width <= 740 && info.large.height <= 740)
-      info.medium = info.large;
+      {
+        info.medium = info.large;
+        info.large = null;
+      }
     else
-      info.medium = forceReadMetadata(base+'p'+suffix, large_image, 740);
+      info.medium = forceReadMetadata(base+'p'+suffix, large_image,
+                                      740, forceReScale);
     return info;
   }
 
-  static ImageInfo forceReadMetadata (String filename, String orig, int maxDim)
+  static ImageInfo forceReadMetadata (Object filename, Object orig,
+                                      int maxDim, boolean forceReScale)
     throws Throwable
   {
-    File file = new File(filename);
-    if (! file.exists())
+    if (forceReScale || ! URI_utils.exists(filename))
       {
         if (! autoScale)
           return null;
@@ -96,7 +103,7 @@ public class PictureInfo
         System.err.println("scaling "+orig+" to "+filename+" maxSize:"+maxDim);
         Thumbnail.createThumbnail(orig, filename, maxDim);
       }
-    return ImageInfo.readMetadata(file, filename);
+    return ImageInfo.readMetadata(filename);
   }
 
   boolean hasThumbnail ()
@@ -138,7 +145,7 @@ public class PictureInfo
     return findScaledImage(scaleName) != null;
   }
 
-  public String getScaledFile (String scaleName)
+  public Object getScaledFile (String scaleName)
   {
     return findScaledImage(scaleName).filename;
   }
@@ -188,7 +195,7 @@ public class PictureInfo
       : null;
     if (info != original)
       {
-        String filename = info.filename;
+        String filename = info.filename.toString();;
         int namelen = filename.length();
         if (namelen > 5)
           {
@@ -196,9 +203,8 @@ public class PictureInfo
             if (kind == 'r' || kind == 'p' || kind == 't')
               {
                 filename = filename.substring(0, namelen-5) + ".jpg";
-                File orig = new File(filename);
-                if (orig.exists())
-                  original = info = ImageInfo.readMetadata(orig, filename);
+                if (URI_utils.exists(filename))
+                  original = info = ImageInfo.readMetadata(filename);
               }
           }
       }

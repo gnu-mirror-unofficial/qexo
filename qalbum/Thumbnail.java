@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import javax.swing.ImageIcon;
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import gnu.text.URI_utils;
 
 class Thumbnail {
     public static void main(String[] args) {
@@ -29,12 +30,13 @@ class Thumbnail {
      * the thumbnail must 
      * be maxDim pixels or less.
      */
-    public static void createThumbnail(
-     String orig, String thumb, int maxDim) {
+  public static void createThumbnail(Object/*Path*/ orig,
+                                     Object/*Path*/ thumb, int maxDim)
+  {
         try {
             // Get the image from a file.
-            Image inImage = new ImageIcon(
-                          orig).getImage();
+            Image inImage
+              = new ImageIcon(URI_utils.toURL(orig)).getImage();
 
             // Determine the scale.
 	    double scale = (double)maxDim/(
@@ -78,8 +80,7 @@ class Thumbnail {
 
             // JPEG-encode the image 
             //and write to file.
-            OutputStream os = 
-             new FileOutputStream(thumb);
+            OutputStream os = URI_utils.getOutputStream(thumb);
             JPEGImageEncoder encoder = 
               JPEGCodec.createJPEGEncoder(os);
             encoder.encode(outImage);
