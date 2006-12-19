@@ -27,33 +27,35 @@ qalbum.jar: \
 	  qalbum/qalbum.class \
 	  qalbum/Thumbnail.class
 
+CLASSPATH = "..:$(ExifExtractor_JAR):$(KAWALIB)"
+
 DIST_FILES = index.html Makefile qalbum.jar metadata-extractor-2.3.1.jar\
   ImageInfo.java PictureInfo.java create.java Thumbnail.java \
   pictures.xql qalbum picture.js group.js help.html README
 
 qalbum.tgz: qalbum.jar
-	tar czf qalbum.tgz $(DIST_FILES)
-
-sizes.class: sizes.xql
-	scriptdir=`pwd`; ./setup.sh; \
-	$(KAWA) --xquery --main -d .. -P qalbum. -C sizes.xql
+	cd .. && tar czf qalbum/qalbum.tgz \
+          `for f in $(DIST_FILES); do echo qalbum/$$f; done`
 
 $(QALBUM_PACKAGE_DIR)/qalbum.class: $(QALBUM_PACKAGE_DIR)/qalbum.java
-	CLASSPATH="..:$(ExifExtractor_JAR):$(KAWALIB)" $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/qalbum.java
+	CLASSPATH=$(CLASSPATH) $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/qalbum.java
 
 $(QALBUM_PACKAGE_DIR)/create.class: $(QALBUM_PACKAGE_DIR)/create.java
-	CLASSPATH="..:$(ExifExtractor_JAR)" $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/create.java
+	CLASSPATH=$(CLASSPATH) $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/create.java
 
 $(QALBUM_PACKAGE_DIR)/Thumbnail.class: $(QALBUM_PACKAGE_DIR)/Thumbnail.java
-	$(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/Thumbnail.java
+	CLASSPATH=$(CLASSPATH) $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/Thumbnail.java
 
 $(QALBUM_PACKAGE_DIR)/ImageInfo.class: $(QALBUM_PACKAGE_DIR)/ImageInfo.java
-	CLASSPATH="..:$(ExifExtractor_JAR)" $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/ImageInfo.java
+	CLASSPATH=$(CLASSPATH) $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/ImageInfo.java
 
 $(QALBUM_PACKAGE_DIR)/PictureInfo.class: $(QALBUM_PACKAGE_DIR)/PictureInfo.java
-	CLASSPATH="..:$(ExifExtractor_JAR)" $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/PictureInfo.java
+	CLASSPATH=$(CLASSPATH) $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/PictureInfo.java
 
 $(QALBUM_PACKAGE_DIR)/pictures.class: pictures.xql
 	scriptdir=`pwd`; ./setup.sh; \
-	CLASSPATH=$${KAWAJAR-$(KAWALIB)}:..:$(ExifExtractor_JAR) \
+	CLASSPATH=$(CLASSPATH) \
 	$(JAVA) kawa.repl --xquery --main -d .. -P qalbum. -C pictures.xql
+
+clean:
+	rm -f *.class
