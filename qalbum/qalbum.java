@@ -138,9 +138,11 @@ public class qalbum
   public static void help ()
   {
     System.err.println("qalbum usage:");
-    System.err.println("  qalbum create [options] \"Title\" [pic1.jpg]...");
-    System.err.println("  qalbum new ... is a synonym for qalbum create");
-    System.err.println("  qalbum   (generate web pages, if index.xml exists)");
+    System.err.println("  qalbum create [options] \"Title\" [pic1.jpg]...  (create new folder)");
+    System.err.println("  qalbum new ...   (a synonym for qalbum create followed by generate)");
+    System.err.println("  qalbum generate  (generate web pages, if index.xml exists)");
+    System.err.println("  qalbum           (same as: qalbum generate)");
+    System.err.println("  qalbum -R        (generate here and in subdirectories containing index.xml)");
     // System.err.println("  qalbum [-R] tidy");
   }
 }
