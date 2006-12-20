@@ -1,9 +1,15 @@
+<html>
+<head><title>Generating XML and HTML using XQuery</title></html>
 <!--Copyright 2002 (C) Per Bothner.  <per@bothner.com>
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, version 1.1.
 A copy of the latter is in the file fdl.txt in this directory;
 you may not distribute this document without it.-->
-<html><body>
+<body>
+<p>This article describes an early version of the <a href="http://www.gnu.org/software/qexo/qalbum"><code>qalbum</code> photo-album generator</a>.
+Though <code>qalbum</code> now has more features and automation, its implementation still uses XQuery basically as described in this older article.
+I've updated the code described in this article to that
+of the actual XQuery 1.0 specification.</p>
 <p>If you find a mistake, or something is unclear, please email <a href="mailto:per@bothner.com">per@bothner.com</a> so I can fix the text.</p><h1>Generating XML and HTML using XQuery</h1>
 <h2>by Per Bothner</h2>
 <p>Most people think of XQuery as a query language for processing XML "databases". But it is also a very nice language for <em>generating</em> XML and HTML, including web pages. In this
@@ -108,10 +114,13 @@ Java.</p>
 <p>Here is the "main program" to generate the overview page:</p>
 <pre>let $group := doc("index.xml")/group
   return
-    make-group-page($group)</pre>
+    local:make-group-page($group)</pre>
 <p>This is simple enough: We call the <code>document</code> function to read the <code>index.xml</code> file. This returns the document root, so we do <code>/group</code> to select the top-level
-<code>group</code> node, which we pass to the <code>make-group-page</code> function, which does the actual work of creating the web page:</p>
-<pre>define function make-group-page($group) {
+<code>group</code> node, which we pass to the <code>make-group-page</code> function, which does the actual work of creating the web page.
+(All XQuery function have to be in some namespace.
+For convenience, we use the standard <code>local</code> prefix.)
+</p>
+<pre>declare function local:make-group-page($group) {
 &lt;html&gt;
   &lt;head&gt;
     {$group/title}
@@ -123,10 +132,10 @@ Java.</p>
   &lt;/head&gt;
   &lt;body bgcolor="#00AAAA"&gt;
     &lt;h2&gt;{$group/title/node()}&lt;/h2&gt;
-{   make-rows(0, $group/picture)}
+{   local:make-rows(0, $group/picture)}
   &lt;/body&gt;
 &lt;/html&gt;
-}</pre>
+};</pre>
 <p>The value returned by a call to <code>make-group-page</code> is calculated by an <i>element constructor expression</i>, which looks like normal XML data, except you can use curly braces
 (<code>{...}</code>) to embed XQuery expressions. For example, the <code>&lt;h2&gt;</code> HTML element contains an XQuery expression that selects the <code>&lt;title&gt;</code> child of the <code>$group</code> parameter,
 and then selects the children (usually a text node) of that <code>&lt;title&gt;</code> child. Note that double curly braces (<code>{{...}}</code>) in the &lt;style&gt; element are used for curly braces that
@@ -146,24 +155,24 @@ pictures in a row each time, until we come to the end.</p>
  : $pictures:  Remaining &lt;picture&gt; elements to process.
  : Returns formatted HTML for the input $pictures.
  :)
-define function make-rows($prev, $pictures) {
+declare function local:make-rows($prev, $pictures) {
   let $count := count($pictures) return
   if ($count = 0) then ()
   else if ($count &lt;= 3) then
-      format-row($pictures)
+      local:format-row($pictures)
   else if ($count = 4 and $prev = 0) then
     (: A special case:  If there are 4 pictures in a row,
      : then group them as 2 rows of 2 rather than 3 + 1. :)
-    (format-row(sublist($pictures, 1, 2)),
-     format-row(sublist($pictures, 3, 2)))
+    (local:format-row(sublist($pictures, 1, 2)),
+     local:format-row(sublist($pictures, 3, 2)))
   else
-     (format-row(sublist($pictures, 1, 3)),
-      make-rows($prev+3,sublist($pictures,4)))
-}</pre>
+     (local:format-row(sublist($pictures, 1, 3)),
+      local:make-rows($prev+3,sublist($pictures,4)))
+};</pre>
 <p>The <code>format-row</code> function loops over a sequence of <code>&lt;picture&gt;</code> elements and calls <code>make-thumbnail</code> on each one. If the <code>&lt;picture&gt;</code>has a
 <code>&lt;caption&gt;</code> child, it is placed underneath the thumbnail. We wrap each thumbnail plus its caption inside an <code>&lt;a&gt;</code> HTML link wrapped inside an HTML <code>&lt;table&gt;</code>, finally
 wrapping the entire row in another HTML <code>&lt;table&gt;</code>.</p>
-<pre>define function format-row($row) {
+<pre>declare function local:format-row($row) {
   "&amp;#10;  ", (: emit a newline for readabilty :)
   &lt;table width="90%" class="row"&gt;&lt;tr&gt;{
   for $pic in $row return
@@ -172,7 +181,7 @@ wrapping the entire row in another HTML <code>&lt;table&gt;</code>.</p>
       border="0" rules="none"&gt;
       &lt;tr&gt;
         &lt;td align="center"&gt;&lt;a href="{$pic/@id}.html"&gt;{
-          make-thumbnail($pic)}&lt;/a&gt;&lt;/td&gt;
+          local:make-thumbnail($pic)}&lt;/a&gt;&lt;/td&gt;
       &lt;/tr&gt;
       { if ($pic/caption) then
       &lt;tr&gt;
@@ -183,35 +192,35 @@ wrapping the entire row in another HTML <code>&lt;table&gt;</code>.</p>
     &lt;/table&gt;
   &lt;/td&gt;
   }&lt;/tr&gt;&lt;/table&gt;
-}</pre>
+};</pre>
 <p>Finally, <code>make-thumbnail</code> looks for a <code>&lt;small-image&gt;</code> child that contains the actual name of the JPEG file, and calls <code>make-img</code> to emit the <code>&lt;img&gt;</code>
 image link. If there is no <code>&lt;small-image&gt;</code>, we look for a <code>&lt;image&gt;</code> or a <code>&lt;full-image&gt;</code> element, and have the browser scale the image to a smaller size. (In that case
 the browser has to download the bigger image, only to throw away most of the detail, so this is not something you want to do normally.)</p>
-<pre>define function make-thumbnail($pic) {
+<pre>declare function local:make-thumbnail($pic) {
   if ($pic/small-image) then
-    make-img($pic/small-image, 1.0)
+    local:make-img($pic/small-image, 1.0)
   else if ($pic/image) then
-    make-img($pic/small-image, 0.5)
+    local:make-img($pic/small-image, 0.5)
   else if ($pic/full-image) then
-    make-img($pic/full-image, 0.2)
+    local:make-img($pic/full-image, 0.2)
   else
   ( "(missing small-image)", string($pic), ")" )
-}
+};
 
-define function make-img($picture, $scale) {
+declare function local:make-img($picture, $scale) {
   &lt;img border="1" src="{$picture}" width="{number($picture/@width) * $scale}"
     height="{number($picture/@height) * $scale}" /&gt;
-}</pre>
+};</pre>
 <h3>A Slight Refinement</h3>
 <p>The code so far ignores any children of the top-level <code>&lt;group&gt;</code> except for <code>&lt;picture&gt;</code>. However, if you look at the original <code>index.xml</code> example, you'll see
 that the <code>&lt;group&gt;</code> has a <code>&lt;text&gt;</code> child. Let's place any such <code>&lt;text&gt;</code> contents in the appropriate place on the overview page. Another sometimes useful feature is to
 be able to explicitly specify how the pictures are to be organized into rows, rather than depend on the default maximum of three per row. You can do that by editing the <code>index.xml</code> file to place
 a <code>&lt;row&gt;</code> element around one or more <code>&lt;picture&gt;</code> elements to specify that these should go in a row by themselves:</p>
-<pre>define function make-group-page($group) {
+<pre>declare function local:make-group-page($group) {
 &lt;html&gt;
 <i>  ... rest as before ..</i>
     &lt;h2&gt;{$group/title/node()}&lt;/h2&gt;
-{   find-rows((), $group/*)}
+{   local:find-rows((), $group/*)}
   &lt;/body&gt;
 &lt;/html&gt;
 }
@@ -220,24 +229,24 @@ a <code>&lt;row&gt;</code> element around one or more <code>&lt;picture&gt;</cod
  : $pictures:  Sequence of &lt;picture&gt;s that need to be split into rows.
  : $unseen: sequence of remaining children we have not processed yet.
  :)
-define function find-rows($pictures, $unseen) {
-  if (empty($unseen)) then make-rows(0, $pictures)
+declare function local:find-rows($pictures, $unseen) {
+  if (empty($unseen)) then local:make-rows(0, $pictures)
   else
     let $next := item-at($unseen, 1),
         $rest := sublist($unseen, 2)
     return
       typeswitch ($next)
-      case element(row,*) return
-        (make-rows(0, $pictures),format-row($next/*),find-rows((), $rest))
-      case element(date,*) return (: ignore &lt;date&gt; children here. :)
-        (make-rows(0, $pictures),find-rows((), $rest))
-      case element(title,*) return (: ignore &lt;title&gt; children here. :)
-        (make-rows(0, $pictures),find-rows((), $rest))
-      case element(text,*) return (: format &lt;text&gt; as a paragraph. :)
-        (make-rows(0, $pictures),&lt;p&gt;{$next/node()}&lt;/p&gt;,find-rows((), $rest))
+      case element(row) return
+        (local:make-rows(0, $pictures),local:format-row($next/*),local:find-rows((), $rest))
+      case element(date) return (: ignore &lt;date&gt; children here. :)
+        (local:make-rows(0, $pictures),local:find-rows((), $rest))
+      case element(title) return (: ignore &lt;title&gt; children here. :)
+        (local:make-rows(0, $pictures),local:find-rows((), $rest))
+      case element(text) return (: format &lt;text&gt; as a paragraph. :)
+        (local:make-rows(0, $pictures),&lt;p&gt;{$next/node()}&lt;/p&gt;,local:find-rows((), $rest))
       default return
-        find-rows(($pictures,$next), $rest)
-}</pre>
+        local:find-rows(($pictures,$next), $rest)
+};</pre>
 <p>The initial call to <code>find-rows</code> sets <code>$pictures</code> to the empty sequence, and <code>$unseen</code> to the sequence of all the child elements of the top-level <code>&lt;group&gt;</code>. If
 <code>$unseen</code> is the empty sequence, we're done, and we just call <code>make-row</code> to wrap up the last row. Otherwise, we look at the first element of <code>$unseen</code>.</p>
 <p>We use a <code>typeswitch</code> expression to do the appropriate thing depending on the type of that first element. A <code>typeswitch</code> evaluates an expression (in this case $<code>next</code>,
@@ -297,7 +306,7 @@ the <code>.html</code> extension.</p>
     $pictures := $group//picture,
     $count := count($pictures)
   return (
-    write-to(make-group-page($group), "index.html"),
+    write-to(local:make-group-page($group), "index.html"),
     for $i in 1 to $count
     for $style in ("", "info", "large")
     let $picture := item-at($pictures,$i),
@@ -306,11 +315,11 @@ the <code>.html</code> extension.</p>
         $date := if ($picture/date) then $picture/date else $group-date
       return
       write-to(
-        picture($picture, $group, string($picture/@id),
+        local:picture($picture, $group, string($picture/@id),
           $prev, $next, $date, $style),
           concat(string($picture/@id), $style, ".html"))
 )</pre>
-<p>The standard function <code>item-at</code> selects a value from a sequence using an index (starting at one). We've already looked at <code>make-group-page</code>. Listing 2 is the big
+<p>The standard function <code>item-at</code> selects a value from a sequence using an index (starting at one). We've already looked at <code>local:make-group-page</code>. Listing 2 is the big
 <code>picture</code> function, which returns a single picture page as an <code>&lt;html&gt;</code> element.</p>
 <p><i>Listing 2: The <code>picture</code> Function</i></p>
 <pre>(: Generate a page picture image with links etc.
@@ -324,7 +333,7 @@ the <code>.html</code> extension.</p>
  :   or "info".  The "info" style show a thumbnail, plus EXIF information,
  :   plus links to the raw JPGs.
  :)
-define function picture($picture, $group, $name, $prev, $next, $date, $style) {
+declare function local:picture($picture, $group, $name, $prev, $next, $date, $style) {
 &lt;html&gt;
   &lt;head&gt;
     &lt;meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/&gt;
@@ -336,7 +345,7 @@ define function picture($picture, $group, $name, $prev, $next, $date, $style) {
     if (empty($next)) then ()
     else ("
     ",&lt;link rel="next" href="{$next/@id}{$style}.html" /&gt;)}
-    &lt;title&gt;{make-title($picture,$group)}&lt;/title&gt;
+    &lt;title&gt;{local:make-title($picture,$group)}&lt;/title&gt;
     &lt;style type="text/css"&gt;
       a {{ padding: 1 4; text-decoration: none; }}
       td {{ padding-left: 0; border-style: none }}
@@ -365,8 +374,8 @@ define function picture($picture, $group, $name, $prev, $next, $date, $style) {
     &lt;/script&gt;
   &lt;/head&gt;
   &lt;body bgcolor="#00AAAA"&gt;
-{ nav-bar($picture, $name, $prev, $next, $style)}
-{ make-header($picture, $group)}
+{ local:nav-bar($picture, $name, $prev, $next, $style)}
+{ local:make-header($picture, $group)}
 { picture-text($picture)}
 { if (empty($date)) then () else &lt;p&gt;Date taken: {$date}.&lt;/p&gt;}
 { let $full-image := $picture/full-image,
@@ -374,30 +383,30 @@ define function picture($picture, $group, $name, $prev, $next, $date, $style) {
   return
   if ($style = "info") then (
     &lt;table&gt;&lt;tr&gt;
-      &lt;td style="padding: 20 20 20 10"&gt;{make-thumbnail($picture)} &lt;/td&gt;
+      &lt;td style="padding: 20 20 20 10"&gt;{local:make-thumbnail($picture)} &lt;/td&gt;
       &lt;td&gt;{doc(concat($name,"-info.txt"))}&lt;/td&gt;
     &lt;/tr&gt;&lt;/table&gt;,
     &lt;table&gt;&lt;tr&gt;&lt;td&gt;Plain JPEG images:&lt;/td&gt;
-    {raw-jpg-link($picture/full-image, "Original")}
-    {raw-jpg-link($picture/image,
+    {local:raw-jpg-link($picture/full-image, "Original")}
+    {local:raw-jpg-link($picture/image,
     if ($full-image) then "Scaled" else "Original")}
-    {raw-jpg-link($picture/small-image, "Thumbnail")}
+    {local:raw-jpg-link($picture/small-image, "Thumbnail")}
     &lt;/tr&gt;&lt;/table&gt;
   )
   else if ($style="large" and $full-image) then
-    make-img($full-image, 1)
+    local:make-img($full-image, 1)
   else if ($style="large" and $image
            and number($image/@width) &lt;= 640
            and number($image/@height) &lt;= 640) then
-    make-img($image, 2)
+    local:make-img($image, 2)
   else if ($full-image) then
-    make-img($full-image, 0.5)
+    local:make-img($full-image, 0.5)
   else
-    make-img($image, 1)
+    local:make-img($image, 1)
   }
   &lt;/body&gt;
 &lt;/html&gt;
-}</pre>
+};</pre>
 <p>The basic structure of this should by now be familiar. The JavaScript function <code>handler</code> (in the <code>&lt;script&gt;</code>) goes to the next or previous page if the letter <code>'n'</code>
 or <code>'p'</code> on the keyboard is pressed. (The strange layout of the code is to make the generated HTML look nice.) Note how the XQuery comment before the <code>&lt;script&gt;</code> section is nested
 inside parentheses (so we get a syntactically valid empty sequence), which is nested inside the curly brace escapes. Note how we check the <code>$style</code> parameter to select which JPEG image to show,
@@ -407,56 +416,56 @@ and has been extracted from the JPEG file using the <code>jhead</code> program (
 <p><i>Figure 3: A page giving detailed information about a single picture.</i></p><p>The navigation bar (i.e. the row of buttons on the top of the page) is generated by the <code>nav-bar</code> function:</p>
 <pre>(: Create a 1-row navigation-bar: next, prev etc :)
 
-define function nav-bar($picture, $name, $prev, $next, $style) {
+declare function local:nav-bar($picture, $name, $prev, $next, $style) {
 &lt;table&gt;
   &lt;tr&gt;
     &lt;td&gt;&lt;span class="button"&gt;&lt;a href="index.html"&gt;Index&lt;/a&gt;&lt;/span&gt;&lt;/td&gt;{
     if ($style="info") then () else ("
-    ",&lt;td&gt;&lt;span class="button"&gt;{make-link($name, "info", "Info")}&lt;/span&gt;&lt;/td&gt;),
+    ",&lt;td&gt;&lt;span class="button"&gt;{local:make-link($name, "info", "Info")}&lt;/span&gt;&lt;/td&gt;),
     if ($style="large") then () else ("
     ",&lt;td width="200" align="left"&gt;&lt;span class="button"&gt;{
-      make-link($name, "large", "Large image")}&lt;/span&gt;&lt;/td&gt;),
+      local:make-link($name, "large", "Large image")}&lt;/span&gt;&lt;/td&gt;),
     if ($style="") then () else ("
     ",&lt;td width="200" align="left"&gt;&lt;span class="button"&gt;{
-      make-link($name, "", "Medium image")}&lt;/span&gt;&lt;/td&gt;)}
+      local:make-link($name, "", "Medium image")}&lt;/span&gt;&lt;/td&gt;)}
     &lt;td width="100" align="right"&gt;{
       if ($prev) then
-        &lt;span class="button"&gt;{make-link($prev/@id, $style, " &lt; Previous ")
+        &lt;span class="button"&gt;{local:make-link($prev/@id, $style, " &lt; Previous ")
       }&lt;/span&gt; else ()}&lt;/td&gt;
     &lt;td width="100" align="left"&gt;{
       if ($next) then
-        &lt;span class="button"&gt;{make-link($next/@id, $style, " Next &gt; ")}&lt;/span&gt;
+        &lt;span class="button"&gt;{local:make-link($next/@id, $style, " Next &gt; ")}&lt;/span&gt;
       else ()}&lt;/td&gt;
   &lt;/tr&gt;
 &lt;/table&gt;
-}</pre>
+};</pre>
 <p>This is standard use of HTML tables to arrange the clickable buttons in a row. The <code>&lt;span class="button"&gt;</code> acts with the top-level <code>&lt;style&gt;</code>. Notice the use of
 conditionals to only generate the buttons that make sense.</p>
 <p>Finally, the last 5 small functions are as follows:</p>
-<pre>define function picture-text($picture) {
+<pre>declare function picture-text($picture) {
   for $text in $picture/text return &lt;p&gt;{$text/node()}&lt;/p&gt;
-}
+};
 
-define function make-title($picture, $group) {
+declare function local:make-title($picture, $group) {
   concat(string($group/title), " - ",
          if (empty($picture/caption)) then string($picture/@id)
          else string($picture/caption))
-}
+};
 
-define function make-header($picture, $group) {
+declare function local:make-header($picture, $group) {
   &lt;h2&gt;{if ($picture/caption) then $picture/caption/node()
-                else $group/title)/node()}&lt;/h2&gt;
-}
+                else $group/title/node()}&lt;/h2&gt;
+};
 
-define function raw-jpg-link($image, $description) {
+declare function local:raw-jpg-link($image, $description) {
   if (empty($image)) then () else
   &lt;td&gt;&lt;span class="button"&gt;&lt;a href="{$image}"&gt;{$description} ({
     string($image/@width)}x{string($image/@height)})&lt;/a&gt;&lt;/span&gt;&lt;/td&gt;
-}
+};
 
-define function make-link($picture-name, $style, $text) {
+declare function local:make-link($picture-name, $style, $text) {
   &lt;a href="{$picture-name}{$style}.html"&gt;{$text}&lt;/a&gt;
-}</pre>
+};</pre>
 <h2>Running XQuery programs as Servlets</h2>
 <p>Servlets are a popular framework for having a web server process a web (HTTP) request. This approach is both efficient and powerful, and it is part of the Java Enterprise framework. JSP
 (JavaServer Pages, mentioned earlier) is built on top of servlets. A JSP page is an HTML template that can contain embedded Java expressions and commands. A JSP-capable web server automatically
@@ -503,7 +512,7 @@ return
                 if ($picture/date) then $picture/date
                 else $group-date
             return
-              picture($picture, $group, string($picture/@id),
+              local:picture($picture, $group, string($picture/@id),
                       $prev, $next, $date, $style)
 </pre>
 <p>To get the request URL relative to the servlet context we use Qexo's <code>request-servlet-path</code> function. We extract the directory name and the file name using some string operations.
@@ -520,7 +529,7 @@ of the original request.  However, the resulting URL is an
 was, which is less efficient that opening a file directly.</p>
 <p>
 If the requested <code>$file</code> was <code>"index.html"</code> we
-pass the read <code>$group</code> to <code>make-group-page</code> as before, and we're done. Otherwise things are a little complicated.</p>
+pass the read <code>$group</code> to <code>local:make-group-page</code> as before, and we're done. Otherwise things are a little complicated.</p>
 <p>We need to find the correct <code>&lt;picture&gt;</code> element in the read document, by searching for one that matches the incoming request. There are various ways of doing this, but we
 need to keep a few concerns in mind:</p>
 <ul>
@@ -533,16 +542,16 @@ value, and later writing that out. To make it easier for an XQuery compiler to a
 top-level expression, without first storing it in a temporary variable.</p></li>
 </ul>
 <p>The call to <code>doc</code> in the <code>picture</code> function must be similarly modified:</p>
-<pre>define function picture($picture, $group, $name, $prev, $next, $date, $style) {
+<pre>declare function local:picture($picture, $group, $name, $prev, $next, $date, $style) {
   ...
   if ($style = "info") then (
-    make-thumbnail($picture),
+    local:make-thumbnail($picture),
    (let $path := request-servlet-path(),
          $last-slash := last-index-of($path, "/"),
          $dir := substring($path, 1, $last-slash) return
     doc(concat("file:",servlet-context-realpath(),$dir,$name,"-info.txt"))),
   ...
-}</pre>
+};</pre>
 <p>Otherwise, the servlet version is same as the batch version.</p>
 <h3>Installing the Servlet under the Tomcat Server</h3>
 <p>A number of Web servers can run servlets. The servlet specification describes how a <i>web application</i> consists of some number of servlets, static pages, and a <code>web.xml</code>
@@ -770,102 +779,102 @@ XPath patterns, so more complex patterns may need explicit logic.</p>
 <code>convert-header</code> function.</p>
 <p>An alternative method for handling "context" is to pass it as an explicit parameter like the <code>$level</code> parameter of <code>convert-title</code>.</p>
 <p><i>Listing 4: An XQuery program to transform Docbook to HTML</i></p>
-<pre>define function convert-children ($x) {
-  for $y in $x/node() return convert-node($y)
-}
+<pre>declare function local:convert-children ($x) {
+  for $y in $x/node() return local:convert-node($y)
+};
 
-define function convert-title($x, $level) {
+declare function local:convert-title($x, $level) {
   if ($level &lt;= 1) then &lt;h1 class="title"&gt;{$x/node()}&lt;/h1&gt;
   else if ($level = 2) then &lt;h2 class="title"&gt;{$x/node()}&lt;/h2&gt;
   else if ($level = 3) then &lt;h3 class="title"&gt;{$x/node()}&lt;/h3&gt;
   else if ($level = 4) then &lt;h4 class="title"&gt;{$x/node()}&lt;/h4&gt;
   else if ($level = 5) then &lt;h5 class="title"&gt;{$x/node()}&lt;/h5&gt;
   else &lt;h6 class="title"&gt;{$x/node()}&lt;/h6&gt;
-}
+};
 
-define function convert-div-children ($x, $level) {
+declare function local:convert-div-children ($x, $level) {
   for $y in $x/node() return
     typeswitch ($y)
-      case element title return convert-title($y, $level)
-      default return convert-node($y)
-}
+      case element(title) return local:convert-title($y, $level)
+      default return local:convert-node($y)
+};
 
-define function convert-header ($x) {
+declare function local:convert-header ($x) {
   for $y in $x/node() return
     typeswitch ($y)
-      case element(title,*) return
-        &lt;h1&gt;{convert-children($y)}&lt;/h1&gt;
-      case element(subtitle,*) return
-        &lt;h2&gt;{convert-children($y)}&lt;/h2&gt;
-      case element(authorgroup,*) return
-        &lt;h3&gt;&lt;i&gt;{convert-children($y)}&lt;/i&gt;&lt;/h3&gt;
+      case element(title) return
+        &lt;h1&gt;{local:convert-children($y)}&lt;/h1&gt;
+      case element(subtitle) return
+        &lt;h2&gt;{local:convert-children($y)}&lt;/h2&gt;
+      case element(authorgroup) return
+        &lt;h3&gt;&lt;i&gt;{local:convert-children($y)}&lt;/i&gt;&lt;/h3&gt;
       default return ( )
-}
+};
 
-define function convert-biblioentry ($x) {
+declare function local:convert-biblioentry ($x) {
   for $y in $x/node() return
     typeswitch ($y)
-      case element(abbrev,*) return
-        ('[',convert-children($y),']')
-      case element(title,*) return
-        (&lt;cite&gt;{convert-children($y)}&lt;/cite&gt;,'.')
-      case element(authorgroup,*) return
-        (convert-node($y),'.')
-      default return convert-node($y)
-}
+      case element(abbrev) return
+        ('[',local:convert-children($y),']')
+      case element(title) return
+        (&lt;cite&gt;{local:convert-children($y)}&lt;/cite&gt;,'.')
+      case element(authorgroup) return
+        (local:convert-node($y),'.')
+      default return local:convert-node($y)
+};
 
-define function convert-node ($x) {
+declare function local:convert-node ($x) {
   typeswitch ($x)
-    case element(article,*) return
-      &lt;html&gt;{convert-children($x)}&lt;/html&gt;
-    case element(artheader,*) return
-      convert-header($x)
-    case element(title,*) return
-      &lt;title&gt;{convert-children($x)}&lt;/title&gt;
+    case element(article) return
+      &lt;html&gt;{local:convert-children($x)}&lt;/html&gt;
+    case element(artheader) return
+      local:convert-header($x)
+    case element(title) return
+      &lt;title&gt;{local:convert-children($x)}&lt;/title&gt;
     case element(authorgroup,*) return
-      convert-children($x)
-    case element(author,*) return
-      convert-children($x)
-    case element(abstract,*) return
-     &lt;div type='abstract'&gt;&lt;h3&gt;Abstract&lt;/h3&gt;{convert-children($x)}&lt;/div&gt;
-    case element(para,*) return
-      &lt;p&gt;{convert-children($x)}&lt;/p&gt;
-    case element(screenshot,*) return
+      local:convert-children($x)
+    case element(author) return
+      local:convert-children($x)
+    case element(abstract) return
+     &lt;div type='abstract'&gt;&lt;h3&gt;Abstract&lt;/h3&gt;{local:convert-children($x)}&lt;/div&gt;
+    case element(para) return
+      &lt;p&gt;{local:convert-children($x)}&lt;/p&gt;
+    case element(screenshot) return
       &lt;img src="{string($x/mediaobject/imageobject/imagedata[@format="PNG"]/@fileref)}" /&gt;
-    case element(caption,*) return
-      &lt;p&gt;&lt;b&gt;{convert-children($x)}&lt;/b&gt;&lt;/p&gt;
-    case element(emphasis,*) return
-      &lt;em&gt;{convert-children($x)}&lt;/em&gt;
-    case element(citation,*) return
-      ('[',convert-children($x),']')
-    case element(quote,*) return
-      ('"',convert-children($x),'"')
-    case element(classname,*) return
-      &lt;code&gt;{convert-children($x)}&lt;/code&gt;
-    case element(function,*) return
-      &lt;code&gt;{convert-children($x)}&lt;/code&gt;
-    case element(itemizedlist,*) return
-      &lt;ul&gt;{convert-children($x)}&lt;/ul&gt;
-    case element(listitem,*) return
-      &lt;li&gt;{convert-children($x)}&lt;/li&gt;
-    case element(sect1,*) return
-      &lt;div class="sect1"&gt;{convert-div-children($x, 2)}&lt;/div&gt;
-    case element(sect2,*) return
-      &lt;div class="sect2"&gt;{convert-div-children($x, 3)}&lt;/div&gt;
-    case element(programlisting,*) return
-      &lt;pre&gt;{convert-children($x)}&lt;/pre&gt;
-    case element(informalfigure,*) return
-      convert-children($x)
-    case element(bibliography,*) return
-      &lt;div class="bibliography"&gt;&lt;h2&gt;Bibliography&lt;/h2&gt;{convert-children($x)}&lt;/div&gt;
-    case element(biblioentry,*) return
-      &lt;p&gt;{convert-biblioentry($x)}&lt;/p&gt;
-    case element(firstname,*) return
-      convert-children($x)
-    case element(surname,*) return
-      convert-children($x)
+    case element(caption) return
+      &lt;p&gt;&lt;b&gt;{local:convert-children($x)}&lt;/b&gt;&lt;/p&gt;
+    case element(emphasis) return
+      &lt;em&gt;{local:convert-children($x)}&lt;/em&gt;
+    case element(citation) return
+      ('[',local:convert-children($x),']')
+    case element(quote) return
+      ('"',local:convert-children($x),'"')
+    case element(classname) return
+      &lt;code&gt;{local:convert-children($x)}&lt;/code&gt;
+    case element(function) return
+      &lt;code&gt;{local:convert-children($x)}&lt;/code&gt;
+    case element(itemizedlist) return
+      &lt;ul&gt;{local:convert-children($x)}&lt;/ul&gt;
+    case element(listitem) return
+      &lt;li&gt;{local:convert-children($x)}&lt;/li&gt;
+    case element(sect1) return
+      &lt;div class="sect1"&gt;{local:convert-div-children($x, 2)}&lt;/div&gt;
+    case element(sect2) return
+      &lt;div class="sect2"&gt;{local:convert-div-children($x, 3)}&lt;/div&gt;
+    case element(programlisting) return
+      &lt;pre&gt;{local:convert-children($x)}&lt;/pre&gt;
+    case element(informalfigure) return
+      local:convert-children($x)
+    case element(bibliography) return
+      &lt;div class="bibliography"&gt;&lt;h2&gt;Bibliography&lt;/h2&gt;{local:convert-children($x)}&lt;/div&gt;
+    case element(biblioentry) return
+      &lt;p&gt;{local:convert-biblioentry($x)}&lt;/p&gt;
+    case element(firstname) return
+      local:convert-children($x)
+    case element(surname) return
+      local:convert-children($x)
     default return ($x)
-}
+};
 
 let $doc := input()
 let $artheader := $doc/article/artheader
@@ -873,10 +882,10 @@ let $title := $artheader/title
 return
 &lt;html&gt;
 &lt;head&gt;
-{if ($title) then &lt;title&gt;{convert-children($title)}&lt;/title&gt; else ()}
+{if ($title) then &lt;title&gt;{local:convert-children($title)}&lt;/title&gt; else ()}
 &lt;/head&gt;
 &lt;body&gt;
-{convert-children($doc)}
+{local:convert-children($doc)}
 &lt;/body&gt;
 &lt;/html&gt;</pre>
 <p>These two stylesheets are of comparable size and complexity. The XSLT is slightly shorter if you're counting characters (2731 versus 3431), but the difference is minor, and this is the
@@ -890,7 +899,7 @@ XQuery can be used as an alternative to XSLT.</p>
 
 <hr />
 <p>
-Copyright 2002 (C) Per Bothner.  <code>&lt;<a href="mailto:per@bothner.com">per@bothner.com</a>&gt;</code></p>
+Copyright 2002, 2006 (C) Per Bothner.  <code>&lt;<a href="mailto:per@bothner.com">per@bothner.com</a>&gt;</code></p>
 <p>Permission is granted to copy, distribute and/or modify this document
 under the terms of the <a href="fdl.txt">GNU Free Documentation License</a>,
 version 1.1.</p>
