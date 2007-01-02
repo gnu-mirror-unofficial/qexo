@@ -229,18 +229,18 @@ valid XQuery expression, then that expression will be treated as
 a complete expression.  (However, when parsing a file the entire
 file is parsed.)
 <pre>
-$ java -jar kawa-1.8.jar --xquery
-xquery[1]: for $x in (3,4,5) return &lt;a&gt;{$x}&lt;/a&gt;
+$ java -jar kawa-1.9.jar --xquery
+(: 1 :) for $x in (3,4,5) return &lt;a&gt;{$x}&lt;/a&gt;
 &lt;a&gt;3&lt;/a&gt;&lt;a&gt;4&lt;/a&gt;&lt;a&gt;5&lt;/a&gt;
-xquery[2]: string-value(&lt;a&gt;3+5 is {3+5}&lt;/a&gt;)
- 3+5 is 8
-xquery[3]:
+(: 2 :) string(&lt;a&gt;3+5 is {3+5}&lt;/a&gt;)
+3+5 is 8
+(: 3 :)
 </pre>
 <p>
 You can also compile an XQuery program to a Java application:
 <pre>
-$ java -jar kawa-1.8.jar --xquery --main -C prog.xql
-$ java -cp .:kawa-1.8.jar prog
+$ java -jar kawa-1.9.jar --xquery --main -C prog.xql
+$ java -cp .:kawa-1.9.jar prog
 </pre>
 <p>
 You can read <a href="Running.html">here for more on running Qexo</a>.
@@ -249,7 +249,7 @@ You can read <a href="Running.html">here for more on running Qexo</a>.
 <p>
 You can compile an XQuery program to a Servlet.
 Here is a <a href="simple-xquery-webapp.html">simple web application example</a>.
-This article has <a href="servlet.html">addition but older information</a>.
+This article has <a href="servlet.html">additional but older information</a>.
 The servlet can be run in a servlet-aware web server, or as a CGI script.
 
 <h2 id="License">License</h2>
@@ -264,9 +264,5 @@ relative to the most recent XQuery specification documents.
 
     <hr>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
-<!-- Created: Sat Aug 18 14:08:13 PDT 2001 -->
-<!-- hhmts start -->
-Last modified: Thu Feb  3 22:11:55 PST 2005
-<!-- hhmts end -->
   </body>
 </html>
