@@ -48,8 +48,7 @@ using <code>gnu.math.IntNum</code>, but in the future may be implemented using p
 <li<code>xs:decimal</code> is implemented using <code>java.math.BigDecimal</code>.</li>
 <li><code>xs:base64Binary</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/Base64Binary.html"><code>gnu.kawa.xml.Base64Binary</code></a>.
 <li><code>xs:hexBinary</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/HexBinary.html"><code>gnu.kawa.xml.HexBinary</code></a>.
-<li><code>xs:anyURI</code> is currently implemented using <code>java.net.URI</code> (or <code>java.lang.String</code> if Qexo is compiled for pre-JDK-1.4).
-This is likely to change to using a new type <code>gnu.kawa.util.Path</code>.
+<li><code>xs:anyURI</code> is implemented using <a href="../kawa/api/gnu/text/Path.html"><code>gnu.text.Path</code></a> and specifically <a href="../kawa/api/gnu/text/URIPath.html"><code>gnu.text.URIPath</code></a>.
 <li><code>xs:NOTATION</code> is implemented using
 <a href="../kawa/api/gnu/kawa/xml/Notation.html"><code>gnu.kawa.xml.Notation</code></a>.
 </ul>
