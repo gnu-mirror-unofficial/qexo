@@ -5,7 +5,7 @@ import java.util.*;
 import javax.imageio.*;
 import javax.imageio.stream.*;
 import com.drew.metadata.exif.ExifDirectory;
-import gnu.text.URI_utils;
+import gnu.text.*;
 
 public class create
 {
@@ -126,7 +126,8 @@ public class create
         for (int i = iarg;  i < iend;  i++)
           {
             String filename = args[i];
-            if (! URI_utils.exists(filename))
+            Path path = Path.valueOf(filename);
+            if (! path.exists())
               error(filename+": No such file");
             String base = filename;
             int dotIndex = base.lastIndexOf('.');
@@ -138,7 +139,7 @@ public class create
             try
               {
                 ImageInputStream iis
-                  = ImageIO.createImageInputStream(URI_utils.getInputStream(filename));
+                  = ImageIO.createImageInputStream(path.openInputStream());
                 if (iis == null) // This happens with gcj 4.1.1
                   throw new Error("ImageIO.createImageInputStream("+filename+") failed - internal error or wrong java in PATH?");
                 reader.setInput(iis, true);

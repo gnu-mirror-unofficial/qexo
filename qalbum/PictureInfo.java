@@ -1,7 +1,7 @@
 package qalbum;
 import java.io.*;
 import java.net.URI;
-import gnu.text.URI_utils;
+import gnu.text.*;
 
 public class PictureInfo
 {
@@ -47,8 +47,8 @@ public class PictureInfo
     else if (rotated.length() != 0)
       {
         
-        String/*Path*/ rotname = base+'r'+suffix;
-        if (URI_utils.exists(rotname))
+        Path rotname = Path.valueOf(base+'r'+suffix);
+        if (rotname.exists())
           info.large = ImageInfo.readMetadata(rotname);
         else if (autoScale)
           {
@@ -77,7 +77,7 @@ public class PictureInfo
       }
     else
       info.large = info.original;
-    Object large_image = info.large.filename;
+    Path large_image = info.large.filename;
     info.thumbnail = forceReadMetadata(base+'t'+suffix, large_image,
                                        240, forceReScale);
     if (info.large.width <= 740 && info.large.height <= 740)
@@ -91,19 +91,20 @@ public class PictureInfo
     return info;
   }
 
-  static ImageInfo forceReadMetadata (Object filename, Object orig,
+  static ImageInfo forceReadMetadata (String filename, Path orig,
                                       int maxDim, boolean forceReScale)
     throws Throwable
   {
-    if (forceReScale || ! URI_utils.exists(filename))
+    Path path = Path.valueOf(filename);
+    if (forceReScale || ! path.exists())
       {
         if (! autoScale)
           return null;
         // FIXME also print size.
         System.err.println("scaling "+orig+" to "+filename+" maxSize:"+maxDim);
-        Thumbnail.createThumbnail(orig, filename, maxDim);
+        Thumbnail.createThumbnail(orig, path, maxDim);
       }
-    return ImageInfo.readMetadata(filename);
+    return ImageInfo.readMetadata(path);
   }
 
   boolean hasThumbnail ()
@@ -111,7 +112,7 @@ public class PictureInfo
     return thumbnail != null;
   }
 
-  public ImageInfo findImageInfo (String filename)
+  public ImageInfo findImageInfo (Path filename)
   {
     if (original != null && filename.equals(original.filename))
       return original;
@@ -145,7 +146,7 @@ public class PictureInfo
     return findScaledImage(scaleName) != null;
   }
 
-  public Object getScaledFile (String scaleName)
+  public Path getScaledFile (String scaleName)
   {
     return findScaledImage(scaleName).filename;
   }
@@ -160,17 +161,17 @@ public class PictureInfo
     return findScaledImage(scaleName).height;
   }
 
-  public int getWidthFor (String filename)
+  public int getWidthFor (Path filename)
   {
     return findImageInfo(filename).width;
   }
 
-  public int getHeightFor (String filename)
+  public int getHeightFor (Path filename)
   {
     return findImageInfo(filename).height;
   }
 
-  public String getSizeDescription (String filename)
+  public String getSizeDescription (Path filename)
   {
     StringBuffer sbuf = new StringBuffer();
     ImageInfo info = findImageInfo(filename);
@@ -203,8 +204,9 @@ public class PictureInfo
             if (kind == 'r' || kind == 'p' || kind == 't')
               {
                 filename = filename.substring(0, namelen-5) + ".jpg";
-                if (URI_utils.exists(filename))
-                  original = info = ImageInfo.readMetadata(filename);
+                Path path = Path.valueOf(filename);
+                if (path.exists())
+                  original = info = ImageInfo.readMetadata(path);
               }
           }
       }

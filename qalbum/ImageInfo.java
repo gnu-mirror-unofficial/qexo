@@ -4,7 +4,7 @@ import com.drew.metadata.*;
 import com.drew.metadata.exif.*;
 import com.drew.metadata.jpeg.*;
 import java.io.*;
-import gnu.text.URI_utils;
+import gnu.text.*;
 
 /** Information relating to and extracted from a JPEG image. */
 
@@ -13,13 +13,14 @@ public class ImageInfo
   Metadata metadata;
   Directory exifDirectory;
   int width, height;
-  Object filename;
+  Path filename;
 
   public static ImageInfo readMetadata (Object filename)
     throws Throwable
   {
+    Path path = Path.valueOf(filename);
     InputStream in
-      = new BufferedInputStream(URI_utils.getInputStream(filename));
+      = new BufferedInputStream(path.openInputStream());
     Metadata metadata = JpegMetadataReader.readMetadata(in);
     Directory exifDirectory = metadata.getDirectory(ExifDirectory.class);
     Directory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
@@ -28,7 +29,7 @@ public class ImageInfo
     info.exifDirectory = exifDirectory;
     info.width = jpegDirectory.getInt(JpegDirectory.TAG_JPEG_IMAGE_WIDTH);
     info.height = jpegDirectory.getInt(JpegDirectory.TAG_JPEG_IMAGE_HEIGHT);
-    info.filename = filename;
+    info.filename = path;
     return info;
   }
 
@@ -118,10 +119,9 @@ public class ImageInfo
 
     sbuf.append("File name:     ");  sbuf.append(filename);  sbuf.append('\n');
 
-    sbuf.append("File size:     ");
-    sbuf.append(URI_utils.contentLength(filename));  sbuf.append(" bytes\n");
+    sbuf.append("File size:     ");    sbuf.append(filename.getContentLength());  sbuf.append(" bytes\n");
     sbuf.append("File date:     ");
-    sbuf.append(new java.util.Date(URI_utils.lastModified(filename)));
+    sbuf.append(new java.util.Date(filename.getLastModified()));
     sbuf.append('\n');
 
     appendExifString("Camera make:   ", ExifDirectory.TAG_MAKE, sbuf);
