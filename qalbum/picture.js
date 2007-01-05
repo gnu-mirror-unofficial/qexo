@@ -185,13 +185,6 @@ function styleOption(value, target, text) {
   return r;
 }
 
-function OnClick(id) {
-  if (top.slider) {
-    top.slider.sliderSelectId(id);
-    return false;
-  }
-}
-
 function WriteStyleMenu () {
   document.write("<td><span class='button'>Style: <select onchange='styleChange(this)'>"
   + styleOption("help", libdir+"/help.html#styles", "Help me choose")

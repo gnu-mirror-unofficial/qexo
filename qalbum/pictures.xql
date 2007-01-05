@@ -28,7 +28,7 @@ declare function local:style-link($style) {
 };
 
 declare function local:make-link($picture-name, $style, $text) {
-  <a class="button" href="{$picture-name}{local:style-link($style)}.html" onclick="OnClick('{$picture-name}')">{$text}</a>
+  <a class="button" href="{$picture-name}{local:style-link($style)}.html">{$text}</a>
 };
 
 declare function local:format-row($first, $last, $pictures, $picinfos) {
