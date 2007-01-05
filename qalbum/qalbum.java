@@ -68,7 +68,7 @@ public class qalbum
     if (indexFile.exists())
       {
         System.out.println("Processing "+indexFile);
-        CallContext.getInstance().setBaseUri(dir.toURI().toString());
+        Path.setCurrentPath(Path.valueOf(dir));
         if (args.length == 0) // Optimization.
           generate(indexFile, dir, args);
         else
@@ -96,7 +96,7 @@ public class qalbum
     String libdir = null;
     try
       {
-        InputStream ins = URI_utils.getInputStream(indexFile);
+        InputStream ins = new FileInputStream(indexFile);
         InPort inp = new InPort(ins);
         for (;;)
           {
