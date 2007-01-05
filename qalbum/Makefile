@@ -53,7 +53,7 @@ $(QALBUM_PACKAGE_DIR)/PictureInfo.class: $(QALBUM_PACKAGE_DIR)/PictureInfo.java
 	CLASSPATH=$(CLASSPATH) $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/PictureInfo.java
 
 $(QALBUM_PACKAGE_DIR)/pictures.class: pictures.xql
-	scriptdir=`pwd`; ./setup.sh; \
+	scriptdir=`pwd`; \
 	CLASSPATH=$(CLASSPATH) \
 	$(JAVA) kawa.repl --xquery --main -d .. -P qalbum. -C pictures.xql
 
