@@ -21,12 +21,31 @@ if (scaled) {
  }
 
 function StyleFixLinks() {
-  if (up_button_link)
-    up_button_link.href = "index.html"+uphash;
-  if (prev_button_link)
-    prev_button_link.href = prev_button_link.href.replace("#.*$","")+hash;
-  if (next_button_link)
-    next_button_link.href = next_button_link.href.replace("#.*$","")+hash;
+  if (top.slider) {
+    if (up_button_link) { 
+      up_button_link.setAttribute('onclick',
+        "top.location='index.html#slider'");
+      up_button_link.href = "index.html"+uphash;
+    }
+    if (prev_button_link) {
+      prev_button_link.setAttribute('onclick',
+        "top.slider.sliderSelectId('"+prevId+"');return false;");
+      prev_button_link.href = "slider.html#"+prevId;
+    }
+    if (next_button_link) {
+      next_button_link.setAttribute('onclick',
+        "top.slider.sliderSelectId('"+nextId+"');return false;");
+      next_button_link.href = "slider.html#"+nextId;
+    }
+  }
+  else {
+    if (up_button_link)
+      up_button_link.href = "index.html"+uphash;
+    if (prev_button_link)
+      prev_button_link.href = prev_button_link.href.replace("#.*$","")+hash;
+    if (next_button_link)
+      next_button_link.href = next_button_link.href.replace("#.*$","")+hash;
+  }
 }
 
 function OnLoad() {

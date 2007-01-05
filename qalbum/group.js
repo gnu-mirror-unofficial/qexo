@@ -26,6 +26,8 @@ function fixLinks() {
         href = href.replace(/[.]html/, ".html#medium-scaled");
       else if (hash=="#medium-scaled-only")
         href = href.replace(/[.]html/, ".html#medium-scaled-only");
+      else if (hash=="#slider")
+        href = href.replace(/([^/]*)[.]html.*/, "slider.html#$1");
       links[i].href = href;
     }
   }
@@ -49,10 +51,6 @@ function sliderSelect(node) {
     scrollTo(0, row.offsetTop);
   else if (row.offsetTop < scrollTop)
     scrollTo(0, row.offsetTop+row.offsetHeight-innerHeight);
-}
-
-function onClickSlider (e) {
-  sliderSelect(e);
 }
 
 function sliderHandler (e) {

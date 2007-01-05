@@ -1,9 +1,9 @@
 declare namespace PictureInfo = "class:qalbum.PictureInfo";
-declare namespace CallContext = "class:gnu.mapping.CallContext";
+declare namespace Path = "class:gnu.text.Path";
 declare boundary-space preserve;
 declare variable $libdir external;
 declare variable $nl := "&#10;";
-declare variable $pwd := CallContext:getBaseUri(CallContext:getInstance());
+declare variable $pwd := Path:currentPath();
 
 declare function local:make-img($class, $picinfo) {
   let $image-name := PictureInfo:getScaledFile($picinfo, $class) return
@@ -125,7 +125,7 @@ declare function local:make-header($picture, $group) {
 declare function local:nav-bar($picture, $name, $prev, $next, $style) {
 <table>
   <tr>
-    <td><a class="button" id="up-button" href="index.html" onclick="top.location='index.html'">Index</a></td>
+    <td><a class="button" id="up-button" href="index.html">Index</a></td>
     <td width="100" align="right">{
       if ($prev) then
       <a class="button" id="prev-button" href="{$prev/@id}{local:style-link($style)}.html"> &lt; Previous </a>
@@ -151,7 +151,7 @@ declare function local:nav-bar($picture, $name, $prev, $next, $style) {
 declare function local:raw-jpg-link($class, $description, $picinfo) {
   if (PictureInfo:getScaledExists($picinfo, $class)) then
    let $image := PictureInfo:getScaledFile($picinfo, $class) return
-  <td><span class="button"><a href="{$image}">{$description} {PictureInfo:getSizeDescription($picinfo, string($image))}</a></span></td>
+  <td><span class="button"><a href="{$image}">{$description} {PictureInfo:getSizeDescription($picinfo, $image)}</a></span></td>
   else ()
 };
 
@@ -234,7 +234,7 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
          $ofile := string($oimage)
      where $mfile ne $ofile
      return
-    <td><span class="button"><a href="{$mfile}">Scaled {PictureInfo:getSizeDescription($picinfo, $mfile)}</a></span></td>
+    <td><span class="button"><a href="{$mfile}">Scaled {PictureInfo:getSizeDescription($picinfo, $mimage)}</a></span></td>
     else ()}
     {local:raw-jpg-link("thumb", "Thumbnail", $picinfo)}
     </tr></table>,"
@@ -362,9 +362,9 @@ declare function local:slider-index-page-helper($nodes, $i, $n,
                                           $picinfos, $p+$npictures))
       case element(picture) return ("
     ",
-      <tr><td><table id="{$item/@id}" bgcolor="black" onclick="javascript:onClickSlider(this)">
+      <tr><td><table id="{$item/@id}" bgcolor="black" onclick="sliderSelectId('{$item/@id}'); return false">
       <tr>
-        <td align="center"><a href="{$item/@id}.html" target="main">{
+        <td align="center"><a href="slider.html#{$item/@id}" target="main">{
           local:make-thumbnail($item, item-at($picinfos, $p))}</a></td>
       </tr> {
       if ($item/caption) then
