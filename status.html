@@ -2,15 +2,45 @@
 <html>
   <head>
     <title>Qexo Implementation Status</title>
+<link rel="stylesheet" title="Kawa (navbar: fixed, left)"
+  href="../kawa/style/kawa-l.css" media="screen, print, projection, tv">
+<link rel="alternate stylesheet" title="Kawa (navbar: fixed, right)"
+  href="../kawa/style/kawa-r.css" media="screen, print, projection, tv">
+  </head>
   </head>
 
-  <body>
+<body id="body">
+<div class="navcol">
+<b class="logo"><a href="index.html">Qexo</a></b>
+<div class="navbar">
+<!--start-generated-navbar-->
+<ul>
+<li><a rel="bookmark" href="news.html">News: Recent changes</a></li>
+<li><a rel="bookmark" href="index.html#Documentation">Documentation and articles</a></li>
+<li><a rel="bookmark" href="index.html#Examples">Short examples</a></li>
+<li><a rel="bookmark" href="index.html#Download">Getting and installing</a></li>
+<li><a rel="bookmark" href="index.html#Usage">Using Qexo</a></li>
+<li><a rel="bookmark" href="index.html#Servlets">Servlets and Web Applications</a></li>
+<li><a rel="bookmark" href="Extensions.html">XQuery Extensions</a></li>
+<li><a rel="bookmark" href="status.html">Status and conformance</a>
+<!--start-children-toc-->
+<ul parent="index.html">
+</ul>
+<!--end-children-toc-->
+</li>
+<li><a rel="bookmark" href="index.html#License">License: Qexo is Free Software</a></li>
+<li><a rel="bookmark" href="../kawa/index.html">Qexo is based on Kawa</a></li>
+</ul>
+<!--end-generated-navbar-->
+</div>
+</div>
+
     <h1>Qexo Implementation Status</h1>
 
-<p><em>This describes the status of the Qexo version 1.8.91.</em></p>
+<p><em>This describes the status of the Qexo version 1.8.95.</em></p>
 
 <h2>Feature Summary</h2>
-<p>Qexo 1.8.91 implements most of the core XQuery specification,
+<p>Qexo 1.8.95 implements most of the core XQuery specification,
 and <a href="http://www.w3.org/XML/Query/test-suite/XQTSReportSimple.html">passes over 98%</a>
 of the <a href="http://www.w3.org/XML/Query/test-suite/">XQuery Test Suite</a>.
 <p>Qexo implements the Full Axis Feature.</p>
@@ -31,63 +61,65 @@ are not yet implemented:
 and <code>xs:ENTITY</code>.</p>
 
 <ul>
-<li><code>xs:untypedAtomic</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/UntypedAtomic.html"><code>gnu.kawa.xml.UntypedAtomic</code></a>.</li>
-<li><code>xs:dateTime</code>, <code>xs:date</code>, <code>xs:time</code>,
+<li><p><code>xs:untypedAtomic</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/UntypedAtomic.html"><code>gnu.kawa.xml.UntypedAtomic</code></a>.</li>
+<li><p><code>xs:dateTime</code>, <code>xs:date</code>, <code>xs:time</code>,
 <code>xs:gYearMonth</code>, <code>xs:gYear</code>, <code>xs:gMonthDay</code>, <code>xs:gDay</code>, and <code>xs:gMonth</code>
 are implemented using <a href="../kawa/api/gnu/math/DateTime.html"><code>gnu.math.DateTime</code></a>.
-<li><code>xs:duration</code>, <code>xs:yearMonthDuration</code>,
+<li><p><code>xs:duration</code>, <code>xs:yearMonthDuration</code>,
 <code>xs:dayTimeDuration</code> are implemented using <a href="../kawa/api/gnu/math/Duration.html"><code>gnu.math.Duration</code></a>.
-<li><code>xs:QName</code> is implemented using <a href="../kawa/api/gnu/mapping/Symbol.html"><code>gnu.mapping.Symbol</code></a>.
-<li><code>xs:boolean</code> is implemented using <code>java.lang.Boolean</code>.</li>
-<li><code>xs:string</code> is implemented using <code>java.lang.String</code>.</li>
-<li><code>xs:integer</code>, <code>xs:positiveInteger</code>,
+<li><p><code>xs:QName</code> is implemented using <a href="../kawa/api/gnu/mapping/Symbol.html"><code>gnu.mapping.Symbol</code></a>.
+<li><p><code>xs:boolean</code> is implemented using <code>java.lang.Boolean</code>.</li>
+<li><p><code>xs:string</code> is implemented using <code>java.lang.String</code>.</li>
+<li><p><code>xs:integer</code>, <code>xs:positiveInteger</code>,
 <code>xs:nonPositiveInteger</code>, <code>xs:negativeInteger</code>,
 and <code>xs:nonNegativeInteger</code> are implemented using <a href="../kawa/api/gnu/math/IntNum.html"><code>gnu.math.IntNum</code></a>.</li>
-<li><code>xs:long</code>, <code>xs:int</code>, <code>xs:short</code>, <code>xs:byte</code>, <code>xs:unsignedLong</code>, <code>xs:unsignedInt</code>, <code>xs:unsignedShort</code>, <code>xs:unsignedbyte</code> are currently also implemented
+<li><p><code>xs:long</code>, <code>xs:int</code>, <code>xs:short</code>, <code>xs:byte</code>, <code>xs:unsignedLong</code>, <code>xs:unsignedInt</code>, <code>xs:unsignedShort</code>, <code>xs:unsignedbyte</code> are currently also implemented
 using <code>gnu.math.IntNum</code>, but in the future may be implemented using primitive Java types.
 <li<code>xs:decimal</code> is implemented using <code>java.math.BigDecimal</code>.</li>
-<li><code>xs:base64Binary</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/Base64Binary.html"><code>gnu.kawa.xml.Base64Binary</code></a>.
-<li><code>xs:hexBinary</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/HexBinary.html"><code>gnu.kawa.xml.HexBinary</code></a>.
-<li><code>xs:anyURI</code> is implemented using <a href="../kawa/api/gnu/text/Path.html"><code>gnu.text.Path</code></a> and specifically <a href="../kawa/api/gnu/text/URIPath.html"><code>gnu.text.URIPath</code></a>.
-<li><code>xs:NOTATION</code> is implemented using
+<li><p><code>xs:base64Binary</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/Base64Binary.html"><code>gnu.kawa.xml.Base64Binary</code></a>.
+<li><p><code>xs:hexBinary</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/HexBinary.html"><code>gnu.kawa.xml.HexBinary</code></a>.
+<li><p><code>xs:anyURI</code> is implemented using <a href="../kawa/api/gnu/text/Path.html"><code>gnu.text.Path</code></a> and specifically <a href="../kawa/api/gnu/text/URIPath.html"><code>gnu.text.URIPath</code></a>.
+<li><p><code>xs:NOTATION</code> is implemented using
 <a href="../kawa/api/gnu/kawa/xml/Notation.html"><code>gnu.kawa.xml.Notation</code></a>.
 </ul>
 
 <h2>Expressions</h2>
 <p>Except as noted below, all XQuery expression forms are handled.</p>
-<p><code>ordered</code>, <code>unordered</code> expressions are
-recognized but ignored.</p>
-<p><code>validate</code> expressions are not supported.</p>
-<p>Extension expressions are impemented, but no extensions
-are currently recognized.</p>
+<ul>
+<li><p><code>ordered</code>, <code>unordered</code> expressions are
+recognized but ignored.</li>
+<li><p><code>validate</code> expressions are not supported.</li>
+<li><p>Extension expressions are implemented, but no extensions
+are currently recognized.</li>
+</ul>
 
 <h2>Prologue declarations</h2>
 
 <ul>
-<li><code>VersionDecl</code> (<code>xquery version</code>) is handled
+<li><p><code>VersionDecl</code> (<code>xquery version</code>) is handled
 but any encoding specification is ignored.
-<li><code>VarDecl</code> (<code>declare variable</code>): Ok, including
+<li><p><code>VarDecl</code> (<code>declare variable</code>): Ok, including
 support for <code>external</code> variables.</li>
-<li><code>FunctionDecl</code> (<code>declare function</code>): Ok, though no
+<li><p><code>FunctionDecl</code> (<code>declare function</code>): Ok, though no
 support for <code>external</code> functions yet.
 Type conversion and casting behavior are uneven:
 the special function conversions (such as atomization) are
 not done for non-builtin functions.
 </li>
-<li><code>NamespaceDecl</code> (<code>declare namespace</code>): Ok.
-<li><code>DefaultNamespaceDecl</code> (<code>declare default (element/function) namespace</code>): Ok.</li>
-<li><code>BoundarySpaceDecl</code> (<code>declare boundary-space</code>): Ok.
-<li><code>DefaultCollationDecl</code> (<code>declare default collection</code>): Ok.  The default collection is set in the static context, but so far
+<li><p><code>NamespaceDecl</code> (<code>declare namespace</code>): Ok.
+<li><p><code>DefaultNamespaceDecl</code> (<code>declare default (element/function) namespace</code>): Ok.</li>
+<li><p><code>BoundarySpaceDecl</code> (<code>declare boundary-space</code>): Ok.
+<li><p><code>DefaultCollationDecl</code> (<code>declare default collection</code>): Ok.  The default collection is set in the static context, but so far
 nothing uses it.  Also, only the default (code-point) collation works.</li>
-<li><code>BaseURIDecl</code> (<code>declare base-uri</code>): Ok.
-<li><code>ConstructionDecl</code> (<code>declare construction</code>): Not implemented.
+<li><p><code>BaseURIDecl</code> (<code>declare base-uri</code>): Ok.
+<li><p><code>ConstructionDecl</code> (<code>declare construction</code>): Not implemented.
 </li>
-<li><code>OrderingModeDecl</code> (<code>declare ordering</code>): Ok.
-<li><code>EmptyOrderDecl</code> (<code>declare default oder empty</code>): Ok.
-<li><code>CopyNamespacesDecl</code> (<code>declare copy-namespaces</code>): Ok.
-<li><code>SchemaImport</code> (<code>import scheme</code>): Not implemented.</li>
-<li><code>ModuleImport</code> (<code>module import</code>): Works, including support for separate compilation.</li>
-<li><code>OptionDecl</code> (<code>declare option</code>): Ok, though
+<li><p><code>OrderingModeDecl</code> (<code>declare ordering</code>): Ok.
+<li><p><code>EmptyOrderDecl</code> (<code>declare default oder empty</code>): Ok.
+<li><p><code>CopyNamespacesDecl</code> (<code>declare copy-namespaces</code>): Ok.
+<li><p><code>SchemaImport</code> (<code>import scheme</code>): Not implemented.</li>
+<li><p><code>ModuleImport</code> (<code>module import</code>): Works, including support for separate compilation.</li>
+<li><p><code>OptionDecl</code> (<code>declare option</code>): Ok, though
 there are no options handled yet.
 </ul>
 
@@ -151,13 +183,13 @@ our needs.</p>
 <h3>15 Functions and Operators on Sequences</h3>
 <p>These generally work fine, expect:</p>
 <ul>
-<li><code>deep-equal</code> does not take collation into account,
+<li><p><code>deep-equal</code> does not take collation into account,
 and there are are probably some other data types not handled quite correctly.
-<li><code>id</code> works and automatically generates an efficient index the
+<li><p><code>id</code> works and automatically generates an efficient index the
 first time it is called.  However, because Qexo does not do validation,
 only attributes named <code>xml:id</code> are recognzied as having
 the <code>is-id</code> property.
-<li><code>idref</code> always returns the empty sequence.
+<li><p><code>idref</code> always returns the empty sequence.
 </ul>
 
 <h3>16 Context Functions</h3>
@@ -168,8 +200,5 @@ the <code>is-id</code> property.
     <hr>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Mon Dec 13 17:03:18 PST 2004 -->
-<!-- hhmts start -->
-Last modified: Wed Dec 22 22:17:37 PST 2004
-<!-- hhmts end -->
   </body>
 </html>
