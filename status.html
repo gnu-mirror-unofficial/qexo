@@ -53,13 +53,6 @@ However, only some serialization parameters are settable.</p>
 but does not implement Static Typing Feature.</p>
 
 <h2>Atomic types</h2>
-<p>These subtypes of <code>xs:string</code>
-are not yet implemented:
-<code>xs:normalizedString</code>, <code>xs:token</code>,
-<code>xs:language</code>, <code>xs:NMTOKEN</code>, <code>xs:Name</code>,
-<code>xs:NCName</code>, <code>xs:ID</code>, <code>xs:IDREF</code>,
-and <code>xs:ENTITY</code>.</p>
-
 <ul>
 <li><p><code>xs:untypedAtomic</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/UntypedAtomic.html"><code>gnu.kawa.xml.UntypedAtomic</code></a>.</li>
 <li><p><code>xs:dateTime</code>, <code>xs:date</code>, <code>xs:time</code>,
@@ -70,12 +63,16 @@ are implemented using <a href="../kawa/api/gnu/math/DateTime.html"><code>gnu.mat
 <li><p><code>xs:QName</code> is implemented using <a href="../kawa/api/gnu/mapping/Symbol.html"><code>gnu.mapping.Symbol</code></a>.
 <li><p><code>xs:boolean</code> is implemented using <code>java.lang.Boolean</code>.</li>
 <li><p><code>xs:string</code> is implemented using <code>java.lang.String</code>.</li>
+<li><p><code>xs:normalizedString</code>, <code>xs:token</code>,
+<code>xs:language</code>, <code>xs:NMTOKEN</code>, <code>xs:Name</code>,
+<code>xs:NCName</code>, <code>xs:ID</code>, <code>xs:IDREF</code>,
+and <code>xs:ENTITY</code> are implemented using <a href="../kawa/api/gnu/kawa/xml/XString.html"><code>gnu.kawa.xml.XString</code></a>.</p></li>
 <li><p><code>xs:integer</code>, <code>xs:positiveInteger</code>,
 <code>xs:nonPositiveInteger</code>, <code>xs:negativeInteger</code>,
-and <code>xs:nonNegativeInteger</code> are implemented using <a href="../kawa/api/gnu/math/IntNum.html"><code>gnu.math.IntNum</code></a>.</li>
+and <code>xs:nonNegativeInteger</code> are implemented using <a href="../kawa/api/gnu/math/IntNum.html"><code>gnu.math.IntNum</code></a>.</p></li>
 <li><p><code>xs:long</code>, <code>xs:int</code>, <code>xs:short</code>, <code>xs:byte</code>, <code>xs:unsignedLong</code>, <code>xs:unsignedInt</code>, <code>xs:unsignedShort</code>, <code>xs:unsignedbyte</code> are currently also implemented
-using <code>gnu.math.IntNum</code>, but in the future may be implemented using primitive Java types.
-<li<code>xs:decimal</code> is implemented using <code>java.math.BigDecimal</code>.</li>
+using <code>gnu.math.IntNum</code>, but in the future may be implemented using primitive Java types.</p>
+<li><p><code>xs:decimal</code> is implemented using <code>java.math.BigDecimal</code>.</p></li>
 <li><p><code>xs:base64Binary</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/Base64Binary.html"><code>gnu.kawa.xml.Base64Binary</code></a>.
 <li><p><code>xs:hexBinary</code> is implemented using <a href="../kawa/api/gnu/kawa/xml/HexBinary.html"><code>gnu.kawa.xml.HexBinary</code></a>.
 <li><p><code>xs:anyURI</code> is implemented using <a href="../kawa/api/gnu/text/Path.html"><code>gnu.text.Path</code></a> and specifically <a href="../kawa/api/gnu/text/URIPath.html"><code>gnu.text.URIPath</code></a>.
@@ -184,7 +181,7 @@ our needs.</p>
 <p>These generally work fine, expect:</p>
 <ul>
 <li><p><code>deep-equal</code> does not take collation into account,
-and there are are probably some other data types not handled quite correctly.
+and there are probably some other data types not handled quite correctly.
 <li><p><code>id</code> works and automatically generates an efficient index the
 first time it is called.  However, because Qexo does not do validation,
 only attributes named <code>xml:id</code> are recognzied as having
