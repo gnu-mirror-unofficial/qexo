@@ -62,7 +62,8 @@ are implemented using <a href="../kawa/api/gnu/math/DateTime.html"><code>gnu.mat
 <code>xs:dayTimeDuration</code> are implemented using <a href="../kawa/api/gnu/math/Duration.html"><code>gnu.math.Duration</code></a>.
 <li><p><code>xs:QName</code> is implemented using <a href="../kawa/api/gnu/mapping/Symbol.html"><code>gnu.mapping.Symbol</code></a>.
 <li><p><code>xs:boolean</code> is implemented using <code>java.lang.Boolean</code>.</li>
-<li><p><code>xs:string</code> is implemented using <code>java.lang.String</code>.</li>
+<li><p><code>xs:string</code> is implemented using <code>java.lang.String</code>.  The interface <code>java.lang.CharSequence</code> is the type for
+<code>xs:string</code> and its subtypes.</p></li>
 <li><p><code>xs:normalizedString</code>, <code>xs:token</code>,
 <code>xs:language</code>, <code>xs:NMTOKEN</code>, <code>xs:Name</code>,
 <code>xs:NCName</code>, <code>xs:ID</code>, <code>xs:IDREF</code>,
