@@ -2,22 +2,32 @@
 <html>
   <head>
     <title>Scripts for Managing Photographs </title>
-<!--
-<style type="text/css">
+<link rel="stylesheet" title="Kawa (navbar: fixed, left)"
+  href="../../kawa/style/kawa-l.css" media="screen, print, projection, tv">
+<link rel="alternate stylesheet" title="Kawa (navbar: fixed, right)"
+  href="../../kawa/style/kawa-r.css" media="screen, print, projection, tv">
+ </head>
 
-.top h1: {width: 50% }
-.map p: {width: 50%}
-</style>-->
-  </head>
-
-  <body>
-<table><tr>
-<td style="width: 60%"><h1>QAlbum: Scripts for Digital Pictures</h1></td>
-<td style="width: 40%">
-<p id="p1"><a rel="bookmark" href="#Suggested">Suggested procedure</a>
-<p id="p2"><a rel="bookmark" href="#Format">Format of the picture-group file</a>
-<p id="p2"><a rel="bookmark" href="#Download">Getting and installing</a>
-</td></tr></table>
+<body>
+<h1>QAlbum: Scripts for Digital Pictures</h1>
+<div class="navcol">
+<h1 class="logo"><a href="">QAlbum</a></h1>
+<div class="navbar">
+<!--start-generated-navbar-->
+<!--start-children-toc-->
+<ul>
+<li><a rel="bookmark" href="#Features">Features</a></li>
+<li><a rel="bookmark" href="http://pics.bothner.com/2003/Vancouver/">Sample album</a></li>
+<li><a rel="bookmark" href="#Conventions">File naming convention</a></li>
+<li><a rel="bookmark" href="#Suggested">Suggested procedure</a></li>
+<li><a rel="bookmark" href="#Format">Format of the picture-group file</a></li>
+<li><a rel="bookmark" href="#Download">Getting and installing</a></li>
+<li><a rel="bookmark" href="#License">Author and license</a></li>
+</ul>
+<!--end-children-toc-->
+<!--end-generated-navbar-->
+</div>
+</div>
 
 <p>
 The idea of these scripts is that each <q>folder</q> (directory
@@ -35,11 +45,11 @@ and edit the <code>index.xml</code>, and then re-run
 
 <p>
 Here is an <a href="http://pics.bothner.com/2003/Vancouver/">example</a>
-page that illustrates many <code>qlbum</code> features, and here is the
+page that illustrates many <code>qalbum</code> features, and here is the
 <a href="http://pics.bothner.com/2003/Vancouver/index.xml">picture group
 file</a> describing it.
 
-<h2>Features</h2>
+<h2  id="Features">Features</h2>
 <p>
 There are a number of tools which do similar things.
 This one has some nice little extras:</p>
@@ -56,14 +66,15 @@ Everything works even if the <q>web folder</q> is burned to a CD-ROM, say.</li>
 The image is automatically rescaled if the browser window is resized.
 This is nice for full-screen mode, for example.
 (This feature requires JavaScript.)</li>
-<li>A nice slider mode.</li>
-<li>Nice bookmarkable (and search-engine-friendly) URLs for everything.</li>
+<li>A nice slider mode.  (This also requires JavaScript.)</li>
+<li>Nice bookmarkable (and search-engine-friendly) URLs for everything.
+The browser's location-bar is kept up-to-date.</li>
 <li>The user can select between a number of styles for viewing
 each picture.  The style is remembered between pictures,
 encoded in the URL.</li>
 </ul>
 
-<h2>Naming convention</h2>
+<h2 id="Conventions">File naming convention</h2>
 <p>A suggested naming convention:  Each <code>.jpg</code>
 file should follow this naming convention:  <code>prefixNnX.jpg</code>,
 where <code>prefix</code> is name common to a group of files,
@@ -308,17 +319,17 @@ that explains how it works.
 <h3>Requirements</h3>
 <ul>
 <li>
-<p>Most of <code>qlbum</code> is pure Java, except for a small
+<p>Most of <code>qalbum</code> is pure Java, except for a small
 <code>bash</code> wrapper, and should run
 on any system with JDK 1.4.  However, I have made no attempt to
-run <code>qlbum</code> on anything except GNU/Linux system (specifically
+run <code>qalbum</code> on anything except GNU/Linux system (specifically
 Fedora).  It should work fine on any-Unix-like OS.
 If you try to get this working on Windows, I'd like to hear about it.
 <li><p>You need a Java implementation,
 specifically one that has the <code>javax.imagio</code>
 classes added in JDK 1.4.</li>
 <li><p>You need <a href="http://www.gnu.org/software/kawa/">Kawa</a>
-(version 1.8.92 or newer or the latest from SVN);
+(version 1.9.0 or the latest from SVN);
 see the <a href="http://www.gnu.org/software/kawa/Getting-Kawa.html">instructions for getting Kawa</a>.
 <li><p>
 You need the <code>jpegtran</code> program installed in your path.
@@ -331,12 +342,22 @@ metadata-extractor</a>, but this is included in the <code>qalbum</code>
 distribution for convenience.
 </ul>
 <h3>Download</h3>
-<p>Get <a href="ftp://ftp.gnu.org/pub/gnu/kawa/qalbum.tgz"><code>qalbum.tgz</code></a> from <a href="ftp://ftp.gnu.org/pub/gnu/kawa/"><code>ftp://ftp.gnu.org/pub/gnu/kawa/</code></a>.
+<p>Get <a href="ftp://ftp.gnu.org/pub/gnu/kawa/qalbum-1.1.tgz"><code>qalbum-1.1.tgz</code></a> or a later version from <a href="ftp://ftp.gnu.org/pub/gnu/kawa/"><code>ftp://ftp.gnu.org/pub/gnu/kawa/</code></a>.
+Note that not all versions of <code>qalbum-XXX.tgz</code>
+are going to compabitble for all versions of Kawa,
+but the latest versions should work.
+
 <h3>Installation</h3>
 <p>Extract <code>qalbum.tgz</code> into a suitable directory.
 <p>In that directory create a <code>kawa.jar</code> link:
 <pre>
-cd qalbum && ln -s /my/path/to/kawa-1.9.jar kawa.jar
+cd qalbum && ln -s /my/path/to/kawa-1.9.0.jar kawa.jar
+</pre>
+<p>This step is optional, unless there is some version
+inconsistency between <code>qalbum-<var>version</var>.jar</code> and Kawa.
+This does require JDK, rather than just JRE:
+<pre>
+make clean && make
 </pre>
 <p>
 You might want to create a symlink from some directory on your
@@ -352,7 +373,7 @@ your <code>$PATH</code>.
 
 <p>The <code>qalbum</code> <a href="http://www.gnu.org/software/qexo/qalbum">home page</a>.
 
-<h2>Author and license stuff</h2>
+<h2 id="License">Author and license stuff</h2>
 <p>
 These scripts were written by
 <a href="http://www.bothner.com/~per">Per Bothner</a>
