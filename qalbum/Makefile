@@ -8,18 +8,19 @@ JAR = jar
 QEXO = $(KAWA) --xquery
 QALBUM_PACKAGE_DIR = ../qalbum
 QALBUM_PACKAGE_ROOT = ..
+QALBUM_VERSION = 1.1
 ExifExtractor_JAR = metadata-extractor-2.3.0.jar
 
-all: qalbum.jar qalbum.tgz
+all: qalbum qalbum-$(QALBUM_VERSION).jar qalbum-$(QALBUM_VERSION).tgz
 
-qalbum.jar: \
+qalbum-$(QALBUM_VERSION).jar: \
   $(QALBUM_PACKAGE_DIR)/ImageInfo.class \
   $(QALBUM_PACKAGE_DIR)/PictureInfo.class \
   $(QALBUM_PACKAGE_DIR)/pictures.class \
   $(QALBUM_PACKAGE_DIR)/create.class \
   $(QALBUM_PACKAGE_DIR)/qalbum.class \
   $(QALBUM_PACKAGE_DIR)/Thumbnail.class
-	cd .. && $(JAR) cmf qalbum/jar-manifest qalbum/qalbum.jar \
+	cd .. && $(JAR) cmf qalbum/jar-manifest qalbum/qalbum-$(QALBUM_VERSION).jar \
 	  qalbum/ImageInfo.class \
 	  qalbum/PictureInfo.class \
 	  qalbum/pictures.class \
@@ -29,12 +30,13 @@ qalbum.jar: \
 
 CLASSPATH = "..:$(ExifExtractor_JAR):$(KAWALIB)"
 
-DIST_FILES = index.html Makefile qalbum.jar metadata-extractor-2.3.1.jar\
+DIST_FILES = index.html Makefile qalbum-$(QALBUM_VERSION).jar \
+  metadata-extractor-2.3.1.jar\
   ImageInfo.java PictureInfo.java create.java Thumbnail.java \
-  pictures.xql qalbum picture.js group.js help.html README
+  pictures.xql qalbum.in qalbum picture.js group.js help.html README
 
-qalbum.tgz: qalbum.jar
-	cd .. && tar czf qalbum/qalbum.tgz \
+qalbum-$(QALBUM_VERSION).tgz: qalbum-$(QALBUM_VERSION).jar $(DIST_FILES)
+	cd .. && tar czf qalbum/qalbum-$(QALBUM_VERSION).tgz \
           `for f in $(DIST_FILES); do echo qalbum/$$f; done`
 
 $(QALBUM_PACKAGE_DIR)/qalbum.class: $(QALBUM_PACKAGE_DIR)/qalbum.java
@@ -57,5 +59,10 @@ $(QALBUM_PACKAGE_DIR)/pictures.class: pictures.xql
 	CLASSPATH=$(CLASSPATH) \
 	$(JAVA) kawa.repl --xquery --main -d .. -P qalbum. -C pictures.xql
 
+qalbum: qalbum.in
+	sed -e 's/@QALBUM_VERSION@/$(QALBUM_VERSION)/g' \
+	  -e 's/@KAWA_JAR@/kawa.jar/g' <qalbum.in >qalbum
+	chmod +x qalbum
+
 clean:
-	rm -f *.class
+	rm -f *.class qalbum*.jar qalbum*.tgz qalbum

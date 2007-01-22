@@ -9,7 +9,7 @@ then
   else JAVA=java
   fi
 fi
-KAWA_JAR=${KAWA_JAR-${scriptdir}/kawa.jar}
+KAWA_JAR=${KAWA_JAR-${scriptdir}/@KAWA_JAR@}
 ExifExtractor_JAR=${ExifExtractor_JAR-$scriptdir/metadata-extractor-2.3.1.jar}
-exec $JAVA -cp $scriptdir/qalbum-1.1.jar:${KAWA_JAR}:${ExifExtractor_JAR}:$scriptdir/.. qalbum.qalbum --scriptdir="$scriptdir" "$@"
+exec $JAVA -cp $scriptdir/qalbum-@QALBUM_VERSION@.jar:${KAWA_JAR}:${ExifExtractor_JAR}:$scriptdir/.. qalbum.qalbum --scriptdir="$scriptdir" "$@"
 exit -1
