@@ -38,7 +38,8 @@ function sliderSelectId(id) {
 }
 function sliderSelect(node) {
   if (top.selected)
-    top.selected.setAttribute("bgcolor", "black");
+    // The test for top.sliderBgcolor is for backward compatibility.
+    top.selected.setAttribute("bgcolor", top.sliderBgcolor ? top.sliderBgcolor : "black");
   node.setAttribute("bgcolor", "red");
   top.selected = node;
   top.main.location=node.id+".html";

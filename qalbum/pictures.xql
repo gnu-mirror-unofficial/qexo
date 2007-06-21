@@ -4,6 +4,7 @@ declare boundary-space preserve;
 declare variable $libdir external;
 declare variable $nl := "&#10;";
 declare variable $pwd := Path:currentPath();
+declare variable $bgcolor := "#40E0E0";
 
 declare function local:make-img($class, $picinfo) {
   let $image-name := PictureInfo:getScaledFile($picinfo, $class) return
@@ -37,7 +38,7 @@ declare function local:format-row($first, $last, $pictures, $picinfos) {
   for $i in $first to $last
   let $pic := item-at($pictures, $i) return
   <td align="center">
-   <table bgcolor="black" cellpadding="0" frame="border"
+   <table cellpadding="0" frame="border"
       border="0" rules="none">
       <tr>
         <td align="center"><a fixup="style" href="{$pic/@id}.html">{
@@ -45,8 +46,7 @@ declare function local:format-row($first, $last, $pictures, $picinfos) {
       </tr>
       { if ($pic/caption) then
       <tr>
-        <td  bgcolor="#FFFF99" align="center"><a class="textual"
-          href="{$pic/@id}.html">{$pic/caption/node()}</a></td>
+        <td align="center">{$pic/caption/node()}</td>
       </tr>
       else ()}
     </table>
@@ -212,7 +212,7 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
   </head>
 {
   element body {
-    attribute bgcolor {"#00DDDD"},
+    attribute bgcolor {$bgcolor},
     attribute onload {"javascript:OnLoad();"},
     attribute onresize {"javascript:ScaledResize();"},
     local:above-picture($picture, $group, $name, $preamble, $prev, $next, $date, $style, $i, $count),
@@ -291,10 +291,11 @@ let $first := string($group/picture[1]/@id) return
     <link rel="top" href="../../index.html" />
     <style type="text/css">
       a.textual {{ text-decoration: none }}
-      img {{ border: 0 }}
+      img {{ border: thin solid black }}
       table.row {{ padding: 10px }}
     </style>
     <script type="text/javascript">
+      var sliderBgcolor = "{$bgcolor}";
       function loadFrames() {{
         var hash=top.location.hash;
         var main=top.main;
@@ -320,13 +321,13 @@ declare function local:make-slider-index-page($group, $picinfos) {
     <style type="text/css">
       p {{ font-size: small }}
       a.textual {{ text-decoration: none }}
-      img {{ border: 0 }}
+      img {{ border: think solid black }}
       table.row {{ padding: 10px }}
     </style>
     <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"> </script>
   <script language="JavaScript">document.onkeypress = sliderHandler;</script>
   </head>
-  <body bgcolor="#00AAAA" onload="javascript:fixLinks();">
+  <body bgcolor="{$bgcolor}" onload="javascript:fixLinks();">
   <table cellpadding="0" frame="border"
       border="0" rules="none" >{
   let $nodes := $group/* return
@@ -362,15 +363,14 @@ declare function local:slider-index-page-helper($nodes, $i, $n,
                                           $picinfos, $p+$npictures))
       case element(picture) return ("
     ",
-      <tr><td><table id="{$item/@id}" bgcolor="black" onclick="sliderSelectId('{$item/@id}'); return false">
+      <tr><td><table id="{$item/@id}" onclick="sliderSelectId('{$item/@id}'); return false">
       <tr>
         <td align="center"><a href="slider.html#{$item/@id}" target="main">{
           local:make-thumbnail($item, item-at($picinfos, $p))}</a></td>
       </tr> {
       if ($item/caption) then
       <tr>
-        <td  bgcolor="#FFFF99" align="center"><a class="textual"
-          href="{$item/@id}.html" target="main">{$item/caption/node()}</a></td>
+        <td align="center">{$item/caption/node()}</td>
       </tr>
       else ()}
     </table></td></tr>,
@@ -389,7 +389,7 @@ declare function local:make-group-page($group, $pictures, $picinfos) {
     <link rel="top" href="../../index.html" />
     <style type="text/css">
       a.textual {{ text-decoration: none }}
-      img {{ border: 0 }}
+      img {{ border: think solid black }}
       table.row {{ padding: 10px; width: 100% }}
       div#header {{ padding: 1px; width: 720 }}
       span.button {{ border: thin solid; background-color: #FFFF99; }}
@@ -403,7 +403,7 @@ declare function local:make-group-page($group, $pictures, $picinfos) {
     </style>
     <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"> </script>
   </head>
-  <body bgcolor="#00AAAA" onload="javascript:fixLinks();">
+  <body bgcolor="{$bgcolor}" onload="javascript:fixLinks();">
   <div id="header">
   <p id="group-buttons">
     <a href="{$libdir}/help.html">Help</a>
