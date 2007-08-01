@@ -106,7 +106,7 @@ declare function local:find-rows($first, $next, $unseen,
 };
 
 declare function local:picture-text($picture) {
-  for $text in $picture/text return <p>{$text/node()}</p>
+  for $text in $picture/text return <tr>{$text/node()}</tr>
 };
 
 declare function local:make-title($picture, $group) {
@@ -115,22 +115,17 @@ declare function local:make-title($picture, $group) {
          else string($picture/caption))
 };
 
-declare function local:make-header($picture, $group) {
-  <h2>{if ($picture/caption) then $picture/caption/node()
-       else $group/title/node()}</h2>
-};
-
 (: Create a 1-row navigation-bar: next, prev etc :)
 
 declare function local:nav-bar($picture, $name, $prev, $next, $style) {
 <table>
   <tr>
     <td><a class="button" id="up-button" href="index.html">Index</a></td>
-    <td width="100" align="right">{
+    <td width="10em" align="right">{
       if ($prev) then
       <a class="button" id="prev-button" href="{$prev/@id}{local:style-link($style)}.html"> &lt; Previous </a>
       else ()}</td>
-    <td width="100" align="left">{
+    <td width="10em" align="left">{
       if ($next) then
       <a class="button" id="next-button" href="{$next/@id}{local:style-link($style)}.html"> Next &gt; </a>
       else ()
@@ -138,10 +133,10 @@ declare function local:nav-bar($picture, $name, $prev, $next, $style) {
     if ($style="info") then () else ("
     ",<td style-button="info">{local:make-link($name, "info", "Info")}</td>),
     if ($style="large" or $style="full") then () else ("
-    ",<td width="200" align="left" style-button="large">{
+    ",<td width="20em" align="left" style-button="large">{
       local:make-link($name, "large", "Large image")}</td>),
     if ($style="") then () else ("
-    ",<td width="200" align="left" style-button="medium">{
+    ",<td width="20em" align="left" style-button="medium">{
       local:make-link($name, "", "Medium image")}</td>)}
   <script language="JavaScript">WriteStyleMenu();</script>
   </tr>
@@ -190,7 +185,7 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
       a.button:hover {{ background-color: orange; }}
       span.button {{ border: thin solid; background-color: #FFFF99; }}
       img {{ border: thin solid black }}
-      div#preamble {{ z-index: 1; top: 0px; left: 0px; width: 600px }}
+      div#preamble {{ z-index: 1; top: 0px; left: 0px;}}
       div.preamble-text {{ background-color: #FFFF99; border: 1px solid black; padding: 0.5em}}
    </style>
 {(  (: (Note what we have to do to add an XQuery comment here!)
@@ -272,11 +267,15 @@ declare function local:above-picture($picture, $group, $name, $preamble, $prev, 
 { (:if ($style="full") then () else:)
   local:nav-bar($picture, $name, $prev, $next, $style)}
 <div class="preamble-text">
-<p>{if ($i=$count) then "Last" else concat("Number ", $i)} of {$count}.  {
-  if (empty($date)) then () else concat("Date taken: ",string($date),"."),
-  if ($style="full") then <script language="JavaScript">if (scaled) document.write(" <i>[Type <code>h</code> to hide.]</i>")</script> else () }</p>
 { $preamble }
-{ local:make-header($picture, $group)}
+<table width="100%"><tr>
+<td><font size="4"><b>{if ($picture/caption) then $picture/caption/node()
+       else $group/title/node()}</b></font>
+</td>
+<td align="right">{if ($i=$count) then "Last" else concat("Number&#xA0;", $i)}&#xA0;of&#xA0;{$count}.  
+{if (empty($date)) then () else concat("Date&#xA0;taken:&#xA0;",string($date),".")}
+</td></tr></table>
+{ if ($style="full") then <script language="JavaScript">if (scaled) document.write(" <i>[Type <code>h</code> to hide.]</i>")</script> else () }
 { local:picture-text($picture)}
 </div></form>
 </div>
