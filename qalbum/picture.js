@@ -53,6 +53,7 @@ function OnLoad() {
   prev_button_link = document.getElementById("prev-button");
   next_button_link = document.getElementById("next-button");
   StyleFixLinks();
+  // Begin backward compatibility.
   var td_nodes = document.getElementsByTagName("td");
   for (var i = td_nodes.length;  --i >= 0; )
     {
@@ -61,6 +62,7 @@ function OnLoad() {
       if (td_node.getAttribute("style-button"))
         td_node.parentNode.removeChild(td_node);
     }
+  // End backward ocmpatibility.
   preamble = document.getElementById("preamble");
   if (scaled)
     ScaledLoad();
@@ -100,6 +102,9 @@ function ScaledResize() {
           vSize = 700;  // assuming 1024x768, minus chrome and such
           hSize = 1024; // these do not account for kiosk mode or Opera Show
   }
+  // FIXME: It would be nice to use the space left *after* the preamble.
+  // However, I haven't gotten this working.
+  // hSize = hSize - preamble.clientHeight;
   var wscale = hSize /  image.origwidth;
   var hscale = vSize / image.origheight;
   var scale = Math.min(wscale, hscale);
@@ -185,8 +190,8 @@ function styleOption(value, target, text) {
   return r;
 }
 
-function WriteStyleMenu () {
-  document.write("<td><span class='button'>Style: <select onchange='styleChange(this)'>"
+function StyleMenu() {
+  return "<span class='button'>Style: <select onchange='styleChange(this)'>"
   + styleOption("help", libdir+"/help.html#styles", "Help me choose")
   + styleOption("", thisId+".html", "medium (default)")
   + styleOption("large", thisId+"large.html", "large")
@@ -196,5 +201,11 @@ function WriteStyleMenu () {
   + styleOption("medium-scaled-only", thisId+".html#medium-scaled-only", "medium scaled, no text")
   + styleOption("slider", "slider.html#"+thisId, "slider")
   + styleOption("info", thisId+"info.html", "information")
-  + "</select></span></td>");
+  + "</select></span>";
 }
+
+function WriteStyleMenu () {
+  document.write("<td>"+StyleMenu()+"</td>");
+}
+
+document.write("<style>span[style-button] { display: none }</style>");

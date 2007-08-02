@@ -28,8 +28,8 @@ declare function local:style-link($style) {
   if ($style="full") then "large" else $style
 };
 
-declare function local:make-link($picture-name, $style, $text) {
-  <a class="button" href="{$picture-name}{local:style-link($style)}.html">{$text}</a>
+declare function local:make-style-link($picture-name, $style, $text) {
+  <span class="button" style-button="{if ($style="") then "medium" else $style}"><a href="{$picture-name}{local:style-link($style)}.html">{$text}</a></span>
 };
 
 declare function local:format-row($first, $last, $pictures, $picinfos) {
@@ -118,29 +118,23 @@ declare function local:make-title($picture, $group) {
 (: Create a 1-row navigation-bar: next, prev etc :)
 
 declare function local:nav-bar($picture, $name, $prev, $next, $style) {
-<table>
-  <tr>
-    <td><a class="button" id="up-button" href="index.html">Index</a></td>
-    <td width="10em" align="right">{
-      if ($prev) then
-      <a class="button" id="prev-button" href="{$prev/@id}{local:style-link($style)}.html"> &lt; Previous </a>
-      else ()}</td>
-    <td width="10em" align="left">{
-      if ($next) then
-      <a class="button" id="next-button" href="{$next/@id}{local:style-link($style)}.html"> Next &gt; </a>
-      else ()
-    }</td>{
-    if ($style="info") then () else ("
-    ",<td style-button="info">{local:make-link($name, "info", "Info")}</td>),
-    if ($style="large" or $style="full") then () else ("
-    ",<td width="20em" align="left" style-button="large">{
-      local:make-link($name, "large", "Large image")}</td>),
-    if ($style="") then () else ("
-    ",<td width="20em" align="left" style-button="medium">{
-      local:make-link($name, "", "Medium image")}</td>)}
-  <script language="JavaScript">WriteStyleMenu();</script>
-  </tr>
-</table>
+<span>
+  <span class="button"><a class="button" id="up-button" href="index.html">Index</a></span>
+  {if ($prev) then
+  <span class="button"><a id="prev-button" href="{$prev/@id}{local:style-link($style)}.html"> &lt; Previous </a></span>
+  else <span class="button" style="visibility: hidden"> &lt; Previous </span>,
+  if ($next) then
+  <span class="button"><a id="next-button" href="{$next/@id}{local:style-link($style)}.html"> Next &gt; </a></span>
+  else <span class="button" style="visibility: hidden"> Next &gt; </span>
+  }{
+  if ($style="info") then () else ("
+  ",local:make-style-link($name, "info", "Info")),
+  if ($style="large" or $style="full") then () else ("
+  ",local:make-style-link($name, "large", "Large image")),
+  if ($style="") then () else ("
+  ",local:make-style-link($name, "", "Medium image"))}
+  <script language="JavaScript">document.write(StyleMenu());</script>
+</span>
 };
 
 declare function local:raw-jpg-link($class, $description, $picinfo) {
@@ -183,7 +177,7 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
       td {{ padding-left: 0; border-style: none }}
       a.button {{ border: thin solid; background-color: #FFFF99; }}
       a.button:hover {{ background-color: orange; }}
-      span.button {{ border: thin solid; background-color: #FFFF99; }}
+      span.button {{ border: thin solid; background-color: #FFFF99; margin-right: 1em }}
       img {{ border: thin solid black }}
       div#preamble {{ z-index: 1; top: 0px; left: 0px;}}
       div.preamble-text {{ background-color: #FFFF99; border: 1px solid black; padding: 0.5em}}
