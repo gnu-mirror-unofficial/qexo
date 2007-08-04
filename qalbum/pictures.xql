@@ -34,24 +34,26 @@ declare function local:make-style-link($picture-name, $style, $text) {
 
 declare function local:format-row($first, $last, $pictures, $picinfos) {
   "&#10;  ", (: emit a newline for readabilty :)
-  <table class="row"><tr>{
+  (: We used to split a list of consecutive pictures into rows.  Now, we use CSS to flow the
+   : pictures inline, as many as will fit on the line.  The downside is when CSS is missing or disabled,
+   : we get one picture per line, which isn't great.  A possible fix is to emit the old row layout,
+   : but use JavaScript to take it apart.  But these days I expect more people will have CSS but
+   : disable JavaScript from security concerns, so that doesn't seem like a good plan.  I haven't found
+   : a pure CSS solution to disable row grouping. :)
   for $i in $first to $last
   let $pic := item-at($pictures, $i) return
-  <td align="center">
-   <table cellpadding="0" frame="border"
-      border="0" rules="none">
+  <span class="piclink">
+   <table cellpadding="0" frame="border" border="0" rules="none">
       <tr>
         <td align="center"><a fixup="style" href="{$pic/@id}.html">{
           local:make-thumbnail($pic, item-at($picinfos, $i))}</a></td>
       </tr>
-      { if ($pic/caption) then
-      <tr>
-        <td align="center">{$pic/caption/node()}</td>
-      </tr>
-      else ()}
+      <tr>{
+      if ($pic/caption) then <td align="center" class="caption">{$pic/caption/node()}</td>
+      else <td style="visibility: hidden" class="caption">(No caption)</td> (: For better alignment :)
+      }</tr>
     </table>
-  </td>
-  }</tr></table>
+  </span>
 };
 
 (: Process a sequence of <picture> elements, grouping them into
@@ -285,7 +287,6 @@ let $first := string($group/picture[1]/@id) return
     <style type="text/css">
       a.textual {{ text-decoration: none }}
       img {{ border: thin solid black }}
-      table.row {{ padding: 10px }}
     </style>
     <script type="text/javascript">
       var sliderBgcolor = "{$bgcolor}";
@@ -314,8 +315,7 @@ declare function local:make-slider-index-page($group, $picinfos) {
     <style type="text/css">
       p {{ font-size: small }}
       a.textual {{ text-decoration: none }}
-      img {{ border: think solid black }}
-      table.row {{ padding: 10px }}
+      img {{ border: thin solid black }}
     </style>
     <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"> </script>
   <script language="JavaScript">document.onkeypress = sliderHandler;</script>
@@ -363,7 +363,7 @@ declare function local:slider-index-page-helper($nodes, $i, $n,
       </tr> {
       if ($item/caption) then
       <tr>
-        <td align="center">{$item/caption/node()}</td>
+        <td align="center" class="caption">{$item/caption/node()}</td>
       </tr>
       else ()}
     </table></td></tr>,
@@ -382,8 +382,8 @@ declare function local:make-group-page($group, $pictures, $picinfos) {
     <link rel="top" href="../../index.html" />
     <style type="text/css">
       a.textual {{ text-decoration: none }}
-      img {{ border: think solid black }}
-      table.row {{ padding: 10px; width: 100% }}
+      img {{ border: thin solid black }}
+      td.caption {{ background-color: #FFFF99 }}
       div#header {{ padding: 1px; width: 720 }}
       span.button {{ border: thin solid; background-color: #FFFF99; }}
       p#group-buttons {{ display: block; margin: 0; text-align: center;
@@ -393,6 +393,7 @@ declare function local:make-group-page($group, $pictures, $picinfos) {
       p#group-buttons a:link {{ text-decoration: none}}
       p#group-buttons a:hover {{ background: orange }}
       div#header h2 {{ position: relative;  left: 7em;  top: 0em;}}
+      table {{ display: inline}}
     </style>
     <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"> </script>
   </head>
