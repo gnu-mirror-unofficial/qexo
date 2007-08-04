@@ -182,7 +182,7 @@ declare function local:picture($picture, $group, $name, $preamble, $prev, $next,
       span.button {{ border: thin solid; background-color: #FFFF99; margin-right: 1em }}
       img {{ border: thin solid black }}
       div#preamble {{ z-index: 1; top: 0px; left: 0px;}}
-      div.preamble-text {{ background-color: #FFFF99; border: 1px solid black; padding: 0.5em}}
+      div.preamble-text {{ background-color: #FFFF99; border: 1px solid black; padding: 0.5em; width: 70%}}
    </style>
 {(  (: (Note what we have to do to add an XQuery comment here!)
      : Next we generate a JavaScript handler, to handle pressing the keys
@@ -284,10 +284,6 @@ let $first := string($group/picture[1]/@id) return
     {$group/title}
     <link rel="up" href="../index.html" />
     <link rel="top" href="../../index.html" />
-    <style type="text/css">
-      a.textual {{ text-decoration: none }}
-      img {{ border: thin solid black }}
-    </style>
     <script type="text/javascript">
       var sliderBgcolor = "{$bgcolor}";
       function loadFrames() {{
@@ -316,6 +312,7 @@ declare function local:make-slider-index-page($group, $picinfos) {
       p {{ font-size: small }}
       a.textual {{ text-decoration: none }}
       img {{ border: thin solid black }}
+      td.caption {{ background-color: #FFFF99 }}
     </style>
     <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"> </script>
   <script language="JavaScript">document.onkeypress = sliderHandler;</script>
@@ -356,9 +353,9 @@ declare function local:slider-index-page-helper($nodes, $i, $n,
                                           $picinfos, $p+$npictures))
       case element(picture) return ("
     ",
-      <tr><td><table id="{$item/@id}" onclick="sliderSelectId('{$item/@id}'); return false">
+      <tr><td><table id="{$item/@id}" onclick="sliderSelectCurStyle('{$item/@id}'); return false">
       <tr>
-        <td align="center"><a href="slider.html#{$item/@id}" target="main">{
+        <td align="center"><a fixup="style" href="slider.html#{$item/@id}" target="main">{
           local:make-thumbnail($item, item-at($picinfos, $p))}</a></td>
       </tr> {
       if ($item/caption) then

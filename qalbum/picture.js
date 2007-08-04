@@ -22,20 +22,34 @@ if (scaled) {
 
 function StyleFixLinks() {
   if (top.slider) {
-    if (up_button_link) { 
-      up_button_link.setAttribute('onclick',
-        "top.location='index.html#slider'");
-      up_button_link.href = "index.html"+uphash;
+    var tophash = top.location.hash;
+    var sl = tophash.indexOf("/");
+    var style = sl <= 0 ? "" : tophash.substring(sl);
+    if (up_button_link) {
+      var uplink = "index.html#slider"+(sl <= 0 ? "" : ("-"+tophash.substring(sl+1)));
+      up_button_link.setAttribute('onclick', "top.location='"+uplink+"'");
+      up_button_link.href = uplink;
     }
     if (prev_button_link) {
       prev_button_link.setAttribute('onclick',
-        "top.slider.sliderSelectId('"+prevId+"');return false;");
-      prev_button_link.href = "slider.html#"+prevId;
+        "top.slider.sliderSelectId('"+prevId+style+"');return false;");
+      prev_button_link.href = "slider.html#"+prevId+style;
     }
     if (next_button_link) {
       next_button_link.setAttribute('onclick',
-        "top.slider.sliderSelectId('"+nextId+"');return false;");
-      next_button_link.href = "slider.html#"+nextId;
+        "top.slider.sliderSelectId('"+nextId+style+"');return false;");
+      next_button_link.href = "slider.html#"+nextId+style;
+    }
+    var links = top.slider.document.getElementsByTagName("a");
+    for (var i = links.length; --i >= 0; ) {
+      if (links[i].getAttribute("fixup")) {
+        var href = links[i].href;
+        var ind = href.indexOf("#");
+        if (ind > 0 && (ind = href.indexOf("/", ind)) > 0)
+          href = href.substring(0, ind);
+        href = href + style;
+        links[i].href = href;
+      }
     }
   }
   else {
@@ -127,7 +141,7 @@ function handler(e) {
   }
   if (nextId && key == 110) { // 'n' key
       if (top.slider) {
-        top.slider.sliderSelectId(nextId);
+        top.slider.sliderSelectCurStyle(nextId);
         return false;
       }
       location=nextId+style_link+".html"+hash; return true;
@@ -141,29 +155,42 @@ function handler(e) {
   }
   if (prevId && key == 112) {
       if (top.slider) {
-        top.slider.sliderSelectId(prevId);
+        top.slider.sliderSelectCurStyle(prevId);
         return false;
       }
     location=prevId+style_link+".html"+hash; return true;
   }
-  if (key == 117) { location="index.html"+uphash; return true; }
+  if (key == 117) /* u==Up */ { top.location="index.html"+uphash; return true; }
   if (key == 115) { location="slider.html#"+thisId; return true; }
   if (key == 105) { location=thisId+"info.html"; return true; }
   if (key == 108) { location=thisId+"large.html#large-scaled"; return true; }
   if (key == 109) { location=thisId+".html"; return true; }
   if (scaled && key == 104 ) {
-    hidePreamble = !hidePreamble;
-    preamble.style.visibility = hidePreamble ? "hidden" : "visible";
-    if (hash.indexOf("large") > 0)
-      hash = hidePreamble ? "#large-scaled-only" : "#large-scaled";
-    else
-      hash = hidePreamble ? "#medium-scaled-only" : "#medium-scaled";
-    uphash = hash;
-    location.hash = hash;
-    StyleFixLinks();
+    toggleHidePreamble();
     return true;
   }
 }
+
+function toggleHidePreamble() {
+  hidePreamble = !hidePreamble;
+  preamble.style.visibility = hidePreamble ? "hidden" : "visible";
+  if (hash.indexOf("large") > 0)
+    hash = hidePreamble ? "#large-scaled-only" : "#large-scaled";
+  else
+    hash = hidePreamble ? "#medium-scaled-only" : "#medium-scaled";
+  if (top.slider) {
+    top.main.uphash = hash;
+    var oldhash = top.location.hash;
+    var sl = oldhash.indexOf("/");
+    if (sl > 0)
+      hash = oldhash.substring(0, sl+1) + hash.substring(1);
+  }
+  else
+    uphash = hash;
+  top.location.hash = hash;
+  StyleFixLinks();
+}
+
 document.onkeypress = handler;
 
 function styleChange (element) {
@@ -200,6 +227,8 @@ function StyleMenu() {
   + styleOption("medium-scaled", thisId+".html#medium-scaled", "medium scaled-to-fit")
   + styleOption("medium-scaled-only", thisId+".html#medium-scaled-only", "medium scaled, no text")
   + styleOption("slider", "slider.html#"+thisId, "slider")
+  + styleOption("slider-medium-scaled", "slider.html#"+thisId+"/medium-scaled", "slider medium scaled-to-fit")
+  + styleOption("slider-large-scaled", "slider.html#"+thisId+"/large-scaled", "slider large scaled-to-fit")
   + styleOption("info", thisId+"info.html", "information")
   + "</select></span>";
 }
