@@ -38,44 +38,30 @@ class Thumbnail {
             Image inImage
               = new ImageIcon(orig.toURL()).getImage();
 
-            // Determine the scale.
-	    double scale = (double)maxDim/(
-	       double)inImage.getHeight(null);
-            if (inImage.getWidth(
-             null) > inImage.getHeight(null)) {
-                scale = (double)maxDim/(
-                double)inImage.getWidth(null);
+            int inW = inImage.getWidth(null);
+            int inH = inImage.getHeight(null);
+            int scaledW, scaledH;
+            if (inW > inH) {
+              scaledW = maxDim;
+              scaledH = (maxDim * inH) / inW;
+            }
+            else if (inW < inH) {
+              scaledH = maxDim;
+              scaledW = (maxDim  * inW) / inH;
+            }
+            else {
+              scaledH = scaledW = maxDim;
             }
 
-            // Determine size of new image. 
-            //One of them
-            // should equal maxDim.
-            int scaledW = (int)(
-             scale*inImage.getWidth(null));
-            int scaledH = (int)(
-             scale*inImage.getHeight(null));
-
-            // Create an image buffer in 
-            //which to paint on.
+            // Create an image buffer in which to paint on.
             BufferedImage outImage = 
               new BufferedImage(scaledW, scaledH,
                 BufferedImage.TYPE_INT_RGB);
 
-            // Set the scale.
-            AffineTransform tx = 
-              new AffineTransform();
-
-            // If the image is smaller than 
-            //the desired image size,
-            // don't bother scaling.
-            if (scale < 1.0d) {
-                tx.scale(scale, scale);
-            }
-
             // Paint image.
             Graphics2D g2d = 
              outImage.createGraphics();
-            g2d.drawImage(inImage, tx, null);
+            g2d.drawImage(inImage, 0, 0, scaledW, scaledH, null);
             g2d.dispose();
 
             // JPEG-encode the image 
