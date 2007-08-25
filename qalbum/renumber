@@ -1,0 +1,26 @@
+#!/bin/bash
+# Usage: renumber $oldpat $newpat $delta $mini $maxi
+# Move files matching $oldpath$i.jpg to $newpath({$i+$delta}.jpg
+# but only if $i is in the range [$mini .. $maxi].
+# Limition: $i must be > 0.
+oldpat=$1
+newpat=$2
+delta=$3
+mini=$4
+maxi=$5
+range=$(($maxi-$mini+1))
+for file in "$oldpat"*.[jJ][pP][gG]
+do
+  i=`echo $file | sed -e 's|'"$oldpat"'0*\([1-9].*\).[jJ][pP][gG]|\1|'`
+  if test $i -ge $mini && test $i -le $maxi
+  then
+    if test $range -ge 10 && test $(($i+$delta)) -le 9
+    then
+      echo mv -i "$file" "${newpat}"0$(($i+$delta)).jpg
+      mv -i "$file" "${newpat}"0$(($i+$delta)).jpg
+    else
+      echo mv -i "$file" "$newpat"$(($i+$delta)).jpg
+      mv -i "$file" "$newpat"$(($i+$delta)).jpg
+    fi
+  fi
+done
