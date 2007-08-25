@@ -34,7 +34,7 @@ The idea of these scripts is that each <q>folder</q> (directory
 of images) contains a descriptior file named <code>index.xml</code>,
 which lists the images, along with captions or other descritive
 information.  This <code>index.xml</code> can be created and managed
-using various tools/scripts, or edited manualy with a text editor.
+using various tools/scripts, or edited manually with a text editor.
 Then running <code><a href="qalbum">qalbum</a></code> generates all
 the HTML pages, creating scaled images as needed.
 The resulting web pages can be uploaded to a web server, or
@@ -141,10 +141,10 @@ your browser at <code>file:/home/me/vacation/index.html</code>.
 
 <h3>Unrotating rotated picture</h3>
 <p>
-Some cameras (including my current Canon A540) can detect
+Many modern cameras can detect
 their <q>orientation</q> (i.e. if the camera is rotated), and write
 that into the saved file.
-The <code>qalbum</code> script can detect this (at least for the Canon A540!),
+The <code>qalbum</code> script can detect this (at least for some cameras),
 and automatically takes care of the rotation.
 If you have such a camera, you can skip this section.
 <p>
@@ -162,7 +162,7 @@ instead add the following:
 <p>
 Then run:
 <pre>
-qalnum
+qalbum
 </pre>
 <p>
 This creates rotated copies of the files you specified
@@ -329,20 +329,23 @@ If you try to get this working on Windows, I'd like to hear about it.
 specifically one that has the <code>javax.imagio</code>
 classes added in JDK 1.4.</li>
 <li><p>You need <a href="http://www.gnu.org/software/kawa/">Kawa</a>
-(version 1.9.0 or the latest from SVN);
+(version 1.9.1 or the latest from SVN);
 see the <a href="http://www.gnu.org/software/kawa/Getting-Kawa.html">instructions for getting Kawa</a>.
 <li><p>
 You need the <code>jpegtran</code> program installed in your path.
 This is used to loss-lessly rotate images when needed.
 This could probably be replaced by pure Java code,
 but I haven't done so yet.
+Most GNU/Linux distributes provide a jpegtran package;
+you can also download <a href="http://www.ijg.org/">source code</a> or
+a <a href="http://sylvana.net/jpegcrop/jpegtran.exe">MS-Windows executable</a>.
 <li><p>
 You also need <a href="http://www.drewnoakes.com/code/exif/">Dawn Oakes's
 metadata-extractor</a>, but this is included in the <code>qalbum</code>
 distribution for convenience.
 </ul>
 <h3>Download</h3>
-<p>Get <a href="ftp://ftp.gnu.org/pub/gnu/kawa/qalbum-1.1.tgz"><code>qalbum-1.1.tgz</code></a> or a later version from <a href="ftp://ftp.gnu.org/pub/gnu/kawa/"><code>ftp://ftp.gnu.org/pub/gnu/kawa/</code></a>.
+<p>Get <a href="ftp://ftp.gnu.org/pub/gnu/kawa/qalbum-1.2.tgz"><code>qalbum-1.2.tgz</code></a> or a later version from <a href="ftp://ftp.gnu.org/pub/gnu/kawa/"><code>ftp://ftp.gnu.org/pub/gnu/kawa/</code></a>.
 Note that not all versions of <code>qalbum-XXX.tgz</code>
 are going to compabitble for all versions of Kawa,
 but the latest versions should work.
@@ -351,11 +354,12 @@ but the latest versions should work.
 <p>Extract <code>qalbum.tgz</code> into a suitable directory.
 <p>In that directory create a <code>kawa.jar</code> link:
 <pre>
-cd qalbum && ln -s /my/path/to/kawa-1.9.0.jar kawa.jar
+cd qalbum && ln -s /my/path/to/kawa-1.9.1.jar kawa.jar
 </pre>
-<p>This step is optional, unless there is some version
+<p>The following step is optional, unless there is some version
 inconsistency between <code>qalbum-<var>version</var>.jar</code> and Kawa.
-This does require JDK, rather than just JRE:
+It does require JDK, rather than just JRE, and a Unix-like environment
+(like GNU/Linux, Mac OS X, or Cygwin)::
 <pre>
 make clean && make
 </pre>
@@ -388,14 +392,13 @@ hearing about it.
 <p>
 Please do not redistribute the scripts in a product or as
 part of some other software distribution without permission.
-(
 I expect you to customise the scripts for your own use; if you
 make significant enhancements, I would appreciate hearing about it.
     <hr>
     <address><a href="mailto:per@bothner.com">Per Bothner</a></address>
 <!-- Created: Mon Feb 14 15:42:29 PST 2000 -->
 <!-- hhmts start -->
-Last modified: Mon Dec 18 15:46:29 PST 2006
+Last modified: Sat Aug 25 13:19:47 PDT 2007
 <!-- hhmts end -->
   </body>
 </html>
