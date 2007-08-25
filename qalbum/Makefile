@@ -8,8 +8,8 @@ JAR = jar
 QEXO = $(KAWA) --xquery
 QALBUM_PACKAGE_DIR = ../qalbum
 QALBUM_PACKAGE_ROOT = ..
-QALBUM_VERSION = 1.1
-ExifExtractor_JAR = metadata-extractor-2.3.0.jar
+QALBUM_VERSION = 1.2
+ExifExtractor_JAR = metadata-extractor-2.3.1.jar
 
 all: qalbum qalbum-$(QALBUM_VERSION).jar qalbum-$(QALBUM_VERSION).tgz
 
@@ -31,7 +31,7 @@ qalbum-$(QALBUM_VERSION).jar: \
 CLASSPATH = "..:$(ExifExtractor_JAR):$(KAWALIB)"
 
 DIST_FILES = index.html Makefile qalbum-$(QALBUM_VERSION).jar \
-  metadata-extractor-2.3.1.jar\
+  $(ExifExtractor_JAR) \
   ImageInfo.java PictureInfo.java create.java Thumbnail.java \
   pictures.xql qalbum.in qalbum picture.js group.js help.html README
 
