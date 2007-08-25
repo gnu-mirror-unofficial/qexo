@@ -32,8 +32,8 @@ CLASSPATH = "..:$(ExifExtractor_JAR):$(KAWALIB)"
 
 DIST_FILES = index.html Makefile qalbum-$(QALBUM_VERSION).jar \
   $(ExifExtractor_JAR) \
-  ImageInfo.java PictureInfo.java create.java Thumbnail.java \
-  pictures.xql qalbum.in qalbum picture.js group.js help.html README
+  qalbum.java ImageInfo.java PictureInfo.java create.java Thumbnail.java \
+  pictures.xql qalbum.in qalbum picture.js group.js help.html jar-manifest README
 
 qalbum-$(QALBUM_VERSION).tgz: qalbum-$(QALBUM_VERSION).jar $(DIST_FILES)
 	cd .. && tar czf qalbum/qalbum-$(QALBUM_VERSION).tgz \
