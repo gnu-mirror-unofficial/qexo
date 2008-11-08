@@ -195,8 +195,7 @@ Each picture-group file contains a single <code><b>&lt;group&gt;</b></code>
 element.
 Each <samp>&lt;group&gt;</samp> must contain  <samp>&lt;title&gt;</samp>
 element, fullowed by any number of <code>&lt;date&gt;</code>,
-<code>&lt;picture&gt;</code>, <code>&lt;text&gt;</code>,
-and <code>&lt;row&gt;</code> elements.
+<code>&lt;picture&gt;</code>, and <code>&lt;text&gt;</code> elements.
 </p><p>
 <dt>The <code><b>&lt;title&gt;</b></code> element:
 <dd>This must appear in  <code>&lt;group&gt;</code> element
@@ -204,7 +203,7 @@ and <code>&lt;row&gt;</code> elements.
 It should be a short phrase describing the pictures in the group.
 It is used for the HTML <code>&lt;title&gt;</code> of the overview page,
 and can contain whatever HTML markup is legal for that.
-</p><p>
+</p>
 <dt>The <code><b>&lt;picture&gt;</b></code> element:
 <dd>
 Each  <samp>&lt;picture&gt;</samp> element describes one image.
@@ -217,7 +216,7 @@ and may optionally contain <code>&lt;caption&gt;</code>,
 <code>&lt;date&gt;</code>, and <code>&lt;original&gt;</code> elements.
 (Old <code>index.xml</code> may also contain
 <code>&lt;full-image&gt;</code> and <code>&lt;small-image&gt;</code> elements.)
-</p><p>
+</p>
 <dt>The <code><b>&lt;image&gt;</b></code> element:
 <dd>This contains the name of the actual <code>jpg</code> image file.
 This is normally the original, un-rotated, un-scaled image
@@ -225,15 +224,7 @@ downloaded from the camera.
 (In old <code>index.xml</code> files, this is used for the scaled
 medium-sized image, and <code>&lt;full-image&gt;</code> is the
 large un-scaled file.)
-</p><p>
-<dt>The <code><b>&lt;full-image&gt;</b></code> element:
-<dd>This only appears in old <code>index.xml</code> files,
-where it contains the name of the large unscaled image file.
-</p><p>
-<dt>The <code><b>&lt;small-image&gt;</b></code> element:
-<dd>This only appears in old <code>index.xml</code> files,
-where it contains the name of the thumbnail-sized scaled image file.
-</p><p>
+</p>
 <dt>The <code><b>&lt;date&gt;</b></code> element:
 <dd>
 Each <samp>&lt;picture&gt;</samp> may also have a <samp>&lt;date&gt;</samp>
@@ -294,20 +285,23 @@ Note that you would remove <code>&lt;picture&gt;</code> elements
 for outtake pictures, and instead place <code>&lt;outtake&gt;</code> elements
 in the selected (non-outtake) <code>&lt;picture&gt;</code> elements.
 </p><p>
+</dl>
+<p>
+Obsolete entries, which you might see in old <code>index.xml</code> files:
+</p>
+<dl>
+<dt>The <code><b>&lt;full-image&gt;</b></code> element:
+<dd>This used to contain the name of the large unscaled image file.</p>
+<dt>The <code><b>&lt;small-image&gt;</b></code> element:
+<dd>This used to contain the name of the thumbnail-sized scaled image file.</p>
 <dt>The <code><b>&lt;row&gt;</b></code> element:
 <dd>This is seldom used, but can be used to ensure that a
 group of <code>&lt;picture&gt;</code> are all displayed on the same
 row in the overview page.
-Each <samp>&lt;group&gt;</samp> has one or more 
-<samp>&lt;row&gt;</samp> elements, where each <samp>&lt;row&gt;</samp>
-contains one or more <samp>&lt;picture&gt;</samp> elements.
-The <samp>&lt;row&gt;</samp> element has no semantic meaning,
-but it is used to group together those <samp>&lt;picture&gt;</samp>
-elements that should be shown next to each other (on the same row)
-of the overview page.
 If you leave out <samp>&lt;row&gt;</samp> elements,
-the pictures will be displayed 3 in a line, except that if
-there are 4 pictures they will be displayed as 2+2.</p><p>
+the pictures will be displayed as many as will fit on a line.
+(It used to be 3 on a line, except that if there were 4 pictures they
+would be displayed as 2+2</p><p>
 </dl>
 
 <h2 id="Download">Installing: Files to download and dependencies</h2>
