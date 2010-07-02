@@ -295,7 +295,7 @@ Obsolete entries, which you might see in old <code>index.xml</code> files:
 <dt>The <code><b>&lt;small-image&gt;</b></code> element:
 <dd>This used to contain the name of the thumbnail-sized scaled image file.</p>
 <dt>The <code><b>&lt;row&gt;</b></code> element:
-<dd>This is seldom used, but can be used to ensure that a
+<dd>This was seldom used, but could be used to ensure that a
 group of <code>&lt;picture&gt;</code> are all displayed on the same
 row in the overview page.
 If you leave out <samp>&lt;row&gt;</samp> elements,
@@ -303,6 +303,29 @@ the pictures will be displayed as many as will fit on a line.
 (It used to be 3 on a line, except that if there were 4 pictures they
 would be displayed as 2+2</p><p>
 </dl>
+<dl>
+<dt>The <code><b>&lt;select&gt;</b></code> element:
+<dd>
+Select pictures based on a file-name pattern.
+The attribute <code>path=<var>path</var></code> names the pattern.
+Symbolic links will be created for the files that match <var>path</var>.
+The pattern names a file path with certain special characters:
+The character <code>*</code> matches any character (except <code>/</code>).
+The pattern <code>{<var>num1</var>..<var>num2</var>}</code> matches
+any integer in the range from <var>num1</var> to <var>num2</var> inclusive.
+These special characters are not allowed in the directory (if any)
+of the <var>path</var>.
+The attribute <code>quality=<var>min-quality</var></code> is used to select
+only the pictures that have the mininum quality rating (or that are unrated).
+The attribute <code><var>as=<var>path</code> can be used to specify the
+name to be used for links.</p>
+<p>
+The <code>&lt;select&gt;</code> element may have
+<code>&lt;picture&gt;</code> child elements.
+Then any information in the <code>&lt;picture&gt;</code> element will
+override or add to that extracted from the file, such
+as a <code>&lt;caption&gt;</code>.
+</dt>
 
 <h2 id="Download">Installing: Files to download and dependencies</h2>
 <p>These scripts have been run using the

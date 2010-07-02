@@ -5,9 +5,26 @@ import gnu.text.*;
 
 public class PictureInfo
 {
+
+  public static void print(String prefix, Object value) {
+    System.err.print(prefix);
+    System.err.print(value);
+    if (value != null) {
+      System.err.print(" type: ");
+      System.err.print(value.getClass().getName());
+    }
+  }
+  public static void println(String prefix, Object value) {
+    print(prefix, value);
+    System.err.println();
+  }
+
   static boolean autoScale = true;
 
+  Object key;
   String label;
+  String caption;
+  Object text;
   ImageInfo original;
   /** Same as original, unless rotated/cropped etc.
    * (Though in the future we might add a copyright notice.). */
@@ -18,18 +35,37 @@ public class PictureInfo
   /** Thumbnail image.  Width about 240 pixels. */
   ImageInfo thumbnail;
 
-  public static PictureInfo getImages(String label,
+  public boolean dontSkip ()
+  {
+    return original == null || original.dontSkip();
+  }
+
+  public static PictureInfo getImages(Object key, String label,
                                       String rotated,
-                                      Object path)
+                                      Object path, String caption)
     throws Throwable
   {
     if (path instanceof URI)
       path = new File((URI) path);
     String image = path.toString();
+    PictureInfo info = getImages(label, rotated, ImageInfo.readMetadata(image));
+    if (caption != null && caption.length() == 0)
+      caption = null;
+    info.caption = caption;
+    info.key = key;
+    return info;
+  }
+  public static PictureInfo getImages(String label,
+                                      String rotated,
+                                      ImageInfo original)
+    throws Throwable
+  {
     PictureInfo info = new PictureInfo();
     info.label = label;
-    info.original = ImageInfo.readMetadata(image);
-    String main = image;
+    info.original = original;
+    if (! info.dontSkip())
+      return info;
+    String image = original.filename.toString();
     int dot = image.lastIndexOf('.');
     int flen = image.length();
     if (dot <= 0 || dot > flen - 4 || dot < flen - 5)
@@ -105,6 +141,28 @@ public class PictureInfo
         Thumbnail.createThumbnail(orig, path, maxDim);
       }
     return ImageInfo.readMetadata(path);
+  }
+
+  public int getRating ()
+  {
+    return original == null ? 0 : original.getRating();
+  }
+
+  public Object getKey ()
+  {
+    return key;
+  }
+
+  public String getLabel ()
+  {
+    return label;
+  }
+
+  public String getCaption ()
+  {
+    if (caption == null)
+      caption = original == null ? "" : original.getCaption();
+    return caption;
   }
 
   boolean hasThumbnail ()

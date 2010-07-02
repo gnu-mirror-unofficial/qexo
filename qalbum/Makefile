@@ -1,6 +1,6 @@
 #KAWALIB = /home/bothner/kawa-bin
 #KAWALIB = /home/bothner/Kawa/unmodified
-KAWALIB = /home/pics/scripts/kawa.jar
+KAWALIB = /home/pics/qalbum/kawa.jar
 JAVA = java
 JAVAC = javac
 KAWA = CLASSPATH=$${KAWAJAR-$(KAWALIB)}:.. $(JAVA) kawa.repl
@@ -15,6 +15,7 @@ all: qalbum qalbum-$(QALBUM_VERSION).jar qalbum-$(QALBUM_VERSION).tgz
 
 qalbum-$(QALBUM_VERSION).jar: \
   $(QALBUM_PACKAGE_DIR)/ImageInfo.class \
+  $(QALBUM_PACKAGE_DIR)/SelectFiles.class \
   $(QALBUM_PACKAGE_DIR)/PictureInfo.class \
   $(QALBUM_PACKAGE_DIR)/pictures.class \
   $(QALBUM_PACKAGE_DIR)/create.class \
@@ -54,10 +55,13 @@ $(QALBUM_PACKAGE_DIR)/ImageInfo.class: $(QALBUM_PACKAGE_DIR)/ImageInfo.java
 $(QALBUM_PACKAGE_DIR)/PictureInfo.class: $(QALBUM_PACKAGE_DIR)/PictureInfo.java
 	CLASSPATH=$(CLASSPATH) $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/PictureInfo.java
 
+$(QALBUM_PACKAGE_DIR)/SelectFiles.class: $(QALBUM_PACKAGE_DIR)/SelectFiles.java
+	CLASSPATH=$(CLASSPATH) $(JAVAC) -d $(QALBUM_PACKAGE_ROOT) $(QALBUM_PACKAGE_DIR)/SelectFiles.java
+
 $(QALBUM_PACKAGE_DIR)/pictures.class: pictures.xql
 	scriptdir=`pwd`; \
 	CLASSPATH=$(CLASSPATH) \
-	$(JAVA) kawa.repl --xquery --main -d .. -P qalbum. -C pictures.xql
+	$(JAVA) kawa.repl --target 6 --xquery --main -d .. -P qalbum. -C pictures.xql
 
 qalbum: qalbum.in
 	sed -e 's/@QALBUM_VERSION@/$(QALBUM_VERSION)/g' \

@@ -38,6 +38,14 @@ public class ImageInfo
     return exifDirectory.getString(tag);
   }
 
+  public static int minRating = 3;
+
+  public boolean dontSkip()
+  {
+    long rating = exifLong(0x4746);
+    return rating == 0 || rating >= minRating;
+  }
+
   /** Get image "caption" from the EXIF "user comment."
    * The caption is the first line.
    */

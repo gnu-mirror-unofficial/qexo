@@ -23,6 +23,7 @@ public class create
     String title = null;
     String libdir = null;
     boolean force = false;
+    String prefix = "";
     for (; ; iarg++)
       {
         if (iarg == args.length)
@@ -41,6 +42,10 @@ public class create
         else if (arg.startsWith("--title="))
           {
             title = arg.substring(8);
+          }
+        else if (arg.startsWith("--prefix="))
+          {
+            prefix = arg.substring(9);
           }
         else if (arg.equals("--force"))
           {
@@ -125,10 +130,19 @@ public class create
         String prevDate = null;
         for (int i = iarg;  i < iend;  i++)
           {
-            String filename = args[i];
+            String filename = prefix + args[i];
             Path path = Path.valueOf(filename);
             if (! path.exists())
-              error(filename+": No such file");
+              {
+                if (filename.indexOf('{') >= 0)
+                  {
+                    out.print("<select path=\"");
+                    out.print(filename);
+                    out.println("\"/>");
+                    continue;
+                  }
+                error(filename+": No such file");
+              }
             String base = filename;
             int dotIndex = base.lastIndexOf('.');
             if (dotIndex > 0)
