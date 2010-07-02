@@ -38,6 +38,34 @@ public class ImageInfo
     return exifDirectory.getString(tag);
   }
 
+  /** Get image "caption" from the EXIF "user comment."
+   * The caption is the first line.
+   */
+  public String getCaption ()
+  {
+    String comment = getExifDescription(ExifDirectory.TAG_USER_COMMENT);
+    if (comment != null && comment.length() > 0)
+      {
+        int nl = comment.indexOf('\n');
+        return nl < 0 ? comment : comment.substring(0, nl);
+      }
+    return "";
+  }
+
+  /** Get image "text" description from the EXIF "user comment."
+   * Leave out the first line, which is the caption.
+   */
+  public String getText ()
+  {
+    String comment = getExifDescription(ExifDirectory.TAG_USER_COMMENT);
+    if (comment != null && comment.length() > 0)
+      {
+        int nl = comment.indexOf('\n');
+        return nl < 0 ? "" : comment.substring(nl);
+      }
+    return "";
+  }
+
   public String getExifDescription (int tag)
   {
     return getDescription(tag, exifDirectory);
@@ -58,7 +86,6 @@ public class ImageInfo
 
   public void appendExifString (String label, int tag, StringBuffer sbuf)
   {
-    //String value = getExifString(tag);
     String value = getDescription(tag, exifDirectory);
     if (value == null)
       return;
@@ -77,6 +104,23 @@ public class ImageInfo
       {
         return 0;
       }
+  }
+
+  public long exifLong (int tag)
+  {
+    try
+      {
+        return exifDirectory.getLong(tag);
+      }
+    catch (Throwable ex)
+      {
+        return 0;
+      }
+  }
+
+  public int getRating ()
+  {
+    return (int) exifLong(0x4746);
   }
 
   public static String readCommonValues (String filename)
@@ -166,6 +210,7 @@ public class ImageInfo
     appendExifString("Metering mode: ", ExifDirectory.TAG_METERING_MODE, sbuf);
     appendExifString("Exposure:      ", ExifDirectory.TAG_EXPOSURE_PROGRAM, sbuf);
     appendExifString("JPG quality:   ", ExifDirectory.TAG_COMPRESSION_LEVEL, sbuf);
+    appendExifString("Rating:   ", 0x4746, sbuf);
 
     return sbuf.toString();
   }
