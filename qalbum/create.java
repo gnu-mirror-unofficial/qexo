@@ -263,6 +263,7 @@ public class create
 
   public static void updateLibdir (File libdir)
   {
+    updateLibFile(libdir, "qalbum.css");
     updateLibFile(libdir, "picture.js");
     updateLibFile(libdir, "group.js");
     updateLibFile(libdir, "help.html");
