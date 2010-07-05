@@ -12,8 +12,8 @@ function fixLinks() {
     return;
   var links = document.getElementsByTagName("a");
   for (var i = links.length; --i >= 0; ) {
+    var href = links[i].href;
     if (links[i].getAttribute("fixup")) {
-      var href = links[i].href;
       if (hash=="#info")
         href = href.replace(/[.]html/, "info.html");
       else if (hash=="#large-scaled")
@@ -32,15 +32,14 @@ function fixLinks() {
         href = href.replace(/([^/]*)[.]html.*/, "slider.html#$1/"+hash.substring(8));
       links[i].href = href;
     }
+    else if (links[i].parentNode.id=="group-buttons") {
+      links[i].href = href.replace(/[.]html/, ".html")+hash;
+    }
   }
 }
 
 function sliderSelectCurStyle(id) {
-  var tophash = top.location.hash;
-  var sl = tophash.indexOf("/");
-  if (sl > 0)
-    id = id+"/"+tophash.substring(sl+1);
-  top.slider.sliderSelectId(id);
+  top.slider.sliderSelectId(id+top.main.style_link);
 }
 
 function sliderSelectId(id) {
@@ -50,15 +49,27 @@ function sliderSelectId(id) {
     style = id.substring(sl+1);
     id = id.substring(0, sl);
   }
-  top.slider.sliderSelect(top.slider.document.getElementById(id), style);
+  var bstyle = "";
+  var m = /(.*)info$/.exec(id);
+  if (m) {
+    id = m[1];
+    bstyle = "info";
+  }
+  m = /(.*)large$/.exec(id);
+  if (m) {
+    id = m[1];
+    bstyle = "large";
+  }
+  top.slider.sliderSelect(top.slider.document.getElementById(id), bstyle, style);
 }
-function sliderSelect(node, style) {
+function sliderSelect(node, bstyle, style) {
   if (top.selected)
     // The test for top.sliderBgcolor is for backward compatibility.
     top.selected.setAttribute("bgcolor", top.sliderBgcolor ? top.sliderBgcolor : "black");
   node.setAttribute("bgcolor", "red");
   top.selected = node;
-  var url = node.id+".html";
+  var url = node.id+bstyle+".html";
+  /* OLD
   if (style=="medium-scaled")
     url = node.id+".html#medium-scaled";
   else if (style=="medium-scaled-only")
@@ -72,11 +83,15 @@ function sliderSelect(node, style) {
   else if (style=="large-scaled-only")
     url = node.id+"large.html#large-scaled-only";
   else if (style!="" && style != "medium") // Error
+  */
     style = "";
-  hash = style=="" ? node.id : node.id+"/"+style;
+  hash = node.id + bstyle;
+
+  hash = style=="" ? hash : hash+"/"+style;
   top.main.location=url;
   // Konqueror doesn't like this: top.location.hash="#"+node.id;
   top.location.hash=hash;
+//  top.location.hash="#"+node.id;
   var scrollTop = window.pageYOffset ? window.pageYOffset
     : document.body.scrollTop;
   var row = node.parentNode.parentNode;
@@ -84,6 +99,10 @@ function sliderSelect(node, style) {
     scrollTo(0, row.offsetTop);
   else if (row.offsetTop < scrollTop)
     scrollTo(0, row.offsetTop+row.offsetHeight-innerHeight);
+}
+
+function setTopHash(hash) {
+    location.hash = hash;
 }
 
 function sliderHandler (e) {

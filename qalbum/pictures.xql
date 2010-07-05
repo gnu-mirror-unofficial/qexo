@@ -5,7 +5,7 @@ declare boundary-space preserve;
 declare variable $libdir external;
 declare variable $nl := "&#10;";
 declare variable $pwd := Path:currentPath();
-declare variable $bgcolor := "#40E0E0";
+declare variable $bgcolor := "#60ECEC";
 
 declare function local:dont-skip($picinfo) {
   PictureInfo:dontSkip($picinfo)
@@ -22,9 +22,9 @@ declare function local:make-img($class, $picinfo) {
 
 declare function local:make-main-img($picinfo, $scale as xs:double, $class) {
   let $image-name := PictureInfo:getScaledFile($picinfo, $class) return
-  <img class="main" id="main-image" src="{$image-name}"
+  <div><img class="main" id="main-image" src="{$image-name}"
     width="{PictureInfo:getWidthFor($picinfo, $image-name) * $scale}"
-    height="{PictureInfo:getHeightFor($picinfo, $image-name) * $scale}"/>
+    height="{PictureInfo:getHeightFor($picinfo, $image-name) * $scale}"/></div>
 };
 
 declare function local:make-thumbnail($picinfo) {
@@ -62,7 +62,7 @@ declare function local:format-group-image($pinfo) {
 };
 
 declare function local:picture-text($picture) {
-  for $text in $picture/text return <tr>{$text/node()}</tr>
+  for $text in $picture/text return <p><span>{$text/node()}</span></p>
 };
 
 declare function local:make-title($picinfo, $group) {
@@ -74,24 +74,20 @@ declare function local:make-title($picinfo, $group) {
 (: Create a 1-row navigation-bar: next, prev etc :)
 
 declare function local:nav-bar($name, $prevId, $nextId, $style) {
-<span>
-  <span class="button"><a class="button" id="up-button" href="index.html">Index</a></span>
-  {if ($prevId) then
-  <span class="button"><a id="prev-button" href="{$prevId}{local:style-link($style)}.html"> &lt; Previous </a></span>
-  else <span class="button" style="visibility: hidden"> &lt; Previous </span>}{
-  if ($nextId) then
-  <span class="button"><a id="next-button" href="{$nextId}{local:style-link($style)}.html"> Next &gt; </a></span>
-  else <span class="button" style="visibility: hidden"> Next &gt; </span>
-  }
-  {
+  <div><span id="prev-button" class="button">{if ($prevId) then
+  <div><a id="prev-link" href="{$prevId}{local:style-link($style)}.html"><div>&lt;-<br/>Previous</div></a></div>
+  else ()}</span>{(
+    )}<span style="display: inline-block; width: 80%"><span id="up-button" class="button"><a class="button" id="up-link" href="index.html">Up to index</a></span>{
   if ($style="info") then () else ("
-  ",local:make-style-link($name, "info", "Info")),
+  ",local:make-style-link($name, "info", "Image-info")),
   if ($style="large" or $style="full") then () else ("
-  ",local:make-style-link($name, "large", "Large image")),
+  ",local:make-style-link($name, "large", "High-resolution")),
   if ($style="") then () else ("
-  ",local:make-style-link($name, "", "Medium image"))}
-  <script language="JavaScript">document.write(StyleMenu());</script>
-</span>
+  ",local:make-style-link($name, "", "Medium-resolution"))}<script type="text/javascript">document.write(StyleMenu());</script><span class="button"><a href="{$libdir}/help.html">Help</a></span>
+</span
+  ><span id="next-button" class="button">{if ($nextId) then
+  <div><a id="next-link" href="{$nextId}{local:style-link($style)}.html"><div>-&gt;<br/>Next</div></a></div>
+  else ()}</span></div>
 };
 
 declare function local:raw-jpg-link($class, $description, $picinfo) {
@@ -130,23 +126,17 @@ declare function local:picture($picinfo, $group, $name, $preamble, $text, $prevI
     then ("
     ",<link rel="next" href="{$nextId}{local:style-link($style)}.html" />)
     else ()}
+    <link rel="stylesheet" title="QAlbum style" href="../../lib/qalbum.css"/>
     <title>{local:make-title($picinfo,$group)}</title>
+    <!--Used by JavaScript-->
     <style type="text/css">
-      a {{ padding: 1 4; text-decoration: none; }}
-      td {{ padding-left: 0; border-style: none }}
-      a.button {{ border: thin solid; background-color: #FFFF99; }}
-      a.button:hover {{ background-color: orange; }}
-      span.button {{ border: thin solid; background-color: #FFFF99; margin-right: 1em }}
-      img {{ border: thin solid black }}
-      div#preamble {{ z-index: 1; top: 0px; left: 0px;}}
-      div.preamble-text {{ background-color: #FFFF99; border: 1px solid black; padding: 0.5em; width: 70%}}
-   </style>
-   <meta name="viewport" content="target-densitydpi=device-dpi" /><!--For Android-->{(
+    </style>
+    <meta name="viewport" content="target-densitydpi=device-dpi" /><!--For Android-->{(
     (: (Note what we have to do to add an XQuery comment here!)
      : Next we generate a JavaScript handler, to handle pressing the keys
      : 'n' (or space) and 'p' for navigation.  The indentation of the code
      : isn't "logical", but it makes the JavaScript code look nice. :) )}
-    <script language="JavaScript">
+    <script type="text/javascript">
       var thisId = "{$name}";
       var nextId = "{$nextId}";
       var prevId = "{$prevId}";
@@ -157,11 +147,10 @@ declare function local:picture($picinfo, $group, $name, $preamble, $text, $prevI
                     else if ($style="full") then 'location.hash ? location.hash : "#large"'
                     else 'location.hash?location.hash:top.slider?"#slider":""'};
     </script>
-    <script language="JavaScript" type="text/javascript" src="{$libdir}/picture.js">{((:Following space needed to force output of closing tag:))} </script>
+    <script type="text/javascript" src="{$libdir}/picture.js">{((:Following space needed to force output of closing tag:))} </script>
   </head>
 {
   element body {
-    attribute bgcolor {$bgcolor},
     attribute onload {"javascript:OnLoad();"},
     attribute onresize {"javascript:ScaledResize();"},
     local:above-picture($picinfo, $group, $name, $text, $preamble, $prevId, $nextId, $date, $style, $i, $count),
@@ -216,21 +205,19 @@ declare function local:picture($picinfo, $group, $name, $preamble, $text, $prevI
 };
 
 declare function local:above-picture($picinfo, $group, $name, $text, $preamble, $prevId, $nextId, $date, $style, $i, $count) {
-<div id="preamble"><form>
-{ (:if ($style="full") then () else:)
-  local:nav-bar($name, $prevId, $nextId, $style)}
+<div id="preamble">
+{ local:nav-bar($name, $prevId, $nextId, $style)}
 <div class="preamble-text">
 { $preamble }
-<table width="100%"><tr>
-<td><font size="4"><b>{let $caption := local:get-caption($picinfo) return
-  if ($caption) then $caption else $group/title/node()}</b></font>
-</td>
-<td align="right">{if ($i=$count) then "Last" else concat("Number&#xA0;", $i)}&#xA0;of&#xA0;{$count}.  
-{if (empty($date)) then () else concat("Date&#xA0;taken:&#xA0;",string($date),".")}
-</td></tr></table>
-{ if ($style="full") then <script language="JavaScript">if (scaled) document.write(" <i>[Type <code>h</code> to hide.]</i>")</script> else () }
+<p><span class="preamble-title">{let $caption := local:get-caption($picinfo) return
+  if ($caption) then $caption else $group/title/node()}</span>
+<span class="preamble-num-date">{
+  if (empty($date)) then () else concat("&#xA0;&#xA0;",string($date),".")}
+  {if ($i=$count) then "Last" else concat("&#xA0;", $i)}&#xA0;of&#xA0;{$count}</span>
+</p>
+{""(: if ($style="full") then <script type="text/javascript">if (scaled) document.write(" <p><span>[Type <code>h</code> to hide.]</span></p>")</script> else ():) }
 { $text }
-</div></form>
+</div>
 </div>
 };
 
@@ -265,17 +252,12 @@ declare function local:make-slider-index-page($group, $picinfos) {
     {$group/title}
     <link rel="up" href="../index.html" />
     <link rel="top" href="../../index.html" />
-    <style type="text/css">
-      p {{ font-size: small }}
-      a.textual {{ text-decoration: none }}
-      img {{ border: thin solid black }}
-      td.caption {{ background-color: #FFFF99 }}
-    </style>
-    <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"> </script>
-  <script language="JavaScript">document.onkeypress = sliderHandler;</script>
+    <link rel="stylesheet" title="QAlbum style" href="../../lib/qalbum.css"/>
+    <script type="text/javascript" src="{$libdir}/group.js"> </script>
+  <script type="text/javascript">document.onkeypress = sliderHandler;</script>
   </head>
-  <body bgcolor="{$bgcolor}" onload="javascript:fixLinks();">
-  <table cellpadding="0" frame="border"
+  <body onload="javascript:fixLinks();">
+  <table class="slider" cellpadding="0" frame="border"
       border="0" rules="none" >{
   let $nodes := $group/* return
     local:slider-index-page-helper($nodes, 1, count($nodes), $picinfos, 1)
@@ -385,22 +367,8 @@ declare function local:make-group-page($group, $picinfos) {
     <link rel="up" href="../index.html" />
     <link rel="help" href="{$libdir}/help.html" />
     <link rel="top" href="../../index.html" />
-    <style type="text/css">
-      a.textual {{ text-decoration: none }}
-      img {{ border: thin solid black }}
-      td.caption {{ background-color: #FFFF99 }}
-      div#header {{ padding: 1px; width: 720 }}
-      span.button {{ border: thin solid; background-color: #FFFF99; }}
-      p#group-buttons {{ display: block; margin: 0; text-align: center;
-        position: absolute;  top: 0.5em;  left: 0.5em;  width: 6em;
-        right: auto;  background: #FFFF99; }}
-      p#group-buttons a {{ text-decoration: none; display: block; border: thin solid black }}
-      p#group-buttons a:link {{ text-decoration: none}}
-      p#group-buttons a:hover {{ background: orange }}
-      div#header h2 {{ position: relative;  left: 7em;  top: 0em;}}
-      table {{ display: inline}}
-    </style>
-    <script language="JavaScript" type="text/javascript" src="{$libdir}/group.js"> </script>
+    <link rel="stylesheet" title="QAlbum style" href="../../lib/qalbum.css"/>
+    <script type="text/javascript" src="{$libdir}/group.js"> </script>
   </head>
   <body bgcolor="{$bgcolor}" onload="javascript:fixLinks();">
   <div id="header">
@@ -439,7 +407,7 @@ declare function local:loop-pictures($group, $date, $i, $count, $style, $texts, 
            $count, $style, (), $rest, $picinfos))
       case element(text) return
         local:loop-pictures($group, $date, $i, $count, $style,
-                      ($texts,<p>{$cur/node()}</p>), $rest, $picinfos)
+                      ($texts,<p><span>{$cur/node()}</span></p>), $rest, $picinfos)
       case element(date) return
         local:loop-pictures($group, $cur, $i, $count, $style,
                       $texts, $rest, $picinfos)
