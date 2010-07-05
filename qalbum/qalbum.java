@@ -122,15 +122,20 @@ public class qalbum
         File libdirFile = new File(dir, libdir);
         if (! libdirFile.isDirectory())
           create.error("libdir "+libdir+" is not a directory");
-        String[] xargs = new String[args.length+1];
+        String[] xargs = new String[args.length+3];
         System.arraycopy(args, 0, xargs, 1, args.length);
         xargs[args.length] = "libdir="+libdir;
+        xargs[args.length+1]
+          = "out:doctype-public=-//W3C//DTD HTML 4.01 Transitional//EN";
+        xargs[args.length+2]
+          = "out:doctype-system=http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd";
         pictures.main(xargs);
         create.updateLibdir(libdirFile);
       }
     catch (Throwable ex)
       {
         System.err.println("caught "+ex);
+        ex.printStackTrace();
         System.exit(-1);
       }
   }
