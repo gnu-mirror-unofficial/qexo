@@ -7,7 +7,7 @@ p#group-buttons { display: block; margin: 0; text-align: center;
 p#group-buttons a { text-decoration: none; display: block; border: thin solid black }
 p#group-buttons a:link { text-decoration: none}
 p#group-buttons a:hover { background: orange }
-span.piclink table { display: inline}
+span.piclink table { display: inline-block }
 
 /* For the slider index page (sindex.html): */
 table.slider p { font-size: small }
