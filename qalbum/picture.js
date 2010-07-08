@@ -332,8 +332,8 @@ function HandleZoomClick(nDelta, x, y) {
     } else {
         // FIXME
     }
-    image.style.width = scale * image.origwidth;
-    image.style.height = scale * image.origheight;
+    image.style.width = (scale * image.origwidth) + "px";
+    image.style.height = (scale * image.origheight) + "px";
     image.style.right=imageRight+"px";
     image.style.bottom=imageBottom+"px";
     UpdateLocationHash();
@@ -426,8 +426,8 @@ function ScaledResize() {
     scale = 1.0;
     zm = 1.0;
   }
-  image.style.width = scale * image.origwidth;
-  image.style.height = scale * image.origheight;
+  image.style.width = (scale * image.origwidth) + "px";
+  image.style.height = (scale * image.origheight) + "px";
 }
 
 function handler(e) {
