@@ -14,7 +14,7 @@ var scaleToFill = 1.0;
 var imageRight = 0;
 var imageBottom = 0;
 var imageMoved = false;
-var booleanZoomFocused = false;
+var zoomInputFocused = false;
 
 var zoom = "1.0";
 function getHashParams(hash) {
@@ -368,6 +368,10 @@ function ScaledLoad() {
     image.addEventListener('mousedown', OnMouseDown, false);
     if (zoom_input_field)
       zoom_input_field.addEventListener('change', ZoomChange, false);
+      zoom_input_field.addEventListener('focus',
+	function(evt) {zoomInputFocused = true;}, false);
+      zoom_input_field.addEventListener('blur',
+	function(evt) {zoomInputFocused = false;}, false);
       registerOnClick(zoom_input_field, stopPropagation);
   }
   else {
@@ -429,7 +433,7 @@ function ScaledResize() {
 function handler(e) {
   var event = e ? e : window.event;
   var key = event.keyCode ? event.keyCode : event.which;
-  if (event.ctrlKey || event.altKey || event.metaKey) return;
+  if (event.ctrlKey || event.altKey || event.metaKey || zoomInputFocused) return;
   var shifted;
   if (key >= 65 && key <= 90) { key += 32; shifted = true; }
   else if (event.shiftKey) shifted = true;
