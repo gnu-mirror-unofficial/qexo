@@ -187,6 +187,8 @@ function OnLoad() {
   next_button_link = document.getElementById("next-link");
   slider_button_link = document.getElementById("slider-link");
   zoom_input_field = document.getElementById("zoom-input-field");
+  if (zoom_input_field)
+    zoom_input_field.value = zoom;
   if (prev_button_link)
     registerOnClick(prev_button_link.parentNode, stopPropagation);
   if (next_button_link)
@@ -195,21 +197,8 @@ function OnLoad() {
   registerOnClick(slider_button_link.parentNode, stopPropagation);
 
   StyleFixLinks();
-  /*
-  // Begin backward compatibility.
-  var td_nodes = document.getElementsByTagName("td");
-  for (var i = td_nodes.length;  --i >= 0; )
-    {
-      var td_node = td_nodes[i];
-      var parent = td_node.parentNode;
-      if (td_node.getAttribute("style-button"))
-        td_node.parentNode.removeChild(td_node);
-    }
-  // End backward compatibility.
-  */
   preamble = document.getElementById("preamble");
-  if (scaled)
-    ScaledLoad();
+  ScaledLoad();
 }
 
 function ImageClickHandler(evt) {
@@ -279,35 +268,37 @@ function ZoomOut(event) {
    //if (event.stopPropagation) event.stopPropagation();  // DOM Level 2
    //else event.cancelBubble = true;                      // IE
    HandleZoom(-2);
-
 }
+
 function ZoomChange(event) {
-   if (!event) event = window.event;
-   var old = zoom;
-   zoom = zoom_input_field.value;
+  if (!event) event = window.event;
+  var old = zoom;
+  zoom = zoom_input_field.value;
   // if (event.stopPropagation) event.stopPropagation();  // DOM Level 2
   // else event.cancelBubble = true;                      // IE
-    // Now prevent any default action.
-    if (event.preventDefault) event.preventDefault();   // DOM Level 2
-    else event.returnValue = false;                     // IE
-   HandleZoom(0);
-   return false;
+  // Now prevent any default action.
+  if (event.preventDefault) event.preventDefault();   // DOM Level 2
+  else event.returnValue = false;                     // IE
+  HandleZoom(0);
+  return false;
 }
 
 function HandleZoom(nDelta) {
   // Simulate HandleZoomClick event at center of image.
   // That seems to yield reasonable centering.
   var zm = Number(zoom);
+  var scale;
   if (isNaN(zm)) {
-    // FIXME
+    scale = 1.0;
+    zoom = (1.0/scaleToFill).toFixed(1);
   }
-  var scale = zm * scaleToFill;
+  else
+    scale = zm * scaleToFill;
   var centerx = hSize - imageRight - 0.5 * scale * image.origwidth;
   var centery = vSize - imageBottom - 0.5 * scale * image.origheight;
-  HandleZoomClick(nDelta,centerx, centery);
+  HandleZoomClick(nDelta, centerx, centery);
 }
 function HandleZoomClick(nDelta, x, y) {
-
     var zm = Number(zoom);
     var scale;
     if (! isNaN(zm)) {
@@ -349,11 +340,6 @@ function ScaledLoad() {
   var zoomInButton = document.getElementById("zoom-in-button");
   var zoomOutButton = document.getElementById("zoom-out-button");
   // FIXME Don't set ImageClickHandler, OnMouseWheelSpin etc in Info mode.
-  //image.onclick = ImageClickHandler;
-  // if (body.captureEvents) body.captureEvents(Event.CLICK);
-  //document.onclick = ImageClickHandler;
-  //if (document.captureEvents) document.captureEvents(Event.CLICK);
-  //captureEvents is deprectated.
   registerOnClick(document, ImageClickHandler);
   registerOnClick(zoomInButton, ZoomIn);
   registerOnClick(zoomOutButton, ZoomOut);
@@ -390,37 +376,33 @@ function ScaledLoad() {
 }
 
 function ScaledResize() {
+  /* Window size calculation from S5 slides.css. by Eric Meyer. */
+  if (window.innerHeight) {
+    vSize = window.innerHeight;
+    hSize = window.innerWidth;
+  } else if (document.documentElement.clientHeight) {
+    vSize = document.documentElement.clientHeight;
+    hSize = document.documentElement.clientWidth;
+  } else if (document.body.clientHeight) {
+    vSize = document.body.clientHeight;
+    hSize = document.body.clientWidth;
+  } else {
+    vSize = 700;  // assuming 1024x768, minus chrome and such
+    hSize = 1024; // these do not account for kiosk mode or Opera Show
+  }
+  var wscale = hSize /  image.origwidth;
+  var hscale = vSize / image.origheight;
+  scaleToFill = Math.min(wscale, hscale);
+
   if (! scaled)
     return;
   var scale;
   var zm = Number(zoom);
   if (! isNaN(zm)) {
-    /* Window size calculation from S5 slides.css. by Eric Meyer. */
-    if (window.innerHeight) {
-            vSize = window.innerHeight;
-            hSize = window.innerWidth;
-    } else if (document.documentElement.clientHeight) {
-            vSize = document.documentElement.clientHeight;
-            hSize = document.documentElement.clientWidth;
-    } else if (document.body.clientHeight) {
-            vSize = document.body.clientHeight;
-            hSize = document.body.clientWidth;
-    } else {
-            vSize = 700;  // assuming 1024x768, minus chrome and such
-            hSize = 1024; // these do not account for kiosk mode or Opera Show
-    }
-    // FIXME: It would be nice to use the space left *after* the preamble.
-    // However, I haven't gotten this working.
-    // hSize = hSize - preamble.clientHeight;
-    var wscale = hSize /  image.origwidth;
-    var hscale = vSize / image.origheight;
-    scaleToFill = Math.min(wscale, hscale);
     scale = zm * scaleToFill;
   }
-  else {
-    scaleToFill = 1.0;
+  else { // native
     scale = 1.0;
-    zm = 1.0;
   }
   image.style.width = (scale * image.origwidth) + "px";
   image.style.height = (scale * image.origheight) + "px";
@@ -429,7 +411,8 @@ function ScaledResize() {
 function handler(e) {
   var event = e ? e : window.event;
   var key = event.keyCode ? event.keyCode : event.which;
-  if (event.ctrlKey || event.altKey || event.metaKey || zoomInputFocused) return;
+  if (event.ctrlKey || event.altKey || event.metaKey || zoomInputFocused)
+    return;
   var shifted;
   if (key >= 65 && key <= 90) { key += 32; shifted = true; }
   else if (event.shiftKey) shifted = true;
