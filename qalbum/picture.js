@@ -92,6 +92,12 @@ function stopPropagation(e) {
   return true;
 }
 
+function SliderFixLink(link, target) {
+  link.setAttribute('onclick',
+    "top.slider.sliderSelectId('"+target+"');return false;");
+  link.href = "slider.html#"+target;
+}
+
 function StyleFixLinks() {
   var links = document.getElementsByTagName("a");
   if (top.slider) {
@@ -102,17 +108,10 @@ function StyleFixLinks() {
       up_button_link.setAttribute('onclick', "top.location='"+uplink+"'");
       up_button_link.href = uplink;
     }
-    if (prev_button_link) {
-// FIXME registerOnClick
-      prev_button_link.setAttribute('onclick',
-        "top.slider.sliderSelectId('"+prevId+style_link+"');return false;");
-      prev_button_link.href = "slider.html#"+prevId+style_link;
-    }
-    if (next_button_link) {
-      next_button_link.setAttribute('onclick',
-        "top.slider.sliderSelectId('"+nextId+style_link+"');return false;");
-      next_button_link.href = "slider.html#"+nextId+style_link;
-    }
+    if (prev_button_link)
+      SliderFixLink(prev_button_link, prevId+style_link);
+    if (next_button_link)
+      SliderFixLink(next_button_link, nextId+style_link);
     if (slider_button_link) {
       slider_button_link.href = thisId+style_link+".html"+hash;
       registerOnClick(slider_button_link,
@@ -126,19 +125,10 @@ function StyleFixLinks() {
       if (bstyle) {
         if (bstyle=="medium")
            bstyle = "";
-        var href = "slider.html#"+thisId+bstyle;
+        var target = thisId+bstyle;
         if (hash && hash.length > 1 && hash[0] == '#')
-          href = href + "/" + hash.substring(1);
-        links[i].href = href;
-
-        registerOnClick(links[i],
-           function(event) {
-             if (!event) var event = window.event;
-             stopPropagation(event);
-             var h = event.target.hash.substring(1);
-             top.slider.sliderSelectId(h);
-             return false;
-           });
+          target = target + "/" + hash.substring(1);
+        SliderFixLink(links[i], target);
       }
     }
     links = top.slider.document.getElementsByTagName("a");
