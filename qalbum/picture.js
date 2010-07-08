@@ -83,7 +83,9 @@ if (scaled) {
   // We add the rule using JavaScript since we only want to disable the
   // initial display when JavaScript is enabled.
   addStyleRule("img#main-image", "visibility: hidden");
- }
+}
+addStyleRule("span#slider-button", "display: inline-block");
+addStyleRule("span#zoom-buttons", "display: inline-block");
 
 function stopPropagation(e) {
   if (!e) var e = window.event;
@@ -114,6 +116,10 @@ function StyleFixLinks() {
       SliderFixLink(next_button_link, nextId+style_link);
     if (slider_button_link) {
       slider_button_link.href = thisId+style_link+".html"+hash;
+      var slider_child = slider_button_link.firstChild;
+      if (slider_child && ! slider_child.nextSibling
+          && slider_child.nodeType == 3)
+	slider_child.data = "Hide slider";
       registerOnClick(slider_button_link,
          function(evt) {
            top.location = slider_button_link.href;
@@ -477,11 +483,8 @@ function toggleHidePreamble() {
 
 document.onkeypress = handler;
 
- function StyleMenu() {
-  return "<span class='button'><a id='slider-link' href='slider.html#"+thisId+style_link+"'>"+(top.slider?"Hide slider":"Show Slider")+"</span>"
-  + (style_link == "info" ? ""
-       : "<span class='button'><a id='zoom-in-button' href='javascript:ZoomIn()'>Zoom&nbsp;in:</a><input type='text' size='4' value='1.0' id='zoom-input-field'></input><a id='zoom-out-button' href='javascript:ZoomOut()'>out</a></span>");
-}
+// No longer used - only so old pages don't die.
+function StyleMenu() { return ""; }
 
 // FIXME
 //document.write("<style>span[style-button] { display: none }</style>");

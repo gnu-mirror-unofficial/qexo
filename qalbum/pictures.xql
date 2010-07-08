@@ -4,6 +4,7 @@ declare namespace Path = "class:gnu.text.Path";
 declare boundary-space preserve;
 declare variable $libdir external;
 declare variable $nl := "&#10;";
+declare variable $nbsp := "&#160;";
 declare variable $pwd := Path:currentPath();
 declare variable $bgcolor := "#60ECEC";
 
@@ -83,7 +84,12 @@ declare function local:nav-bar($name, $prevId, $nextId, $style) {
   if ($style="large" or $style="full") then () else ("
   ",local:make-style-link($name, "large", "High-resolution")),
   if ($style="") then () else ("
-  ",local:make-style-link($name, "", "Medium-resolution"))}<script type="text/javascript">document.write(StyleMenu());</script><span class="button"><a href="{$libdir}/help.html">Help</a></span>
+  ",local:make-style-link($name, "", "Medium-resolution"))}
+  <span id='slider-button' class='button'><a id='slider-link' href='slider.html#{$name}{$style}'>Show Slider</a></span>
+{ if ($style="info") then () else (
+       <span id="zoom-buttons" class='button'><a id='zoom-in-button' href='javascript:ZoomIn()'>Zoom{$nbsp}in:</a><input type='text' size='4' value='1.0' id='zoom-input-field'></input><a id='zoom-out-button' href='javascript:ZoomOut()'>out</a></span>, "
+")
+ }<span class="button"><a href="{$libdir}/help.html">Help</a></span>
 </span
   ><span id="next-button" class="button">{if ($nextId) then
   <div><a id="next-link" href="{$nextId}{local:style-link($style)}.html"><div>-&gt;<br/>Next</div></a></div>

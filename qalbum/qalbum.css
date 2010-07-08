@@ -31,7 +31,6 @@ span.button > div { border: thin solid }
 span.button > div > a { margin: 0; padding: 0 }
 a { text-decoration: none; padding: 0.2ex;}
 td { padding-left: 0; border-style: none }
-/* The following causes problems in Opera */
 span.button { display: inline-block }
 span.button { text-align: center; border: thin solid; margin: 0.4ex; padding: 0 }
 img { border: thin solid black }
@@ -43,3 +42,6 @@ div#preamble form tr { width: 100% }
 div.preamble-text p { padding: 0em; margin: 0.5ex }
 div.preamble-text span.preamble-title { margin: 0; padding: 0ex }
 div.preamble-text span.preamble-num-date { font-weight: bolder; float: right; padding: 0ex }
+
+/* Some stuff should only be visible if JavaScript is available. */
+span#slider-button, span#zoom-buttons { display: none }
