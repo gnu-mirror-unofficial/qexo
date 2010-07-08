@@ -66,7 +66,7 @@ function sliderSelect(node, bstyle, style) {
   if (top.selected)
     // The test for top.sliderBgcolor is for backward compatibility.
     top.selected.setAttribute("bgcolor", top.sliderBgcolor ? top.sliderBgcolor : "black");
-  node.setAttribute("bgcolor", "red");
+  node.setAttribute("bgcolor", "orange");
   top.selected = node;
   var url = node.id+bstyle+".html";
   /* OLD
