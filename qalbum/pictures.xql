@@ -209,8 +209,8 @@ declare function local:above-picture($picinfo, $group, $name, $text, $preamble, 
 { local:nav-bar($name, $prevId, $nextId, $style)}
 <div class="preamble-text">
 { $preamble }
-<p><span class="preamble-title">{let $caption := local:get-caption($picinfo) return
-  if ($caption) then $caption else $group/title/node()}</span>
+<p><span class="preamble-title"><b>{let $caption := local:get-caption($picinfo) return
+  if ($caption) then $caption else $group/title/node()}</b></span>
 <span class="preamble-num-date">{
   if (empty($date)) then () else concat("&#xA0;&#xA0;",string($date),".")}
   {if ($i=$count) then "Last" else concat("&#xA0;", $i)}&#xA0;of&#xA0;{$count}</span>
