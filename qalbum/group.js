@@ -1,4 +1,4 @@
-// Copyright 2006 Per Bothner
+// Copyright 2006, 2010 Per Bothner
 
 var hash = location.hash;
 function handler(e) {
@@ -39,7 +39,7 @@ function fixLinks() {
 }
 
 function sliderSelectCurStyle(id) {
-  top.slider.sliderSelectId(id+top.main.style_link);
+  top.slider.sliderSelect(top.slider.document.getElementById(id), top.main.style_link, top.main.navigationSubHash);
 }
 
 function sliderSelectId(id) {
@@ -69,29 +69,13 @@ function sliderSelect(node, bstyle, style) {
   node.setAttribute("bgcolor", "orange");
   top.selected = node;
   var url = node.id+bstyle+".html";
-  /* OLD
-  if (style=="medium-scaled")
-    url = node.id+".html#medium-scaled";
-  else if (style=="medium-scaled-only")
-    url = node.id+".html#medium-scaled-only";
-  else if (style=="large")
-    url = node.id+"large.html";
-  else if (style=="large-scaled")
-    url = node.id+"large.html#large-scaled";
-  else if (style=="medium-scaled-only")
-    url = node.id+".html#medium-scaled-only";
-  else if (style=="large-scaled-only")
-    url = node.id+"large.html#large-scaled-only";
-  else if (style!="" && style != "medium") // Error
-  */
-    style = "";
   hash = node.id + bstyle;
-
-  hash = style=="" ? hash : hash+"/"+style;
+  if (style != "") {
+    hash = hash+"/"+style;
+    url = url+"#"+style;
+  }
   top.main.location=url;
-  // Konqueror doesn't like this: top.location.hash="#"+node.id;
   top.location.hash=hash;
-//  top.location.hash="#"+node.id;
   var scrollTop = window.pageYOffset ? window.pageYOffset
     : document.body.scrollTop;
   var row = node.parentNode.parentNode;
