@@ -1,6 +1,6 @@
 package qalbum;
 import gnu.mapping.*;
-import gnu.text.*;
+import gnu.kawa.io.Path;
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
@@ -16,7 +16,6 @@ public class SelectFiles
   public static void selectFiles$X (String pattern, Object key, CallContext ctx)
     throws Throwable
   {
-    System.err.println("selectFiles pattern:"+pattern+" key:"+key);
     int sl = pattern.lastIndexOf('/');
     String dirName;
     if (sl < 0)
@@ -114,7 +113,6 @@ class SelectFilter implements FilenameFilter
 
     headLength = nameHead.length();
     tailLength = nameTail.length();
-    System.err.println("SelectFiler head:"+nameHead+" tail:"+nameTail+" l:"+loIndex+" hi:"+hiIndex);
   }
 
   public boolean accept(File dir, String name)

@@ -1,6 +1,6 @@
 declare namespace PictureInfo = "class:qalbum.PictureInfo";
 declare namespace SelectFiles = "class:qalbum.SelectFiles";
-declare namespace Path = "class:gnu.text.Path";
+declare namespace Path = "class:gnu.kawa.io.Path";
 declare boundary-space preserve;
 declare variable $libdir external;
 declare variable $nl := "&#10;";
@@ -44,6 +44,15 @@ declare function local:get-caption($picinfo) {
   PictureInfo:getCaption($picinfo)
 };
 
+declare function local:get-datetime($picinfo, $date) {
+  if (empty($date)) then (
+    let $dt := PictureInfo:getDateTime($picinfo)
+    return concat(translate(substring($dt, 1, 11), ":", "/"),
+                  substring($dt, 12, 5))
+  )
+  else $date
+};
+
 declare function local:format-group-image($pinfo) {
   let $label := PictureInfo:getLabel($pinfo) return
   <span class="piclink">
@@ -82,9 +91,9 @@ declare function local:nav-bar($name, $prevId, $nextId, $style) {
   if ($style="info") then () else ("
   ",local:make-style-link($name, "info", "Image-info")),
   if ($style="large" or $style="full") then () else ("
-  ",local:make-style-link($name, "large", "High-resolution")),
+  ",local:make-style-link($name, "large", "Higher resolution")),
   if ($style="") then () else ("
-  ",local:make-style-link($name, "", "Medium-resolution"))}
+  ",local:make-style-link($name, "", "Lower resolution"))}
   <span id='slider-button' class='button'><a id='slider-link' href='slider.html#{$name}{$style}'>Show Slider</a></span>
 { if ($style="info") then () else (
        <span id="zoom-buttons" class='button'><a id='zoom-in-button' href='javascript:ZoomIn()'>Zoom{$nbsp}in:</a><input type='text' size='4' value='1.0' id='zoom-input-field'></input><a id='zoom-out-button' href='javascript:ZoomOut()'>out</a></span>, "
@@ -137,7 +146,10 @@ declare function local:picture($picinfo, $group, $name, $preamble, $text, $prevI
     <!--Used by JavaScript-->
     <style type="text/css">
     </style>
-    <meta name="viewport" content="target-densitydpi=device-dpi" /><!--For Android-->{(
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"/>
+{
+(:    <meta name="viewport" content="target-densitydpi=device-dpi" /><!--For Android--> :)
+(
     (: (Note what we have to do to add an XQuery comment here!)
      : Next we generate a JavaScript handler, to handle pressing the keys
      : 'n' (or space) and 'p' for navigation.  The indentation of the code
@@ -159,7 +171,7 @@ declare function local:picture($picinfo, $group, $name, $preamble, $text, $prevI
   element body {
     attribute onload {"javascript:OnLoad();"},
     attribute onresize {"javascript:ScaledResize();"},
-    local:above-picture($picinfo, $group, $name, $text, $preamble, $prevId, $nextId, $date, $style, $i, $count),
+    local:above-picture($picinfo, $group, $name, $text, $preamble, $prevId, $nextId, local:get-datetime($picinfo, $date), $style, $i, $count),
   if ($style = "info") then (
     <table><tr>
       <td style="padding: 20 20 20 10">{local:make-thumbnail($picinfo)} </td>
@@ -478,6 +490,8 @@ let $index-file-uri := resolve-uri("index.xml", $pwd),
     $picinfos := local:get-pictures($group/*),
     $count := count($picinfos)
   return (
+write-to(for $g in $group/* return ("[",$g, "]
+"), "file:/tmp/groups"),
     write-to-if-changed(local:make-slider-page($group, $picinfos), resolve-uri("slider.html", $pwd)),
     write-to-if-changed(local:make-slider-index-page($group, $picinfos), resolve-uri("sindex.html", $pwd)),
     write-to-if-changed(local:make-group-page($group, $picinfos), resolve-uri("index.html", $pwd)),

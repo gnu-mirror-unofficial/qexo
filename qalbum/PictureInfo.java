@@ -2,6 +2,7 @@ package qalbum;
 import java.io.*;
 import java.net.URI;
 import gnu.text.*;
+import gnu.kawa.io.Path;
 
 public class PictureInfo
 {
@@ -163,6 +164,11 @@ public class PictureInfo
     if (caption == null)
       caption = original == null ? "" : original.getCaption();
     return caption;
+  }
+
+  public String getDateTime ()
+  {
+    return original == null ? "" : original.getDateTime();
   }
 
   boolean hasThumbnail ()

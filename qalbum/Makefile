@@ -1,6 +1,6 @@
 #KAWALIB = /home/bothner/kawa-bin
 #KAWALIB = /home/bothner/Kawa/unmodified
-KAWALIB = /home/pics/qalbum/kawa.jar
+KAWALIB = /home/bothner/Kawa/web/qexo/qalbum/kawa.jar
 JAVA = java
 JAVAC = javac
 KAWA = CLASSPATH=$${KAWAJAR-$(KAWALIB)}:.. $(JAVA) kawa.repl
@@ -9,7 +9,9 @@ QEXO = $(KAWA) --xquery
 QALBUM_PACKAGE_DIR = ../qalbum
 QALBUM_PACKAGE_ROOT = ..
 QALBUM_VERSION = 1.2
-ExifExtractor_JAR = metadata-extractor-2.3.1.jar
+#ExifExtractor_JAR = metadata-extractor-2.3.1.jar
+#ExifExtractor_JAR = metadata-extractor-2.4.0-beta-1.jar
+ExifExtractor_JARS = metadata-extractor.jar:xmpcore.jar
 
 all: qalbum qalbum-$(QALBUM_VERSION).jar qalbum-$(QALBUM_VERSION).tgz
 
@@ -29,12 +31,17 @@ qalbum-$(QALBUM_VERSION).jar: \
 	  qalbum/qalbum.class \
 	  qalbum/Thumbnail.class
 
-CLASSPATH = "..:$(ExifExtractor_JAR):$(KAWALIB)"
+CLASSPATH = "..:$(ExifExtractor_JARS):$(KAWALIB)"
 
 DIST_FILES = index.html Makefile qalbum-$(QALBUM_VERSION).jar \
-  $(ExifExtractor_JAR) \
+  metadata-extractor.jar xmpcore.jar \
   qalbum.java ImageInfo.java PictureInfo.java create.java Thumbnail.java \
   pictures.xql qalbum.in qalbum picture.js group.js help.html jar-manifest README
+
+all: qalbum-$(QALBUM_VERSION).jar qalbum
+
+SampleUsage.class: SampleUsage.java
+	CLASSPATH=$(CLASSPATH) $(JAVAC) SampleUsage.java
 
 qalbum-$(QALBUM_VERSION).tgz: qalbum-$(QALBUM_VERSION).jar $(DIST_FILES)
 	cd .. && tar czf qalbum/qalbum-$(QALBUM_VERSION).tgz \

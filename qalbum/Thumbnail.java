@@ -4,15 +4,17 @@ package qalbum;
 
 import java.awt.Image;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import javax.swing.ImageIcon;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
-import gnu.text.*;
+import javax.imageio.ImageIO;
+//import com.sun.image.codec.jpeg.JPEGCodec;
+//import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import gnu.kawa.io.Path;
 
 class Thumbnail {
     public static void main(String[] args) {
@@ -61,15 +63,17 @@ class Thumbnail {
             // Paint image.
             Graphics2D g2d = 
              outImage.createGraphics();
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             g2d.drawImage(inImage, 0, 0, scaledW, scaledH, null);
             g2d.dispose();
 
             // JPEG-encode the image 
             //and write to file.
             OutputStream os = thumb.openOutputStream();
-            JPEGImageEncoder encoder = 
-              JPEGCodec.createJPEGEncoder(os);
-            encoder.encode(outImage);
+            ImageIO.write(outImage, "jpeg", os);
+            //JPEGImageEncoder encoder = 
+            //  JPEGCodec.createJPEGEncoder(os);
+            // encoder.encode(outImage);
             os.close();
         } catch (IOException e) {
             e.printStackTrace();

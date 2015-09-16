@@ -4,7 +4,7 @@ import com.drew.metadata.*;
 import com.drew.metadata.exif.*;
 import com.drew.metadata.jpeg.*;
 import java.io.*;
-import gnu.text.*;
+import gnu.kawa.io.Path;
 
 /** Information relating to and extracted from a JPEG image. */
 
@@ -12,6 +12,7 @@ public class ImageInfo
 {
   Metadata metadata;
   Directory exifDirectory;
+  Directory exif0Directory;
   int width, height;
   Path filename;
 
@@ -21,14 +22,18 @@ public class ImageInfo
     Path path = Path.valueOf(filename);
     InputStream in
       = new BufferedInputStream(path.openInputStream());
-    Metadata metadata = JpegMetadataReader.readMetadata(in);
-    Directory exifDirectory = metadata.getDirectory(ExifDirectory.class);
-    Directory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+    com.drew.metadata.Metadata metadata = JpegMetadataReader.readMetadata(in);
+    Directory exifDirectory =
+        metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+    Directory exif0Directory =
+        metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+    Directory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
     ImageInfo info = new ImageInfo();
     info.metadata = metadata;
     info.exifDirectory = exifDirectory;
-    info.width = jpegDirectory.getInt(JpegDirectory.TAG_JPEG_IMAGE_WIDTH);
-    info.height = jpegDirectory.getInt(JpegDirectory.TAG_JPEG_IMAGE_HEIGHT);
+    info.exif0Directory = exif0Directory;
+    info.width = jpegDirectory.getInt(JpegDirectory.TAG_IMAGE_WIDTH);
+    info.height = jpegDirectory.getInt(JpegDirectory.TAG_IMAGE_HEIGHT);
     info.filename = path;
     return info;
   }
@@ -51,21 +56,62 @@ public class ImageInfo
    */
   public String getCaption ()
   {
-    String comment = getExifDescription(ExifDirectory.TAG_USER_COMMENT);
+    String comment = getExifDescription(ExifSubIFDDirectory.TAG_USER_COMMENT);
+    /*
+    String commente = null;
+    if (exifDirectory instanceof ExifDirectory)
+      {
+        try{
+      commente = ((ExifDirectory) exifDirectory).getUserComment();
+      System.err.println("UserComment "+commente);
+        } catch (Throwable ex) { }
+
+      }
+    */
+
+    /*
+    byte[] commentb;
+    try
+      {
+        commentb = exifDirectory.getByteArray(TAG_USER_COMMENT);
+        System.err.print("comment [");
+        for (int i = 0; i < commentb.length;  i++) {
+          if (i > 0) System.err.print(", ");
+          System.err.print(0xFF & commentb[i]);
+        }
+        System.err.println("]");
+      }
+    catch (Throwable ex)
+      {
+        System.err.println("caught "+ex);
+        commentb = null;
+      }
+    if (commentb == null)
+      System.err.println("commentb null");
+    else
+      System.err.println("commentb len:"+commentb.length);
+    */
     if (comment != null && comment.length() > 0)
       {
+        //System.err.println("caption/user-comment:"+comment);
         int nl = comment.indexOf('\n');
         return nl < 0 ? comment : comment.substring(0, nl);
       }
     return "";
   }
 
+  public String getDateTime ()
+  {
+    return getExifDescription(ExifSubIFDDirectory.TAG_DATETIME);
+  }
+
   /** Get image "text" description from the EXIF "user comment."
    * Leave out the first line, which is the caption.
    */
+
   public String getText ()
   {
-    String comment = getExifDescription(ExifDirectory.TAG_USER_COMMENT);
+    String comment = getExifDescription(ExifSubIFDDirectory.TAG_USER_COMMENT);
     if (comment != null && comment.length() > 0)
       {
         int nl = comment.indexOf('\n');
@@ -76,8 +122,18 @@ public class ImageInfo
 
   public String getExifDescription (int tag)
   {
-    return getDescription(tag, exifDirectory);
+    String value = getDescription(tag, exifDirectory);
+    if (value == null)
+        value = getDescription(tag, exif0Directory);
+    return value;
   }
+
+  /*
+  public byte[] getExifBytes (int tag)
+  {
+    return exifDirectory.getByteArray(tag);
+  }
+  */
 
   public String getDescription (int tag, Directory directory)
   {
@@ -94,7 +150,7 @@ public class ImageInfo
 
   public void appendExifString (String label, int tag, StringBuffer sbuf)
   {
-    String value = getDescription(tag, exifDirectory);
+    String value = getExifDescription(tag);
     if (value == null)
       return;
     sbuf.append(label);
@@ -145,7 +201,7 @@ public class ImageInfo
     try
       {
         int focalplaneUnitCode
-          = exifDirectory.getInt(ExifDirectory.TAG_FOCAL_PLANE_UNIT);
+          = exifDirectory.getInt(ExifSubIFDDirectory.TAG_FOCAL_PLANE_RESOLUTION_UNIT);
         switch (focalplaneUnitCode)
           {
           case 1: focalplaneUnits = 25.4; break; // inch
@@ -160,7 +216,7 @@ public class ImageInfo
           case 5: focalplaneUnits = .001; break;  // micrometer
           default:  focalplaneUnits = 0;
           }
-        focalplaneXRes = exifDirectory.getDouble(ExifDirectory.TAG_FOCAL_PLANE_X_RES);
+        focalplaneXRes = exifDirectory.getDouble(ExifSubIFDDirectory.TAG_FOCAL_PLANE_X_RESOLUTION);
         CCDwidth = (float) (((int) (100 * width * focalplaneUnits / focalplaneXRes + 0.5)) / 100.00);
       }
     catch (Throwable ex)
@@ -176,19 +232,19 @@ public class ImageInfo
     sbuf.append(new java.util.Date(filename.getLastModified()));
     sbuf.append('\n');
 
-    appendExifString("Camera make:   ", ExifDirectory.TAG_MAKE, sbuf);
-    appendExifString("Camera model:  ", ExifDirectory.TAG_MODEL, sbuf);
+    appendExifString("Camera make:   ", ExifSubIFDDirectory.TAG_MAKE, sbuf);
+    appendExifString("Camera model:  ", ExifSubIFDDirectory.TAG_MODEL, sbuf);
 
-    //appendExifString("Orientation:   ", ExifDirectory.TAG_ORIENTATION, sbuf);
+    //appendExifString("Orientation:   ", ExifSubIFDDirectory.TAG_ORIENTATION, sbuf);
 
-    appendExifString("Date/Time:     ", ExifDirectory.TAG_DATETIME, sbuf);
+    appendExifString("Date/Time:     ", ExifSubIFDDirectory.TAG_DATETIME, sbuf);
 
     sbuf.append("Resolution:    "); sbuf.append(width);
     sbuf.append(" x "); sbuf.append(height); sbuf.append('\n');
 
-    double focalLength = exifDouble(ExifDirectory.TAG_FOCAL_LENGTH);
+    double focalLength = exifDouble(ExifSubIFDDirectory.TAG_FOCAL_LENGTH);
     String focalLengthDesc
-      = getExifDescription(ExifDirectory.TAG_FOCAL_LENGTH);
+      = getExifDescription(ExifSubIFDDirectory.TAG_FOCAL_LENGTH);
     if (focalLength != 0 && focalLengthDesc != null)
       {
         sbuf.append("Focal length:  ");
@@ -209,15 +265,15 @@ public class ImageInfo
         sbuf.append("mm\n");
       }
 
-    if (exifDirectory.containsTag(ExifDirectory.TAG_SHUTTER_SPEED))
-      appendExifString("Shutter speed: ", ExifDirectory.TAG_SHUTTER_SPEED, sbuf);
+    if (exifDirectory.containsTag(ExifSubIFDDirectory.TAG_SHUTTER_SPEED))
+      appendExifString("Shutter speed: ", ExifSubIFDDirectory.TAG_SHUTTER_SPEED, sbuf);
     else
-      appendExifString("Exposure time: ", ExifDirectory.TAG_EXPOSURE_TIME, sbuf);
-    appendExifString("Aperture:      ", ExifDirectory.TAG_FNUMBER, sbuf);
-    appendExifString("ISO equiv.:    ", ExifDirectory.TAG_ISO_EQUIVALENT, sbuf);
-    appendExifString("Metering mode: ", ExifDirectory.TAG_METERING_MODE, sbuf);
-    appendExifString("Exposure:      ", ExifDirectory.TAG_EXPOSURE_PROGRAM, sbuf);
-    appendExifString("JPG quality:   ", ExifDirectory.TAG_COMPRESSION_LEVEL, sbuf);
+      appendExifString("Exposure time: ", ExifSubIFDDirectory.TAG_EXPOSURE_TIME, sbuf);
+    appendExifString("Aperture:      ", ExifSubIFDDirectory.TAG_FNUMBER, sbuf);
+    appendExifString("ISO equiv.:    ", ExifSubIFDDirectory.TAG_ISO_EQUIVALENT, sbuf);
+    appendExifString("Metering mode: ", ExifSubIFDDirectory.TAG_METERING_MODE, sbuf);
+    appendExifString("Exposure:      ", ExifSubIFDDirectory.TAG_EXPOSURE_PROGRAM, sbuf);
+    appendExifString("JPG quality:   ", ExifSubIFDDirectory.TAG_COMPRESSED_AVERAGE_BITS_PER_PIXEL, sbuf);
     appendExifString("Rating:   ", 0x4746, sbuf);
 
     return sbuf.toString();

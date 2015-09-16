@@ -1,5 +1,5 @@
-// Copyright 2006, 2010 Per Bothner
-
+// Copyright 2006, 2010, 2011 Per Bothner
+"use strict";
 var hash = location.hash;
 function handler(e) {
   var key = e ? e.which : event.keyCode;

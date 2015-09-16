@@ -1,6 +1,6 @@
 package qalbum;
 import java.io.*;
-import gnu.text.*;
+import gnu.kawa.io.*;
 import gnu.mapping.*;
 
 public class qalbum

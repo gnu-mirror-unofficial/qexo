@@ -4,8 +4,8 @@ import java.io.*;
 import java.util.*;
 import javax.imageio.*;
 import javax.imageio.stream.*;
-import com.drew.metadata.exif.ExifDirectory;
-import gnu.text.*;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
+import gnu.kawa.io.Path;
 
 public class create
 {
@@ -161,7 +161,7 @@ public class create
                 height = reader.getHeight(0);
                 iis.close();
                 ImageInfo info = ImageInfo.readMetadata(filename);
-                String date = info.getExifString(ExifDirectory.TAG_DATETIME);
+                String date = info.getExifString(ExifSubIFDDirectory.TAG_DATETIME);
                 if (date != null && date.length() >= 10)
                   {
                     date = date.substring(0, 10).replace(':', '/');
@@ -175,7 +175,7 @@ public class create
                   }
                 out.print("<picture id=\"");  out.print(base);
                 out.println("\">");
-                String orientation = info.getExifString(ExifDirectory.TAG_ORIENTATION);
+                String orientation = info.getExifString(ExifSubIFDDirectory.TAG_ORIENTATION);
                 if (orientation != null && ! orientation.equals("1"))
                   {
                     out.print("<original rotated=\"");
