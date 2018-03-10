@@ -24,12 +24,11 @@ span.button:hover, p a:hover { background-color: orange }
 
 p a { padding: 0; margin: 0 }
 p span { padding: 0.2ex }
-
 body { margin: 0; padding: 0 }
 span#prev-button, span#next-button { width: 10%; text-align: center; display: inline-block; padding: 0; margin: 0; margin-top: 0; border: none; vertical-align: top }
 span.button > div { border: thin solid }
 span.button > div > a { margin: 0; padding: 0 }
-a { text-decoration: none; padding: 0.2ex;}
+a { text-decoration: none; padding: 0px;}
 td { padding-left: 0; border-style: none }
 span.button { display: inline-block }
 span.button { text-align: center; border: thin solid; margin: 0.4ex; padding: 0 }
