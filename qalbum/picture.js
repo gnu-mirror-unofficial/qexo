@@ -13,6 +13,7 @@ var imageBottom = 0;
 var imageMoved = false;
 var zoomInputFocused = false;
 var modCount = 0;
+var image; // set by OnLoad
 
 var zoom = "1.0"; // a real scale factor (as a string) or "native"
 var navigationSubHash = "";
@@ -163,8 +164,8 @@ function StyleFixLinks() {
     }
     for (var i = links.length; --i >= 0; ) {
       var bstyle = links[i].parentNode.getAttribute("style-button");
-      if (bstyle) {
-        if (bstyle=="medium")
+      if (bstyle !==null) {
+        if (bstyle==null)
            bstyle = "";
         SliderFixLink(links[i], thisId+bstyle+slashTail);
       }
@@ -176,13 +177,9 @@ function StyleFixLinks() {
         var ind = href.indexOf("#");
         if (ind > 0 && (ind = href.indexOf("/", ind)) > 0)
           href = href.substring(0, ind);
-        var m = /(.*)info$/.exec(href);
+        var m = /(.*)(info|medium|large)$/.exec(href);
         if (m)
           href = m[1];
-        m = /(.*)large$/.exec(href);
-        if (m)
-          href = m[1];
-
         href = href + style_link;
         links[i].href = href+slashTail;
       }
@@ -214,6 +211,12 @@ function registerOnClick(node, handler) {
 }
 
 function OnLoad() {
+  image = document.getElementById("main-image");
+  if (image == null) { // for "info" style get thumb element.
+    let imgs = document.getElementsByTagName("img");
+    if (imgs.length == 1)
+      image = imgs[0];
+  }
   up_button_link = document.getElementById("up-link");
   prev_button_link = document.getElementById("prev-link");
   next_button_link = document.getElementById("next-link");
@@ -394,7 +397,6 @@ function OnMouseDown(e) {
 function ScaledLoad() {
   var body = preamble.parentNode;
   body.style.overflow = "hidden";
-  image = document.getElementById("main-image");
   var zoomInButton = document.getElementById("zoom-in-button");
   var zoomOutButton = document.getElementById("zoom-out-button");
   // FIXME Don't set ImageClickHandler, OnMouseWheelSpin etc in Info mode.
@@ -428,11 +430,11 @@ function ScaledLoad() {
   //image.style.padding = "0px";
   preamble.style.position="absolute";
   preamble.style.visibility = hidePreamble ? "hidden" : "visible";
-  ScaledResize();
+  ScaledResize(image);
   image.style.visibility = "visible";
 }
 
-function ScaledResize() {
+function ScaledResize(image) {
   /* Window size calculation from S5 slides.css. by Eric Meyer. */
   if (window.innerHeight) {
     vSize = window.innerHeight;

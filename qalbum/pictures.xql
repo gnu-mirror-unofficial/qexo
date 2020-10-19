@@ -33,11 +33,12 @@ declare function local:make-thumbnail($picinfo) {
 };
 
 declare function local:style-link($style) {
-  if ($style="full") then "large" else $style
+  $style
+  (:if ($style="full") then "large" else $style:)
 };
 
 declare function local:make-style-link($picture-name, $style, $text) {
-  <span class="button" style-button="{if ($style="") then "medium" else $style}"><a href="{$picture-name}{local:style-link($style)}.html">{$text}</a></span>
+  <span class="button" style-button="{$style}"><a href="{$picture-name}{local:style-link($style)}.html">{$text}</a></span>
 };
 
 declare function local:get-caption($picinfo) {
@@ -90,10 +91,10 @@ declare function local:nav-bar($name, $prevId, $nextId, $style) {
     )}<span style="display: inline-block; width: 80%"><span id="up-button" class="button"><a class="button" id="up-link" href="index.html">Up to index</a></span>{
   if ($style="info") then () else ("
   ",local:make-style-link($name, "info", "Image-info")),
-  if ($style="large" or $style="full") then () else ("
-  ",local:make-style-link($name, "large", "Higher resolution")),
-  if ($style="") then () else ("
-  ",local:make-style-link($name, "", "Lower resolution"))}
+  if ($style="large" or $style="full" or $style="") then () else ("
+  ",local:make-style-link($name, "", "Higher resolution")),
+  if ($style="medium") then () else ("
+  ",local:make-style-link($name, "medium", "Lower resolution"))}
   <span id='slider-button' class='button'><a id='slider-link' href='slider.html#{$name}{$style}'>Show Slider</a></span>
 { if ($style="info") then () else (
        <span id="zoom-buttons" class='button'><a id='zoom-in-button' href='javascript:ZoomIn()'>Zoom{$nbsp}in:</a><input type='text' size='4' value='1.0' id='zoom-input-field'></input><a id='zoom-out-button' href='javascript:ZoomOut()'>out</a></span>, "
@@ -162,7 +163,7 @@ declare function local:picture($picinfo, $group, $name, $preamble, $text, $prevI
       var hash = location.hash;
       var style_link = "{local:style-link($style)}";
       var uphash = {if ($style="info") then '"#info"'
-                    else if ($style="full") then 'location.hash ? location.hash : "#large"'
+                    else if ($style="medium") then 'location.hash ? location.hash : "#medium"'
                     else 'location.hash?location.hash:top.slider?"#slider":""'};
     </script>
     <script type="text/javascript" src="{$libdir}/picture.js">{((:Following space needed to force output of closing tag:))} </script>
@@ -202,7 +203,7 @@ declare function local:picture($picinfo, $group, $name, $preamble, $text, $prevI
             <td><span class="button"><a href="{string($outtake/@img)}">{if (empty($outtext)) then "picture" else $outtext}</a></span></td>}
         </tr></table>
   )
-  else if (($style="large" or $style="full")
+  else if (($style="large" or $style="full" or $style="")
            and PictureInfo:getScaledExists($picinfo, "large")) then
     local:make-main-img($picinfo, 1e0, "l")
   else if (not(PictureInfo:getScaledExists($picinfo, "medium"))) then
@@ -388,7 +389,7 @@ declare function local:make-group-page($group, $picinfos) {
     <link rel="stylesheet" title="QAlbum style" href="../../lib/qalbum.css"/>
     <script type="text/javascript" src="{$libdir}/group.js"> </script>
   </head>
-  <body bgcolor="{$bgcolor}" onload="javascript:fixLinks();">
+  <body bgcolor="{$bgcolor}" default-style="large" onload="javascript:fixLinks();">
   <div id="header">
   <p id="group-buttons">
     <a href="{$libdir}/help.html">Help</a>
@@ -495,7 +496,7 @@ write-to(for $g in $group/* return ("[",$g, "]
     write-to-if-changed(local:make-slider-page($group, $picinfos), resolve-uri("slider.html", $pwd)),
     write-to-if-changed(local:make-slider-index-page($group, $picinfos), resolve-uri("sindex.html", $pwd)),
     write-to-if-changed(local:make-group-page($group, $picinfos), resolve-uri("index.html", $pwd)),
-    for $style in ("", "info", "full")
+    for $style in ("", "medium", "info")
     return
     local:loop-pictures($group, $group/date[1], 1, $count, $style, (), $group/*, $picinfos)
 )

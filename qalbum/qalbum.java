@@ -48,7 +48,7 @@ public class qalbum
           }
         else if (arg.equals("version") || args.equals("--version"))
           {
-            System.out.println("qalbum Coperyright 2007 Per Bothner");
+            System.out.println("qalbum Copyright 2020 Per Bothner");
           }
         else if (arg.startsWith("--scriptdir="))
           {

@@ -8,7 +8,10 @@ function handler(e) {
 }
 document.onkeypress = handler;
 function fixLinks() {
-  if (hash=="")
+  var defaultStyle = document.body.getAttribute("default-style");
+  if (defaultStyle === null)
+    defaultStyle = "medium"; // old default
+  if (hash=="" || hash=="#"+defaultStyle)
     return;
   var links = document.getElementsByTagName("a");
   for (var i = links.length; --i >= 0; ) {
@@ -17,15 +20,17 @@ function fixLinks() {
       if (hash=="#info")
         href = href.replace(/[.]html/, "info.html");
       else if (hash=="#large-scaled")
-        href = href.replace(/[.]html/, "large.html#large-scaled");
+        href = href.replace(/[.]html/, ".html#large-scaled");
       else if (hash=="#large-scaled-only")
-        href = href.replace(/[.]html/, "large.html#large-scaled-only");
+        href = href.replace(/[.]html/, ".html#large-scaled-only");
       else if (hash=="#large")
-        href = href.replace(/[.]html/, "large.html");
+        href = href.replace(/[.]html/, ".html");
       else if (hash=="#medium-scaled")
-        href = href.replace(/[.]html/, ".html#medium-scaled");
+        href = href.replace(/[.]html/, "medium.html#medium-scaled");
       else if (hash=="#medium-scaled-only")
-        href = href.replace(/[.]html/, ".html#medium-scaled-only");
+        href = href.replace(/[.]html/, "medium.html#medium-scaled-only");
+      else if (hash=="#medium")
+        href = href.replace(/[.]html/, "medium.html");
       else if (hash=="#slider")
         href = href.replace(/([^/]*)[.]html.*/, "slider.html#$1");
       else if (hash.indexOf("#slider-") == 0)
@@ -50,15 +55,10 @@ function sliderSelectId(id) {
     id = id.substring(0, sl);
   }
   var bstyle = "";
-  var m = /(.*)info$/.exec(id);
+  var m = /(.*)(medium|large|info)$/.exec(id);
   if (m) {
     id = m[1];
-    bstyle = "info";
-  }
-  m = /(.*)large$/.exec(id);
-  if (m) {
-    id = m[1];
-    bstyle = "large";
+    bstyle = m[2];
   }
   top.slider.sliderSelect(top.slider.document.getElementById(id), bstyle, style);
 }
