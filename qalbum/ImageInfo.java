@@ -40,7 +40,7 @@ public class ImageInfo
 
   public String getExifString (int tag)
   {
-    return exifDirectory.getString(tag);
+    return exifDirectory == null ? null : exifDirectory.getString(tag);
   }
 
   public static int minRating = 3;
@@ -265,7 +265,8 @@ public class ImageInfo
         sbuf.append("mm\n");
       }
 
-    if (exifDirectory.containsTag(ExifSubIFDDirectory.TAG_SHUTTER_SPEED))
+    if (exifDirectory != null
+        && exifDirectory.containsTag(ExifSubIFDDirectory.TAG_SHUTTER_SPEED))
       appendExifString("Shutter speed: ", ExifSubIFDDirectory.TAG_SHUTTER_SPEED, sbuf);
     else
       appendExifString("Exposure time: ", ExifSubIFDDirectory.TAG_EXPOSURE_TIME, sbuf);
