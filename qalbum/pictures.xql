@@ -7,6 +7,7 @@ declare variable $nl := "&#10;";
 declare variable $nbsp := "&#160;";
 declare variable $pwd := Path:currentPath();
 declare variable $bgcolor := "#60ECEC";
+declare variable $defaultSize := "large";
 
 declare function local:dont-skip($picinfo) {
   PictureInfo:dontSkip($picinfo)
@@ -38,7 +39,7 @@ declare function local:style-link($style) {
 };
 
 declare function local:make-style-link($picture-name, $style, $text) {
-  <span class="button" style-button="{$style}"><a href="{$picture-name}{local:style-link($style)}.html">{$text}</a></span>
+  <span class="button" style-button="{if ($style="") then $defaultSize else $style}"><a href="{$picture-name}{local:style-link($style)}.html">{$text}</a></span>
 };
 
 declare function local:get-caption($picinfo) {
@@ -56,20 +57,28 @@ declare function local:get-datetime($picinfo, $date) {
 
 declare function local:format-group-image($pinfo) {
   let $label := PictureInfo:getLabel($pinfo) return
-  <span class="piclink">
-   <table cellpadding="0" frame="border" border="0" rules="none">
+  <span id="{$label}" class="piclink">
+      <div><a fixup="style" href="{$label}.html">{
+          local:make-thumbnail($pinfo)}</a></div>{
+      let $caption := local:get-caption($pinfo) return
+      if ($caption) then ("
+      ",<div class="caption">{$caption}</div>)
+      else ()}
+  </span>
+  (:
+  <span id="{$label}" class="piclink">
+   <table>
       <tr>
         <td align="center"><a fixup="style" href="{$label}.html">{
           local:make-thumbnail($pinfo)}</a></td>
-      </tr>
-      <tr>{
+      </tr>{
       let $caption := local:get-caption($pinfo) return
-      if ($caption) then <td align="center" class="caption">{$caption}</td>
-      else
- <td style="visibility: hidden" class="caption">(No caption)</td> (: For better alignment :)
-      }</tr>
+      if ($caption) then ("
+      ",<tr><td align="center" class="caption">{$caption}</td></tr>)
+      else ()}
     </table>
   </span>
+  :)
 };
 
 declare function local:picture-text($picture) {
@@ -85,7 +94,7 @@ declare function local:make-title($picinfo, $group) {
 (: Create a 1-row navigation-bar: next, prev etc :)
 
 declare function local:nav-bar($name, $prevId, $nextId, $style) {
-  <div><span id="prev-button" class="button">{if ($prevId) then
+  <div pstyle="{$style}"><span id="prev-button" class="button">{if ($prevId) then
   <div><a id="prev-link" href="{$prevId}{local:style-link($style)}.html"><div>&lt;-<br/>Previous</div></a></div>
   else ()}</span>{(
     )}<span style="display: inline-block; width: 80%"><span id="up-button" class="button"><a class="button" id="up-link" href="index.html">Up to index</a></span>{
@@ -252,97 +261,15 @@ let $first := PictureInfo:getLabel(item-at($picinfos,1)) return
       function loadFrames() {{
         var hash=top.location.hash;
         var main=top.main;
-        var id = hash ? hash.substring(1) : "{$first}";
-        top.slider.sliderSelectId(id);
-        top.slider.focus();
+        top.slider.sliderInit(hash ? hash.substring(1) : "{$first}");
       }}
     </script>
   </head>
   <frameset cols="280,*" onload="top.loadFrames()">
-    <frame name="slider" src="sindex.html" />
+    <frame name="slider" src="index.html" />
     <frame name="main" src="{$first}.html" />
   </frameset>
 </html>
-};
-
-declare function local:make-slider-index-page($group, $picinfos) {
-<html>
-  <head>
-    {$group/title}
-    <link rel="up" href="../index.html" />
-    <link rel="top" href="../../index.html" />
-    <link rel="stylesheet" title="QAlbum style" href="../../lib/qalbum.css"/>
-    <script type="text/javascript" src="{$libdir}/group.js"> </script>
-  <script type="text/javascript">document.onkeypress = sliderHandler;</script>
-  </head>
-  <body onload="javascript:fixLinks();">
-  <table class="slider" cellpadding="0" frame="border"
-      border="0" rules="none" >{
-  let $nodes := $group/* return
-    local:slider-index-page-helper($nodes, 1, count($nodes), $picinfos, 1)
-}
-  </table>
-  </body>
-</html>
-};
-
-(: Recurse over nodes to produce a slider.
- : $nodes: the nodes to process.
- : $i: next node (as an index in $nodes) to process.
- : $n: count($nodes).
- : $picinfos: The PictureInfo objects
- : $p: next picture (as an index in $picinfos) to process.
- :)
-declare function local:slider-index-page-helper($nodes, $i, $n,
-                                                $picinfos, $p) {
-  if ($i > $n) then ()
-  else
-  let $item := item-at($nodes, $i) return
-    typeswitch ($item)
-      case element(text) return
-        (<tr><td><p>{$item/node()}</p></td></tr>,
-          local:slider-index-page-helper($nodes, $i+1, $n, $picinfos, $p))
-      case element(row) return
-        let $pictures := $item/picture
-        let $npictures := count($pictures) return
-          (local:slider-index-page-helper($pictures, 1, $npictures,
-                                          $picinfos, $p),
-           local:slider-index-page-helper($nodes, $i+1, $n,
-                                          $picinfos, $p+$npictures))
-      case element(select) return
-        if ($p gt count($picinfos) or fn:not($item is PictureInfo:getKey(item-at($picinfos, $p))))
-      then
-          local:slider-index-page-helper($nodes, $i+1, $n, $picinfos, $p)
-      else
-          (local:format-slider-image(item-at($picinfos, $p)),
-          local:slider-index-page-helper($nodes, $i, $n, $picinfos, $p+1))
-      case element(picture) return
-        if ($p <= count($picinfos) and $item is PictureInfo:getKey(item-at($picinfos, $p)))
-      then (
-        local:format-slider-image(item-at($picinfos, $p)),
-        local:slider-index-page-helper($nodes, $i+1, $n, $picinfos, $p+1))
-      else
-        local:slider-index-page-helper($nodes, $i+1, $n, $picinfos, $p)
-  default return
-    local:slider-index-page-helper($nodes, $i+1, $n, $picinfos, $p)
-};
-
-declare function local:format-slider-image($picinfo) {
-  let $caption := local:get-caption($picinfo),
-      $label := PictureInfo:getLabel($picinfo)
-  return ("
-    ",
-      <tr><td><table id="{$label}" onclick="sliderSelectCurStyle('{$label}'); return false">
-      <tr>
-        <td align="left"><a fixup="style" href="slider.html#{$label}" target="main">{
-          local:make-thumbnail($picinfo)}</a></td>
-      </tr> {
-      if ($caption) then
-      <tr>
-        <td align="center" class="caption">{$caption}</td>
-      </tr>
-      else ()}
-    </table></td></tr>)
 };
 
 declare function local:group-page-helper($nodes, $i, $n,
@@ -389,7 +316,7 @@ declare function local:make-group-page($group, $picinfos) {
     <link rel="stylesheet" title="QAlbum style" href="../../lib/qalbum.css"/>
     <script type="text/javascript" src="{$libdir}/group.js"> </script>
   </head>
-  <body bgcolor="{$bgcolor}" default-style="large" onload="javascript:fixLinks();">
+  <body bgcolor="{$bgcolor}" default-style="{$defaultSize}" onload="javascript:fixLinks();">
   <div id="header">
   <p id="group-buttons">
     <a href="{$libdir}/help.html">Help</a>
@@ -494,7 +421,6 @@ let $index-file-uri := resolve-uri("index.xml", $pwd),
 write-to(for $g in $group/* return ("[",$g, "]
 "), "file:/tmp/groups"),
     write-to-if-changed(local:make-slider-page($group, $picinfos), resolve-uri("slider.html", $pwd)),
-    write-to-if-changed(local:make-slider-index-page($group, $picinfos), resolve-uri("sindex.html", $pwd)),
     write-to-if-changed(local:make-group-page($group, $picinfos), resolve-uri("index.html", $pwd)),
     for $style in ("", "medium", "info")
     return

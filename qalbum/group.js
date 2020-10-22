@@ -1,6 +1,7 @@
 // Copyright 2006, 2010, 2011 Per Bothner
 "use strict";
 var hash = location.hash;
+var selectedPic = null;
 function handler(e) {
   var key = e ? e.which : event.keyCode;
   if (key == 117) { location="../index.html"; return false; }
@@ -38,6 +39,8 @@ function fixLinks() {
       links[i].href = href;
     }
     else if (links[i].parentNode.id=="group-buttons") {
+      if (links[i].getAttribute("href")==="slider.html" && hash==="#slider")
+        hash = "";
       links[i].href = href.replace(/[.]html/, ".html")+hash;
     }
   }
@@ -63,10 +66,14 @@ function sliderSelectId(id) {
   top.slider.sliderSelect(top.slider.document.getElementById(id), bstyle, style);
 }
 function sliderSelect(node, bstyle, style) {
-  if (top.selected)
+  if (selectedPic)
+      selectedPic.classList.remove("current-image");
+    selectedPic = node;
+    node.classList.add("current-image");
+    //if (top.selected)
     // The test for top.sliderBgcolor is for backward compatibility.
-    top.selected.setAttribute("bgcolor", top.sliderBgcolor ? top.sliderBgcolor : "black");
-  node.setAttribute("bgcolor", "orange");
+    ///top.selected.setAttribute("bgcolor", top.sliderBgcolor ? top.sliderBgcolor : "black");
+    //node.setAttribute("bgcolor", "orange");
   top.selected = node;
   var url = node.id+bstyle+".html";
   hash = node.id + bstyle;
@@ -78,7 +85,7 @@ function sliderSelect(node, bstyle, style) {
   top.location.hash=hash;
   var scrollTop = window.pageYOffset ? window.pageYOffset
     : document.body.scrollTop;
-  var row = node.parentNode.parentNode;
+  var row = node.tagName === "TABLE" ? node.parentNode : node;
   if (row.offsetTop+row.offsetHeight>scrollTop+innerHeight)
     scrollTo(0, row.offsetTop);
   else if (row.offsetTop < scrollTop)
@@ -87,6 +94,37 @@ function sliderSelect(node, bstyle, style) {
 
 function setTopHash(hash) {
     location.hash = hash;
+}
+
+function sliderInit(id) {
+    let body = document.body;
+    body.classList.add("slider");
+    sliderSelectId(id);
+    window.focus();
+    body.addEventListener('click', sliderClickHandler, false);
+    body.addEventListener('keypress', sliderHandler, false);
+}
+
+function sliderClickHandler(e) {
+    let target = e.target;
+    //let prev = null;
+    for (;;) {
+        if (! (target instanceof Element))
+            break;
+        if (target.classList.contains('piclink')) {
+            sliderSelectCurStyle(target.getAttribute('id'));
+            e.preventDefault();
+            return;
+        }
+       // prev = target;
+        target = target.parentNode;
+    }
+    /*
+    if (target && prev) {
+        sliderSelectCurStyle(prev.getAttribute('id'));
+        e.preventDefault();
+    }
+    */
 }
 
 function sliderHandler (e) {
