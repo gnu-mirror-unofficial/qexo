@@ -15,8 +15,13 @@ var zoomInputFocused = false;
 var modCount = 0;
 var image; // set by OnLoad
 var preamble;
+var evCache = new Array();
+var startX, startY, origX, origY, deltaX, deltaY;
+var prevDiff = -1, prevCenterX = -1, prevCenterY = -1;;
 
-var zoom = "1.0"; // a real scale factor (as a string) or "native"
+var zoomn = 1.0; // A real scale factor or NaN (as "native")
+// 1.0 scales the image to fully fit the available space.
+var zoom = "1.0"; // zoomn.toFixed(1) or "native"
 var navigationSubHash = "";
 
 // Set/reset zoom, imageRight, imageBottom, hidePreamble from zoom.
@@ -34,7 +39,7 @@ function getHashParams(hash) {
 }
 
 getHashParams(hash);
-var scaled = style_link != "info" && ! isNaN(Number(zoom));
+var scaled = style_link != "info" && ! isNaN(zoomn);
 
 function UpdateNavigationSubHash() {
   var str = hidePreamble ? "image-only" : "";
@@ -120,8 +125,7 @@ function SliderFixLink(link, target) {
   registerOnClick(link, function(evt) {
       top.slider.sliderSelectId(target);
       stopPropagation(evt);
-      if (evt.preventDefault)
-        evt.preventDefault();
+      evt.preventDefault();
       evt.returnValue = false;
       return false;
     });
@@ -229,6 +233,8 @@ function OnLoad() {
     registerOnClick(prev_button_link.parentNode, stopPropagation);
   if (next_button_link)
     registerOnClick(next_button_link.parentNode, stopPropagation);
+  registerOnClick(document.getElementById("zoom-in-button"), ZoomIn);
+  registerOnClick(document.getElementById("zoom-out-button"), ZoomOut);
   registerOnClick(up_button_link.parentNode, stopPropagation);
   registerOnClick(slider_button_link.parentNode, stopPropagation);
   if (window.addEventListener)
@@ -296,26 +302,22 @@ function OnMouseWheelSpin(e) {
     if (nDelta < 0) {
         HandleZoomClick( -1, e.clientX, e.clientY );
     }
-    if ( e.preventDefault ) {  // Mozilla FireFox
-        e.preventDefault();
-    }
-    e.returnValue = false;  //
+    e.preventDefault();
 }
 function ZoomIn(event) {
-   if (!event) event = window.event;
-   stopPropagation(event);
-   HandleZoom(2);
-  // if (event.stopPropagation) event.stopPropagation();  // DOM Level 2
-  //   else event.cancelBubble = true;                      // IE
-  return false;
+  HandleZoom(2);
+  if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+  }
 }
 
 function ZoomOut(event) {
-   if (!event) event = window.event;
-   stopPropagation(event);
-   //if (event.stopPropagation) event.stopPropagation();  // DOM Level 2
-   //else event.cancelBubble = true;                      // IE
-   HandleZoom(-2);
+  HandleZoom(-2);
+  if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+  }
 }
 
 /* Handler when zoom_input_field is changed. */
@@ -324,9 +326,7 @@ function ZoomChange(event) {
   zoom = zoom_input_field.value;
   // if (event.stopPropagation) event.stopPropagation();  // DOM Level 2
   // else event.cancelBubble = true;                      // IE
-  // Now prevent any default action.
-  if (event.preventDefault) event.preventDefault();   // DOM Level 2
-  else event.returnValue = false;                     // IE
+  event.preventDefault();
   HandleZoom(0);
   return false;
 }
@@ -334,36 +334,33 @@ function ZoomChange(event) {
 function HandleZoom(nDelta) {
   // Simulate HandleZoomClick event at center of image.
   // That seems to yield reasonable centering.
-  var zm = Number(zoom);
-  var scale = isNaN(zm) ? 1.0 : zm * scaleToFill;
+  var scale = isNaN(zoomn) ? 1.0 : zoomn * scaleToFill;
   var centerx = hSize - imageRight - 0.5 * scale * image.origwidth;
   var centery = vSize - imageBottom - 0.5 * scale * image.origheight;
   HandleZoomClick(nDelta, centerx, centery);
 }
 function HandleZoomClick(nDelta, x, y) {
-    var zm = Number(zoom);
     var scale;
     var wasScaled = scaled;
-    if (isNaN(zm) && nDelta != 0) {
-      zm = 1.0/scaleToFill;
+    if (isNaN(zoomn) && nDelta != 0) {
+      zoomn = 1.0/scaleToFill;
       zoom = zm.toFixed(1);
       scaled = true;
     }
-    if (! isNaN(zm)) {
-        var oldzm = zm;
-        zm += nDelta * 0.1;
-        if (zm < 0.1)
-          zm = 0.1;
-        if (zm > 100)
-          zm = 100;
-        var zoomin = zm/oldzm;
-        zoom = zm.toFixed(1);
+    if (! isNaN(zoomn)) {
+        var oldzm = zoomn;
+        zoomn += nDelta * 0.1;
+        if (zoomn < 0.1)
+          zoomn = 0.1;
+        if (zoomn > 100)
+          zoomn = 100;
+        var zoomin = zoomn/oldzm;
+        zoom = zoomn.toFixed(1);
         // distance from click to image right/bottom border
         var dx = hSize - x - imageRight;
         var dy = vSize - y - imageBottom;
         imageRight = Math.round(hSize - x - dx * zoomin);
         imageBottom = Math.round(vSize - y - dy * zoomin);
-        scale = zm * scaleToFill;
     }
     UpdateImage();
     UpdateLocationHash();
@@ -373,9 +370,8 @@ function HandleZoomClick(nDelta, x, y) {
 
 function UpdateImage() {
     var scale;
-    var zm = Number(zoom);
-    if (! isNaN(zm)) {
-        scale = zm * scaleToFill;
+    if (! isNaN(zoomn)) {
+        scale = zoomn * scaleToFill;
     } else {
       scale = 1.0;
       imageRight = 0;
@@ -388,9 +384,95 @@ function UpdateImage() {
     image.style.bottom=imageBottom+"px";
 }
 
-function OnMouseDown(e) {
-   if (!e) e = window.event;  // IE Event Model
-   drag(image,e);
+//remove_event(ev);
+
+function downHandler(ev) {
+    if (evCache.length == 0)
+        image.addEventListener("pointermove", moveHandler, false);
+    evCache.push(ev);
+    drag(image, ev);
+    //ev.preventDefault();
+}
+
+function upHandler(ev) {
+    // Unregister the capturing event handlers.
+    //document.removeEventListener("pointerup", upHandler, true);
+     if ( pendingUpdateAfterMove) {
+         pendingUpdateAfterMove = false;
+         clearTimeout(updateAfterMove);
+         updateAfterMove();
+     }
+
+    for (var i = 0; i < evCache.length; i++) {
+        if (evCache[i].pointerId == ev.pointerId) {
+            evCache.splice(i, 1);
+            break;
+        }
+    }
+    // If the number of pointers down is less than two then reset diff tracker
+    if (evCache.length < 2) prevDiff = -1;
+    // And don't let the event propagate any further.
+    if (evCache.length == 0)
+        image.removeEventListener("pointermove", moveHandler, false);
+    ev.stopPropagation();
+}
+
+function moveHandler(ev) {
+    // Find this event in the cache and update its record with this event
+    for (var i = 0; i < evCache.length; i++) {
+        if (ev.pointerId == evCache[i].pointerId) {
+            evCache[i] = ev;
+            break;
+        }
+    }
+    if (! pendingUpdateAfterMove) {
+        pendingUpdateAfterMove = true;
+        setTimeout(updateAfterMove, 100);
+    }
+    //updateAfterMove();
+    ev.preventDefault();
+    ev.stopPropagation();
+}
+var pendingUpdateAfterMove = false;
+
+function updateAfterMove() {
+    pendingUpdateAfterMove = false;
+    if (evCache.length == 1) {
+        let ev = evCache[0]
+        // Move the element to the current mouse position, adjusted as
+        // necessary by the offset of the initial mouse-click.
+        imageRight -= ev.clientX - startX;
+        startX = ev.clientX;
+        imageBottom -= ev.clientY - startY;
+        startY = ev.clientY;
+        image.style.right=imageRight+"px";
+        image.style.bottom=imageBottom+"px";
+        stopPropagation(ev);
+        imageMoved = true;
+        UpdateLocationHash();
+    } else if (evCache.length == 2) {
+        let curDiffX = Math.abs(evCache[0].clientX - evCache[1].clientX);
+        let curDiffY = Math.abs(evCache[0].clientY - evCache[1].clientY);
+        let curCenterX = 0.5 * evCache[0].clientX + 0.5 * evCache[1].clientX;
+        let curCenterY = 0.5 * evCache[0].clientY + 0.5 * evCache[1].clientY;
+        let curDiff = 0.5 * curDiffX + 0.5 * curDiffY;
+        let oldzm = zoomn;
+        if (prevDiff > 0 && ! isNaN(oldzm)) {
+            var wasScaled = scaled;
+            var zoomin = curDiff / prevDiff;
+            zoomn = oldzm * zoomin;
+            zoom = zoomn.toFixed(1);
+            imageRight = hSize - curCenterX - zoomin * (hSize - prevCenterX - imageRight);
+            imageBottom = vSize - curCenterY - zoomin * (vSize - prevCenterY - imageBottom);
+            UpdateImage();
+            UpdateLocationHash();
+            if (scaled!=wasScaled)
+                StyleFixLinks();
+        }
+        prevDiff = curDiff;
+        prevCenterX = curCenterX;
+        prevCenterY = curCenterY;
+    }
 }
 
 function ScaledLoad() {
@@ -402,23 +484,22 @@ function ScaledLoad() {
   registerOnClick(document, ImageClickHandler);
   registerOnClick(zoomInButton, ZoomIn);
   registerOnClick(zoomOutButton, ZoomOut);
-  //FIXME use registerOnClick
-  if (image.addEventListener) {
+
     image.addEventListener('DOMMouseScroll', OnMouseWheelSpin, false);
     image.addEventListener('mousewheel', OnMouseWheelSpin, false); // Chrome
-    image.addEventListener('mousedown', OnMouseDown, false);
+    image.addEventListener('pointerdown', downHandler, false);
+    image.addEventListener("pointerup", upHandler, true);
+    image.addEventListener("pointercancel", upHandler, true);
+    image.addEventListener("pointerout", upHandler, true);
+    image.addEventListener("pointerleave", upHandler, true);
     if (zoom_input_field)
-      zoom_input_field.addEventListener('change', ZoomChange, false);
-      zoom_input_field.addEventListener('focus',
-	function(evt) {zoomInputFocused = true;}, false);
-      zoom_input_field.addEventListener('blur',
-	function(evt) {zoomInputFocused = false;}, false);
-      registerOnClick(zoom_input_field, stopPropagation);
-  }
-  else {
-//    image.onmousewheel= OnMouseWheelSpin;
-    // ...
-  }
+        zoom_input_field.addEventListener('change', ZoomChange, false);
+    zoom_input_field.addEventListener('focus',
+	                              function(evt) {zoomInputFocused = true;}, false);
+    zoom_input_field.addEventListener('blur',
+	                              function(evt) {zoomInputFocused = false;}, false);
+    registerOnClick(zoom_input_field, stopPropagation);
+
   image.style.position="absolute";
   image.style.right=imageRight+"px";
   image.style.bottom=imageBottom+"px";
@@ -429,11 +510,11 @@ function ScaledLoad() {
   //image.style.padding = "0px";
   preamble.style.position="absolute";
   preamble.style.visibility = hidePreamble ? "hidden" : "visible";
-  ScaledResize(image);
+  ScaledResize();
   image.style.visibility = "visible";
 }
 
-function ScaledResize(image) {
+function ScaledResize() {
   /* Window size calculation from S5 slides.css. by Eric Meyer. */
   if (window.innerHeight) {
     vSize = window.innerHeight;
@@ -454,8 +535,7 @@ function ScaledResize(image) {
 
   if (! scaled)
     return;
-  var zm = Number(zoom);
-  var scale = isNaN(zm) ? 1.0 : zm * scaleToFill;
+  var scale = isNaN(zoomn) ? 1.0 : zoomn * scaleToFill;
   image.style.width = (scale * image.origwidth) + "px";
   image.style.height = (scale * image.origheight) + "px";
 }
@@ -530,53 +610,27 @@ function StyleMenu() { return ""; }
 function drag(elementToDrag, event) {
     // The mouse position (in window coordinates)
     // at which the drag begins 
-    var startX = event.clientX, startY = event.clientY;    
+    startX = event.clientX;
+    startY = event.clientY;    
 
     // The original position (in document coordinates) of the
     // element that is going to be dragged.  Since elementToDrag is 
     // absolutely positioned, we assume that its offsetParent is the
     // document body.
-    var origX = elementToDrag.offsetLeft, origY = elementToDrag.offsetTop;
+    origX = elementToDrag.offsetLeft;
+    origY = elementToDrag.offsetTop;
 
     // Even though the coordinates are computed in different 
     // coordinate systems, we can still compute the difference between them
     // and use it in the moveHandler() function.  This works because
     // the scrollbar position never changes during the drag.
-    var deltaX = startX - origX, deltaY = startY - origY;
-
-    // Register the event handlers that will respond to the mousemove events
-    // and the mouseup event that follow this mousedown event.  
-    if (document.addEventListener) {  // DOM Level 2 event model
-        // Register capturing event handlers
-        document.addEventListener("mousemove", moveHandler, true);
-        document.addEventListener("mouseup", upHandler, true);
-    }
-    else if (document.attachEvent) {  // IE 5+ Event Model
-        // In the IE event model, we capture events by calling
-        // setCapture() on the element to capture them.
-        elementToDrag.setCapture();
-        elementToDrag.attachEvent("onmousemove", moveHandler);
-        elementToDrag.attachEvent("onmouseup", upHandler);
-        // Treat loss of mouse capture as a mouseup event
-        elementToDrag.attachEvent("onlosecapture", upHandler);
-    }
-    else {  // IE 4 Event Model
-        // In IE 4 we can't use attachEvent() or setCapture(), so we set
-        // event handlers directly on the document object and hope that the
-        // mouse events we need will bubble up.  
-        var oldmovehandler = document.onmousemove; // used by upHandler() 
-        var olduphandler = document.onmouseup;
-        document.onmousemove = moveHandler;
-        document.onmouseup = upHandler;
-    }
+    deltaX = startX - origX;
+    deltaY = startY - origY;
 
     // We've handled this event. Don't let anybody else see it.  
-    if (event.stopPropagation) event.stopPropagation();  // DOM Level 2
-    else event.cancelBubble = true;                      // IE
+    event.stopPropagation();  // DOM Level 2
 
-    // Now prevent any default action.
-    if (event.preventDefault) event.preventDefault();   // DOM Level 2
-    else event.returnValue = false;                     // IE
+    event.preventDefault();
 
     imageMoved = false;
 
@@ -584,56 +638,5 @@ function drag(elementToDrag, event) {
      * This is the handler that captures mousemove events when an element
      * is being dragged. It is responsible for moving the element.
      **/
-    function moveHandler(e) {
-        if (!e) e = window.event;  // IE Event Model
 
-        // Move the element to the current mouse position, adjusted as
-        // necessary by the offset of the initial mouse-click.
-        imageRight -= e.clientX - startX;
-        startX = e.clientX;
-        imageBottom -= e.clientY - startY;
-        startY = e.clientY;
-        image.style.right=imageRight+"px";
-        image.style.bottom=imageBottom+"px";
-        //UpdateLocationHash();
-        //elementToDrag.style.left = (e.clientX - deltaX) + "px";
-        //elementToDrag.style.top = (e.clientY - deltaY) + "px";
-
-        stopPropagation(e);
-        // And don't let anyone else see this event.
-        //if (e.stopPropagation) e.stopPropagation();  // DOM Level 2
-        //else e.cancelBubble = true;                  // IE
-        imageMoved = true;
-        UpdateLocationHash();
-    }
-
-    /**
-     * This is the handler that captures the final mouseup event that
-     * occurs at the end of a drag.
-     **/
-    function upHandler(e) {
-        if (!e) e = window.event;  // IE Event Model
-
-        // Unregister the capturing event handlers.
-        if (document.removeEventListener) {  // DOM event model
-            document.removeEventListener("mouseup", upHandler, true);
-            document.removeEventListener("mousemove", moveHandler, true);
-        }
-        else if (document.detachEvent) {  // IE 5+ Event Model
-            elementToDrag.detachEvent("onlosecapture", upHandler);
-            elementToDrag.detachEvent("onmouseup", upHandler);
-            elementToDrag.detachEvent("onmousemove", moveHandler);
-            elementToDrag.releaseCapture();
-        }
-        else {  // IE 4 Event Model
-            // Restore the original handlers, if any
-            document.onmouseup = olduphandler;
-            document.onmousemove = oldmovehandler;
-        }
-
-        // And don't let the event propagate any further.
-        if (e.stopPropagation) e.stopPropagation();  // DOM Level 2
-        else e.cancelBubble = true;                  // IE
-    }
 }
-
